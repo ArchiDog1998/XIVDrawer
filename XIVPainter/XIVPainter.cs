@@ -103,7 +103,6 @@ public class XIVPainter
         }
     }
 
-    bool _started = false;
     private void Update(Framework framework)
     {
         if (UseTaskForAccelerate)
@@ -116,6 +115,7 @@ public class XIVPainter
         }
     }
 
+    bool _started = false;
     private void UpdateData()
     {
         if (_started) return;
@@ -214,7 +214,7 @@ public class XIVPainter
 
     IEnumerable<Vector3> DivideCurve(IEnumerable<Vector3> worldPts, float length, bool isClosed)
     {
-        if(worldPts.Count() < 2) return worldPts;
+        if(worldPts.Count() < 2 || length <= 0.01f) return worldPts;
 
         IEnumerable<Vector3> pts = Array.Empty<Vector3>();
         bool isFirst = true;
