@@ -3,24 +3,27 @@ using XIVPainter.Enum;
 
 namespace XIVPainter.Element3D;
 
-internal class Drawing3DCircularSectorFO : Drawing3DCircularSectorF
+public class Drawing3DCircularSectorFO : Drawing3DCircularSectorF
 {
     public RadiusInclude Including { get; set; }
     public float RadiusTarget { get; set; }
     public GameObject Target { get; set; }
-    public Drawing3DCircularSectorFO(GameObject target, float radius, RadiusInclude include, ushort segments, uint color, float thickness, float round = MathF.Tau) 
-        : base(target?.Position ?? default, include.GetRadius(target, radius), segments, color, thickness, target?.Rotation ?? 0, round)
+    public float RotationTarget { get; set; }
+
+    public Drawing3DCircularSectorFO(GameObject target, float radius, ushort segments, uint color, float thickness, float rotation = 0, float round = MathF.Tau, RadiusInclude include = RadiusInclude.IncludeBoth) 
+        : base(target?.Position ?? default, include.GetRadius(target, radius), segments, color, thickness, rotation + target?.Rotation ?? 0, round)
     {
         RadiusTarget = radius;
         Target = target;
         Including = include;
+        RotationTarget = rotation;
     }
 
     public override void UpdateOnFrame()
     {
         Center = Target?.Position ?? default;
         Radius = Including.GetRadius(Target, RadiusTarget);
-        Rotation = Target?.Rotation ?? 0;
+        Rotation = RotationTarget + Target?.Rotation ?? 0;
         base.UpdateOnFrame();
     }
 }
