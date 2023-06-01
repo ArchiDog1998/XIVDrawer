@@ -7,7 +7,7 @@ public interface IDrawing3D
     public uint Color { get; set; }
     internal byte WarningTime { get; set; }
     internal float AlphaRatio { get; set; }
-    internal DateTime DeadTime { get; set; }
+    public DateTime DeadTime { get; set; }
     internal EaseFuncType DisappearType { get; set; }
     internal float TimeToDisappear { get; set; }
     internal float WarningRatio { get; set; }
