@@ -1,53 +1,74 @@
 ﻿using Dalamud.Logging;
+using System;
 
 namespace XIVPainter;
 
-internal static class DrawingHelper
+public static class DrawingHelper
 {
-    public static uint ToColor(this Vector3 color, float alpha)
-        => new Vector4(color.X, color.Y, color.Z, alpha).ToColor();
-
-    public static uint ToColor(this Vector4 color)
-        => ImGui.ColorConvertFloat4ToU32(color);
-
-    public static uint ColorAlpha(this uint color, float alpha)
-    {
-        var c = ImGui.ColorConvertU32ToFloat4(color);
-        c.W *= alpha;
-        return c.ToColor();
-    }
-
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
     {
         var count = 0;
 
         foreach (var partPts in pts) 
         {
-            if(!partPts.Any()) continue;
-
-            Vector3 prePt = default;
-            bool isFirst = true;
-            foreach (var rightPt in partPts)
+            SegmentAction(partPts, (a, b) =>
             {
-                if (isFirst)
-                {
-                    isFirst = false;
-                    prePt = rightPt;
-                    continue;
-                }
-                if (InLine(prePt, rightPt, pt)) count++;
-                prePt = rightPt;
-            }
-
-            if (InLine(prePt, partPts.First(), pt)) count++;
+                if ((pt.Z < a.Z) != (pt.Z < b.Z) &&
+                    pt.X < a.X + (pt.Z - a.Z) / (b.Z - a.Z) * (b.X - a.X))
+                    count++;
+            });
         }
 
         return count % 2 == 1;
     }
 
-    static bool InLine(Vector3 pt1, Vector3 pt2, Vector3 pt)
-        => (pt.Z < pt1.Z) != (pt.Z < pt2.Z) &&
-            pt.X < pt1.X + (pt.Z - pt1.Z) / (pt2.Z - pt1.Z) * (pt2.X - pt1.X);
+    public static Vector3[] OffSetPolyline(Vector3[] pts, float offset)
+    {
+        var length = pts.Length;
+        var result = new Vector3[length];
+        for (var i = 0; i < length; i++)
+        {
+            var prePt = pts[(i - 1 + length) % length];
+            var pt = pts[i];
+            var nextPt = pts[(i + 1) % length];
+
+            var vec1 = new Vector2(pt.X - prePt.X, pt.Z - prePt.Z);
+            var vec2 = new Vector2(nextPt.X - pt.X, nextPt.Z - pt.Z);
+
+            vec1 /= vec1.Length();
+            vec2 /= vec2.Length();
+
+            var dir = vec2 - vec1;
+            dir /= dir.Length();
+
+            var dis = offset / MathF.Cos(MathF.Acos(Vector2.Dot(vec1, vec2)) / 2);
+            dir *= dis;
+            result[i] = new Vector3(pt.X + dir.X, pt.Y, pt.Z + dir.Y);
+        }
+        return result;
+    }
+
+    public static void SegmentAction<T>(IEnumerable<T> pts, Action<T, T> pairAction)
+    {
+        if (pairAction == null) return;
+        if(pts == null || !pts.Any()) return;
+
+        T prePt = default;
+        bool isFirst = true;
+        foreach (var pt in pts)
+        {
+            if (isFirst)
+            {
+                isFirst = false;
+                prePt = pt;
+                continue;
+            }
+            pairAction(prePt, pt);
+            prePt = pt;
+        }
+
+        pairAction(prePt, pts.First());
+    }
 
     public static IEnumerable<Vector2[]> ConvexPoints(Vector2[] points)
     {

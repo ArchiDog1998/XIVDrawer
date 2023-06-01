@@ -40,7 +40,17 @@ public class Drawing3DPolylineF : Drawing3D
         {
             var pts = owner.GetPtsOnScreen(points, true);
 
-            if(hasBorder) result = result.Append(new PolylineDrawing(pts, boarderColor, Thickness));
+            if(hasBorder)
+            {
+                result = result.Append(new PolylineDrawing(pts, boarderColor, Thickness));
+
+                var offset = owner.GetPtsOnScreen(DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio), true);
+
+                baseColor.W *= 1 - AnimationRatio;
+
+                result = result.Append(new PolylineDrawing(offset, 
+                    ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
+            }
 
             if(!hasFill) result = result.Union(DrawingHelper.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
         }
