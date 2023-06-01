@@ -7,8 +7,7 @@ public class Drawing3DAnnulusF : Drawing3DPolylineF
     public float Radius2 { get; set; }
     public float Rotation { get; set; }
     public float Round { get; set; }
-    public ushort Segments { get; set; }
-    public Drawing3DAnnulusF(Vector3 center, float radius1, float radius2, ushort segments, uint color,
+    public Drawing3DAnnulusF(Vector3 center, float radius1, float radius2, uint color,
         float thickness, float rotation = 0, float round = MathF.Tau)
         : base(null, color, thickness)
     {
@@ -17,15 +16,14 @@ public class Drawing3DAnnulusF : Drawing3DPolylineF
         Radius2 = radius2;
         Rotation = rotation;
         Round = round;
-        Segments = segments;
     }
 
-    public override void UpdateOnFrame()
+    public override void UpdateOnFrame(XIVPainter painter)
     {
-        base.UpdateOnFrame();
+        base.UpdateOnFrame(painter);
 
-        var sect1 = DrawingHelper.SectorPlots(Center, Radius1, Rotation, Round, Segments);
-        var sect2 = DrawingHelper.SectorPlots(Center, Radius2, Rotation, Round, Segments);
+        var sect1 = painter.SectorPlots(Center, Radius1, Rotation, Round);
+        var sect2 = painter.SectorPlots(Center, Radius2, Rotation, Round);
         BorderPoints = new IEnumerable<Vector3>[] { sect1, sect2 };
         FillPoints = GetAnnulusFill(sect1, sect2);
     }

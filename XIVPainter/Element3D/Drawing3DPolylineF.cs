@@ -56,9 +56,9 @@ public class Drawing3DPolylineF : Drawing3D
         return result;
     }
 
-    public override void UpdateOnFrame()
+    public override void UpdateOnFrame(XIVPainter painter)
     {
-        base.UpdateOnFrame();
+        base.UpdateOnFrame(painter);
 
         if (DateTime.Now > DeadTime) return;
 

@@ -10,8 +10,8 @@ public class Drawing3DCircularSectorFO : Drawing3DCircularSectorF
     public GameObject Target { get; set; }
     public float RotationTarget { get; set; }
 
-    public Drawing3DCircularSectorFO(GameObject target, float radius, ushort segments, uint color, float thickness, float rotation = 0, float round = MathF.Tau, RadiusInclude include = RadiusInclude.IncludeBoth) 
-        : base(target?.Position ?? default, include.GetRadius(target, radius), segments, color, thickness, rotation + target?.Rotation ?? 0, round)
+    public Drawing3DCircularSectorFO(GameObject target, float radius, uint color, float thickness, float rotation = 0, float round = MathF.Tau, RadiusInclude include = RadiusInclude.IncludeBoth) 
+        : base(target?.Position ?? default, include.GetRadius(target, radius), color, thickness, rotation + target?.Rotation ?? 0, round)
     {
         RadiusTarget = radius;
         Target = target;
@@ -19,11 +19,11 @@ public class Drawing3DCircularSectorFO : Drawing3DCircularSectorF
         RotationTarget = rotation;
     }
 
-    public override void UpdateOnFrame()
+    public override void UpdateOnFrame(XIVPainter painter)
     {
         Center = Target?.Position ?? default;
         Radius = Including.GetRadius(Target, RadiusTarget);
         Rotation = RotationTarget + Target?.Rotation ?? 0;
-        base.UpdateOnFrame();
+        base.UpdateOnFrame(painter);
     }
 }

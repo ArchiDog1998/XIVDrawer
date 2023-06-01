@@ -32,13 +32,12 @@ public class XIVPainter
 
     #region Config
     public bool UseTaskForAccelerate { get; set; } = true;
-
+    public ushort CircleSegment { get; set; } = 100;
     public bool RemovePtsNotOnGround { get; set; } = true;
     public float DrawingHeight { get; set; } = 3;
     public float SampleLength { get; set; } = 0.5f;
     public float TimeToDisappear { get; set; } = 1.5f;
     public EaseFuncType DisappearType { get; set; } = EaseFuncType.Back;
-
     public byte DefaultWarningTime { get; set; } = 3;
     public float WarningRatio { get; set; } = 0.8f;
     public EaseFuncType WarningType { get; set; } = EaseFuncType.Cubic;
@@ -138,7 +137,7 @@ public class XIVPainter
                             remove.Add(ele);
                         }
                     }
-                    ele.UpdateOnFrame();
+                    ele.UpdateOnFrame(this);
                     relay = relay.Union(ele.To2D(this));
                 }
                 foreach (var r in remove)
@@ -179,6 +178,7 @@ public class XIVPainter
         drawing.TimeToDisappear = TimeToDisappear;
         drawing.WarningRatio = WarningRatio;
         drawing.WarningType = WarningType;
+        drawing.WarningTime = DefaultWarningTime;
 
         lock (_drawing3DLock)
         {
@@ -335,4 +335,26 @@ public class XIVPainter
         return screenPos;
     }
     #endregion
+
+    public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round)
+    {
+        if (radius <= 0) return Array.Empty<Vector3>();
+
+        var seg = (int)(CircleSegment * round / Math.PI / 2);
+        var pts = new Vector3[seg + 1];
+        var step = round / seg;
+
+        for (int i = 0; i <= seg; i++)
+        {
+            pts[i] = RoundPoint(center, radius, rotation + i * step);
+        }
+        return pts;
+    }
+
+    static Vector3 RoundPoint(Vector3 pt, double radius, float rotation)
+    {
+        var x = Math.Sin(rotation) * radius + pt.X;
+        var z = Math.Cos(rotation) * radius + pt.Z;
+        return new Vector3((float)x, pt.Y, (float)z);
+    }
 }

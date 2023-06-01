@@ -17,28 +17,6 @@ internal static class DrawingHelper
         return c.ToColor();
     }
 
-    public static Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round, ushort segments)
-    {
-        if(radius <= 0) return Array.Empty<Vector3>();
-
-        var seg = (int)(segments * round / Math.PI / 2);
-        var pts = new Vector3[seg + 1];
-        var step = round / seg;
-
-        for (int i = 0; i <= seg; i++)
-        {
-            pts[i] = RoundPoint(center, radius, rotation + i * step);
-        }
-        return pts;
-    }
-
-    static Vector3 RoundPoint(Vector3 pt, double radius, float rotation)
-    {
-        var x = Math.Sin(rotation) * radius + pt.X;
-        var z = Math.Cos(rotation) * radius + pt.Z;
-        return new Vector3((float)x, pt.Y, (float)z);
-    }
-
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
     {
         var count = 0;

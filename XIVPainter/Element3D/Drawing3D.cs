@@ -19,7 +19,7 @@ public abstract class Drawing3D : IDrawing3D
     public EaseFuncType WarningType { get; set; }
     public abstract IEnumerable<IDrawing2D> To2D(XIVPainter owner);
 
-    public virtual void UpdateOnFrame()
+    public virtual void UpdateOnFrame(XIVPainter painter)
     {
         if (DeadTime == DateTime.MinValue) return;
         var time = (DateTime.Now - DeadTime).TotalSeconds;
