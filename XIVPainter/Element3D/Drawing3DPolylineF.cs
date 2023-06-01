@@ -44,7 +44,7 @@ public class Drawing3DPolylineF : Drawing3D
             {
                 result = result.Append(new PolylineDrawing(pts, boarderColor, Thickness));
 
-                var offset = owner.GetPtsOnScreen(DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio), true);
+                var offset = owner.GetPtsOnScreen(DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio * 2), true);
 
                 baseColor.W *= 1 - AnimationRatio;
 
@@ -70,7 +70,7 @@ public class Drawing3DPolylineF : Drawing3D
     {
         base.UpdateOnFrame(painter);
 
-        if (DateTime.Now > DeadTime) return;
+        if (DeadTime != DateTime.MinValue && DateTime.Now > DeadTime) return;
 
         showColor = Color;
         if (Color != InsideColor && XIVPainter._clientState?.LocalPlayer != null)

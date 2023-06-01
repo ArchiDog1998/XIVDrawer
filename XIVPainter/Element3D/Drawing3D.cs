@@ -13,7 +13,7 @@ public abstract class Drawing3D : IDrawing3D
     public DateTime DeadTime { get; set; }
 
     public float TimeToDisappear { get; set; }
-
+    public Action UpdateEveryFrame { get; set; }
     public EaseFuncType DisappearType { get; set; }
     public float WarningRatio { get; set; }
     public EaseFuncType WarningType { get; set; }
@@ -23,6 +23,8 @@ public abstract class Drawing3D : IDrawing3D
 
     public virtual void UpdateOnFrame(XIVPainter painter)
     {
+        UpdateEveryFrame?.Invoke();
+
         if (DeadTime == DateTime.MinValue) return;
         var time = (DateTime.Now - DeadTime).TotalSeconds;
 

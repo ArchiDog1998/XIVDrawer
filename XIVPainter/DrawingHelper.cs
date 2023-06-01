@@ -1,5 +1,4 @@
 ﻿using Dalamud.Logging;
-using System;
 
 namespace XIVPainter;
 
@@ -72,6 +71,9 @@ public static class DrawingHelper
 
     public static IEnumerable<Vector2[]> ConvexPoints(Vector2[] points)
     {
+        if (points == null || points.Length < 3) 
+            return new Vector2[][] { points };
+
         int index = 0;
         float leftBottom = float.MaxValue;
         for (int i = 0; i < points.Length; i++)

@@ -18,6 +18,11 @@ public class Drawing3DCircularSectorF : Drawing3DPolylineF
     public override void UpdateOnFrame(XIVPainter painter)
     {
         base.UpdateOnFrame(painter);
-        BorderPoints = new IEnumerable<Vector3>[] { painter.SectorPlots(Center, Radius, Rotation, Round) };
+        IEnumerable<Vector3> pts = painter.SectorPlots(Center, Radius, Rotation, Round);
+        if(Round != MathF.Tau && pts.Any())
+        {
+            pts = pts.Append(Center);
+        }
+        BorderPoints = new IEnumerable<Vector3>[] { pts };
     }
 }

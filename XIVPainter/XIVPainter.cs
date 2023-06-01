@@ -7,8 +7,10 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using System.Linq;
+using System.Numerics;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace XIVPainter;
 
@@ -21,6 +23,9 @@ public class XIVPainter
 
     readonly object _drawing3DLock = new object();
     List<IDrawing3D> _drawing3DElements = new List<IDrawing3D>();
+
+    readonly object _rayRelayLock = new object();
+    readonly Dictionary<Vector2, Vector3> _rayRelay = new Dictionary<Vector2, Vector3>();
 
     [PluginService]
     internal static DalamudPluginInterface _pluginInterface { get; set; }
@@ -123,6 +128,8 @@ public class XIVPainter
 
         try
         {
+            _rayRelay.Clear();
+
             IDrawing2D[] elements = Array.Empty<IDrawing2D>();
             IEnumerable<IDrawing2D> relay = elements;
             lock (_drawing3DLock)
@@ -306,23 +313,47 @@ public class XIVPainter
         return changedPts.Where(p => p.Z > 0);
     }
 
-    IEnumerable<Vector3> ProjectPtsOnGround(IEnumerable<Vector3> pts, float height) => pts.Select(pt =>
+    unsafe IEnumerable<Vector3> ProjectPtsOnGround(IEnumerable<Vector3> pts, float height)
     {
-        Vector3? result;
-        var pUp = pt + Vector3.UnitY * height;
-        if (BGCollisionModule.Raycast(pt + Vector3.UnitY * 10, -Vector3.UnitY, out var hit, 20))
+        if (!RemovePtsNotOnGround && height <= 0) 
+            return pts;
+
+        int* unknown = stackalloc int[3] { 16384, 16384, 0 };
+
+        var result = new List<Vector3>(pts.Count());
+        foreach (var pt in pts)
         {
-            var p = hit.Point;
-            p.Y = Math.Max(p.Y, pt.Y - height);
-            p.Y = Math.Min(p.Y, pt.Y + height);
-            result = p;
-        }
-        else
-        {
-            result = RemovePtsNotOnGround ? null : pt - Vector3.UnitY * height;
+            var xy = new Vector2(float.Round(pt.X, 2), float.Round(pt.Z, 2));
+
+            lock (_rayRelayLock)
+            {
+                if (_rayRelay.TryGetValue(xy, out var vector))
+                {
+                    result.Add(vector);
+                    continue;
+                }
+            }
+
+            RaycastHit hit = default;
+            if (BGCollisionModule.Raycast2(pt + Vector3.UnitY * 10, -Vector3.UnitY, 20, &hit, unknown))
+            {
+                var p = hit.Point;
+                p.Y = Math.Max(p.Y, pt.Y - height);
+                p.Y = Math.Min(p.Y, pt.Y + height);
+
+                lock (_rayRelayLock)
+                {
+                    _rayRelay[xy] = p;
+                }
+                result.Add(p);
+            }
+            else if (!RemovePtsNotOnGround)
+            {
+                result.Add(pt - Vector3.UnitY * height);
+            }
         }
         return result;
-    }).Where(pt => pt.HasValue).Select(pt => pt.Value);
+    }
 
     const float PLANE_Z = 0.001f;
     void GetPointOnPlane(Vector3 front, ref Vector3 back)
