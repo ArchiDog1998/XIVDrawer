@@ -4,6 +4,13 @@ namespace XIVPainter;
 
 public static class DrawingHelper
 {
+    public static void Normalize(ref this Vector2 vec)
+    {
+        var lenth = vec.Length();
+        if(lenth == 0) return;
+        vec /= lenth;
+    }
+
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
     {
         var count = 0;
@@ -34,11 +41,11 @@ public static class DrawingHelper
             var vec1 = new Vector2(pt.X - prePt.X, pt.Z - prePt.Z);
             var vec2 = new Vector2(nextPt.X - pt.X, nextPt.Z - pt.Z);
 
-            vec1 /= vec1.Length();
-            vec2 /= vec2.Length();
+            vec1.Normalize();
+            vec2.Normalize();
 
             var dir = vec2 - vec1;
-            dir /= dir.Length();
+            dir.Normalize();
 
             var dis = offset / MathF.Cos(MathF.Acos(Vector2.Dot(vec1, vec2)) / 2);
             dir *= dis;
@@ -109,7 +116,7 @@ public static class DrawingHelper
             {
                 breakIndex = i;
                 dir = vec1 - vec2;
-                dir /= dir.Length();
+                dir.Normalize();
                 break;
             }
         }
@@ -131,7 +138,7 @@ public static class DrawingHelper
                     if (Math.Abs(i + points.Length - breakIndex) < 2) continue;
                     if (Math.Abs(i - points.Length - breakIndex) < 2) continue;
                     var d = points[i] - pt;
-                    d /= d.Length();
+                    d.Normalize();
 
                     var angle = Vector2.Dot(d, dir);
 
@@ -180,8 +187,8 @@ public static class DrawingHelper
         vec1 = midPt - prePt;
         vec2 = nextPt - midPt;
 
-        vec1 /= vec1.Length();
-        vec2 /= vec2.Length();
+        vec1.Normalize();
+        vec2.Normalize();
 
         return Vector3.Cross(new Vector3(vec1.X, vec1.Y, 0), new Vector3(vec2.X, vec2.Y, 0)).Z;
     }

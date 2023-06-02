@@ -4,25 +4,31 @@ public class Drawing3DCircularSectorF : Drawing3DPolylineF
 {
     public Vector3 Center { get; set; }
     public float Radius { get; set; }
-    public float Rotation { get; set; }
-    public float Round { get; set; }
-    public Drawing3DCircularSectorF(Vector3 center, float radius, uint color, float thickness, float rotation = 0, float round = MathF.Tau)
+    public Vector2[] ArcStartSpan { get; set; }
+    public Drawing3DCircularSectorF(Vector3 center, float radius, uint color, float thickness, params Vector2[] arcStartSpan)
         : base(null, color, thickness)
     {
         Center = center;
         Radius = radius;
-        Rotation = rotation;
-        Round = round;
+        ArcStartSpan = arcStartSpan;
+        if(arcStartSpan == null || arcStartSpan.Length == 0)
+        {
+            ArcStartSpan = new Vector2[] { new Vector2(0, MathF.Tau)};
+        }
     }
 
     public override void UpdateOnFrame(XIVPainter painter)
     {
         base.UpdateOnFrame(painter);
-        IEnumerable<Vector3> pts = painter.SectorPlots(Center, Radius, Rotation, Round);
-        if(Round != MathF.Tau && pts.Any())
+
+        BorderPoints = ArcStartSpan.Select(pair =>
         {
-            pts = pts.Append(Center);
-        }
-        BorderPoints = new IEnumerable<Vector3>[] { pts };
+            IEnumerable<Vector3> pts = painter.SectorPlots(Center, Radius, pair.X, pair.Y);
+            if (pair.Y != MathF.Tau && pts.Any())
+            {
+                pts = pts.Append(Center);
+            }
+            return pts;
+        });
     }
 }

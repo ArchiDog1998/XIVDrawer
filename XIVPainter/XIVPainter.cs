@@ -5,7 +5,6 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
 

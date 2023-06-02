@@ -8,22 +8,23 @@ public class Drawing3DCircularSectorFO : Drawing3DCircularSectorF
     public RadiusInclude Including { get; set; }
     public float RadiusTarget { get; set; }
     public GameObject Target { get; set; }
-    public float RotationTarget { get; set; }
+    public Vector2[] ArcStarSpanTarget { get; set; }
 
-    public Drawing3DCircularSectorFO(GameObject target, float radius, uint color, float thickness, float rotation = 0, float round = MathF.Tau, RadiusInclude include = RadiusInclude.IncludeBoth) 
-        : base(target?.Position ?? default, include.GetRadius(target, radius), color, thickness, rotation + target?.Rotation ?? 0, round)
+    public Drawing3DCircularSectorFO(GameObject target, float radius, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan) 
+        : base(target?.Position ?? default, include.GetRadius(target, radius), color, thickness)
     {
         RadiusTarget = radius;
         Target = target;
         Including = include;
-        RotationTarget = rotation;
+        ArcStarSpanTarget = arcStartSpan;
     }
 
     public override void UpdateOnFrame(XIVPainter painter)
     {
         Center = Target?.Position ?? default;
         Radius = Including.GetRadius(Target, RadiusTarget);
-        Rotation = RotationTarget + Target?.Rotation ?? 0;
+        ArcStartSpan = ArcStarSpanTarget.Select(pt => new Vector2(pt.X + Target?.Rotation ?? 0, pt.Y)).ToArray();
+
         base.UpdateOnFrame(painter);
     }
 }

@@ -6,12 +6,6 @@ namespace XIVPainter;
 
 internal static class RaycastManager
 {
-    struct HitResult
-    {
-        public bool HasValue;
-        public float Y;
-    }
-
     class Vector2Comparer : IComparer<Vector2>
     {
         public int Compare(Vector2 x, Vector2 y)
@@ -23,7 +17,7 @@ internal static class RaycastManager
     }
 
     static readonly object _rayRelayLock = new object();
-    static readonly SortedList<Vector2, HitResult> _rayRelay = new (new Vector2Comparer());
+    static readonly SortedList<Vector2, float> _rayRelay = new (new Vector2Comparer());
 
     static readonly object _calculatingPtsLock = new object();
     static readonly Queue<Vector3> _calculatingPts = new ();
@@ -77,10 +71,17 @@ internal static class RaycastManager
         {
             if (_rayRelay.TryGetValue(xy, out var vector))
             {
-                territoryPt.Y = vector.Y;
-                territoryPt.Y = Math.Max(territoryPt.Y, point.Y - height);
-                territoryPt.Y = Math.Min(territoryPt.Y, point.Y + height);
-                return vector.HasValue;
+                if (float.IsNaN(vector))
+                {
+                    return false;
+                }
+                else
+                {
+                    territoryPt.Y = vector;
+                    territoryPt.Y = Math.Max(territoryPt.Y, point.Y - height);
+                    territoryPt.Y = Math.Min(territoryPt.Y, point.Y + height);
+                    return true;
+                }
             }
         }
 
@@ -129,15 +130,12 @@ internal static class RaycastManager
         }
     }
 
-    static unsafe HitResult Raycast(Vector3 point)
+    static unsafe float Raycast(Vector3 point)
     {
         int* unknown = stackalloc int[3] { 16384, 16384, 0 };
 
-        HitResult result = default;
         RaycastHit hit = default;
 
-        result.HasValue = BGCollisionModule.Raycast2(point + Vector3.UnitY * 10, -Vector3.UnitY, 20, &hit, unknown);
-        result.Y = hit.Point.Y;
-        return result;
+        return BGCollisionModule.Raycast2(point + Vector3.UnitY * 10, -Vector3.UnitY, 20, &hit, unknown) ? hit.Point.Y : float.NaN;
     }
 }

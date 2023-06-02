@@ -1,31 +1,45 @@
-﻿namespace XIVPainter.Element3D;
+﻿using System.Collections.Generic;
+
+namespace XIVPainter.Element3D;
 
 public class Drawing3DAnnulusF : Drawing3DPolylineF
 {
     public Vector3 Center { get; set; }
     public float Radius1 { get; set; }
     public float Radius2 { get; set; }
-    public float Rotation { get; set; }
-    public float Round { get; set; }
+    public Vector2[] ArcStartSpan { get; set; }
+
     public Drawing3DAnnulusF(Vector3 center, float radius1, float radius2, uint color,
-        float thickness, float rotation = 0, float round = MathF.Tau)
+        float thickness, params Vector2[] arcStartSpan)
         : base(null, color, thickness)
     {
         Center = center;
         Radius1 = radius1;
         Radius2 = radius2;
-        Rotation = rotation;
-        Round = round;
+        ArcStartSpan = arcStartSpan;
+        if (arcStartSpan == null || arcStartSpan.Length == 0)
+        {
+            ArcStartSpan = new Vector2[] { new Vector2(0, MathF.Tau) };
+        }
     }
 
     public override void UpdateOnFrame(XIVPainter painter)
     {
         base.UpdateOnFrame(painter);
 
-        var sect1 = painter.SectorPlots(Center, Radius1, Rotation, Round);
-        var sect2 = painter.SectorPlots(Center, Radius2, Rotation, Round);
-        BorderPoints = new IEnumerable<Vector3>[] { sect1, sect2 };
-        FillPoints = GetAnnulusFill(sect1, sect2);
+        IEnumerable<IEnumerable<Vector3>> boarder = Array.Empty<IEnumerable<Vector3>>(),
+            fill = Array.Empty<IEnumerable<Vector3>>();
+        foreach (var pair in ArcStartSpan)
+        {
+            var sect1 = painter.SectorPlots(Center, Radius1, pair.X, pair.Y);
+            var sect2 = painter.SectorPlots(Center, Radius2, pair.X, pair.Y);
+            boarder = boarder.Append(sect1);
+            boarder = boarder.Append(sect2);
+            fill = fill.Union(GetAnnulusFill(sect1, sect2));
+
+        }
+        BorderPoints = boarder;
+        FillPoints = fill;
     }
 
     private static IEnumerable<IEnumerable<Vector3>> GetAnnulusFill(Vector3[] ptsA, Vector3[] ptsB)

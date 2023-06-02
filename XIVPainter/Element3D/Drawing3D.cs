@@ -5,13 +5,9 @@ namespace XIVPainter.Element3D;
 public abstract class Drawing3D : IDrawing3D
 {
     public uint Color { get; set; }
-
     public byte WarningTime { get; set; }
-
     public float AlphaRatio { get; set; }
-
     public DateTime DeadTime { get; set; }
-
     public float TimeToDisappear { get; set; }
     public Action UpdateEveryFrame { get; set; }
     public EaseFuncType DisappearType { get; set; }
