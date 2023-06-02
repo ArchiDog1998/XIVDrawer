@@ -8,6 +8,8 @@ public class Drawing3DPolylineF : Drawing3D
     public uint InsideColor { get; set; }
     public float Thickness { get; set; }
 
+    public bool IsFill { get; set; } = true;
+
     public IEnumerable<IEnumerable<Vector3>> BorderPoints { get; protected set; }
     public IEnumerable<IEnumerable<Vector3>> FillPoints { get; protected set; }
 
@@ -52,9 +54,10 @@ public class Drawing3DPolylineF : Drawing3D
                     ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
             }
 
-            if(!hasFill) result = result.Union(DrawingHelper.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
+            if(!hasFill && IsFill) result = result.Union(DrawingHelper.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
         }
-        if (hasFill)
+
+        if (hasFill && IsFill)
         {
             foreach (var points in FillPoints)
             {
