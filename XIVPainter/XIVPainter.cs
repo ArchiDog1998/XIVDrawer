@@ -6,11 +6,8 @@ using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using System.Linq;
-using System.Numerics;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace XIVPainter;
 
@@ -23,9 +20,6 @@ public class XIVPainter
 
     readonly object _drawing3DLock = new object();
     List<IDrawing3D> _drawing3DElements = new List<IDrawing3D>();
-
-    readonly object _rayRelayLock = new object();
-    readonly Dictionary<Vector2, Vector3> _rayRelay = new Dictionary<Vector2, Vector3>();
 
     [PluginService]
     internal static DalamudPluginInterface _pluginInterface { get; set; }
@@ -60,12 +54,16 @@ public class XIVPainter
 
         _pluginInterface.UiBuilder.Draw += Draw;
         _framework.Update += Update;
+
+        RaycastManager.Enable();
     }
 
     public void Dispose()
     {
         _pluginInterface.UiBuilder.Draw -= Draw;
         _framework.Update -= Update;
+
+        RaycastManager.Dispose();
     }
 
     private void Draw()
@@ -128,8 +126,6 @@ public class XIVPainter
 
         try
         {
-            _rayRelay.Clear();
-
             IDrawing2D[] elements = Array.Empty<IDrawing2D>();
             IEnumerable<IDrawing2D> relay = elements;
             lock (_drawing3DLock)
@@ -243,32 +239,17 @@ public class XIVPainter
 
     IEnumerable<Vector3> DivideCurve(IEnumerable<Vector3> worldPts, float length, bool isClosed)
     {
-        if(worldPts.Count() < 2 || length <= 0.01f) return worldPts;
+        if(worldPts == null || worldPts.Count() < 2 || length <= 0.01f) return worldPts;
 
         IEnumerable<Vector3> pts = Array.Empty<Vector3>();
-        bool isFirst = true;
-        Vector3 lastPt = default;
-        foreach (var pt in worldPts)
-        {
-            if (isFirst)
-            {
-                isFirst = false;
-                lastPt = pt;
-                continue;
-            }
-            pts = pts.Union(DashPoints(lastPt, pt, length));
 
-            lastPt = pt;
-        }
+        DrawingHelper.SegmentAction(worldPts, (a, b) =>
+        {
+            pts = pts.Union(DashPoints(a, b, length));
+        }, isClosed);
 
-        if (isClosed)
-        {
-            pts = pts.Union(DashPoints(lastPt, worldPts.First(), length));
-        }
-        else
-        {
-            pts = pts.Append(lastPt);
-        }
+        if(!isClosed) pts = pts.Append(worldPts.Last());
+
         return pts;
     }
 
@@ -318,34 +299,12 @@ public class XIVPainter
         if (!RemovePtsNotOnGround && height <= 0) 
             return pts;
 
-        int* unknown = stackalloc int[3] { 16384, 16384, 0 };
-
         var result = new List<Vector3>(pts.Count());
         foreach (var pt in pts)
         {
-            var xy = new Vector2(float.Round(pt.X, 2), float.Round(pt.Z, 2));
-
-            lock (_rayRelayLock)
+            if (RaycastManager.Raycast(pt, height, out var territoryPt))
             {
-                if (_rayRelay.TryGetValue(xy, out var vector))
-                {
-                    result.Add(vector);
-                    continue;
-                }
-            }
-
-            RaycastHit hit = default;
-            if (BGCollisionModule.Raycast2(pt + Vector3.UnitY * 10, -Vector3.UnitY, 20, &hit, unknown))
-            {
-                var p = hit.Point;
-                p.Y = Math.Max(p.Y, pt.Y - height);
-                p.Y = Math.Min(p.Y, pt.Y + height);
-
-                lock (_rayRelayLock)
-                {
-                    _rayRelay[xy] = p;
-                }
-                result.Add(p);
+                result.Add(territoryPt);
             }
             else if (!RemovePtsNotOnGround)
             {

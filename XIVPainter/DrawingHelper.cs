@@ -47,7 +47,7 @@ public static class DrawingHelper
         return result;
     }
 
-    public static void SegmentAction<T>(IEnumerable<T> pts, Action<T, T> pairAction)
+    public static void SegmentAction<T>(IEnumerable<T> pts, Action<T, T> pairAction, bool closed = true)
     {
         if (pairAction == null) return;
         if(pts == null || !pts.Any()) return;
@@ -66,7 +66,7 @@ public static class DrawingHelper
             prePt = pt;
         }
 
-        pairAction(prePt, pts.First());
+        if(closed) pairAction(prePt, pts.First());
     }
 
     public static IEnumerable<Vector2[]> ConvexPoints(Vector2[] points)
