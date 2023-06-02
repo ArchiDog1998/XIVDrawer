@@ -6,8 +6,24 @@ namespace XIVPainter;
 
 internal static class RaycastManager
 {
+    struct HitResult
+    {
+        public bool HasValue;
+        public float Y;
+    }
+
+    class Vector2Comparer : IComparer<Vector2>
+    {
+        public int Compare(Vector2 x, Vector2 y)
+        {
+            var xCom = x.X.CompareTo(y.X);
+            if(xCom != 0) return xCom;
+            return y.Y.CompareTo(x.Y);
+        }
+    }
+
     static readonly object _rayRelayLock = new object();
-    static readonly Dictionary<Vector2, HitResult> _rayRelay = new ();
+    static readonly SortedList<Vector2, HitResult> _rayRelay = new (new Vector2Comparer());
 
     static readonly object _calculatingPtsLock = new object();
     static readonly Queue<Vector3> _calculatingPts = new ();
@@ -55,12 +71,13 @@ internal static class RaycastManager
     public static bool Raycast(Vector3 point, float height, out Vector3 territoryPt)
     {
         var xy = GetKey(point);
+        territoryPt = point;
 
         lock (_rayRelayLock)
         {
             if (_rayRelay.TryGetValue(xy, out var vector))
             {
-                territoryPt = vector.Point;
+                territoryPt.Y = vector.Y;
                 territoryPt.Y = Math.Max(territoryPt.Y, point.Y - height);
                 territoryPt.Y = Math.Min(territoryPt.Y, point.Y + height);
                 return vector.HasValue;
@@ -76,7 +93,6 @@ internal static class RaycastManager
             }
             RunRaycast();
         }
-        territoryPt = point;
         return true;
     }
 
@@ -121,13 +137,7 @@ internal static class RaycastManager
         RaycastHit hit = default;
 
         result.HasValue = BGCollisionModule.Raycast2(point + Vector3.UnitY * 10, -Vector3.UnitY, 20, &hit, unknown);
-        result.Point = hit.Point;
+        result.Y = hit.Point.Y;
         return result;
-    }
-
-    struct HitResult
-    {
-        public bool HasValue;
-        public Vector3 Point;
     }
 }
