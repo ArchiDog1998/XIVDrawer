@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Logging;
 using XIVPainter.Enum;
 
 namespace XIVPainter.Element3D;
@@ -17,12 +18,17 @@ public class Drawing3DCircularSectorFO : Drawing3DCircularSectorF
         Target = target;
         Including = include;
         ArcStarSpanTarget = arcStartSpan;
+        if (arcStartSpan == null || arcStartSpan.Length == 0)
+        {
+            ArcStarSpanTarget = new Vector2[] { new Vector2(0, MathF.Tau) };
+        }
     }
 
     public override void UpdateOnFrame(XIVPainter painter)
     {
         Center = Target?.Position ?? default;
         Radius = Including.GetRadius(Target, RadiusTarget);
+
         ArcStartSpan = ArcStarSpanTarget.Select(pt => new Vector2(pt.X + Target?.Rotation ?? 0, pt.Y)).ToArray();
 
         base.UpdateOnFrame(painter);

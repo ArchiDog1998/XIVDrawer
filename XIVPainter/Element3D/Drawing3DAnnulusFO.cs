@@ -19,6 +19,10 @@ public class Drawing3DAnnulusFO : Drawing3DAnnulusF
         Target = target;
         Including = include;
         ArcStarSpanTarget = arcStartSpan;
+        if (arcStartSpan == null || arcStartSpan.Length == 0)
+        {
+            ArcStarSpanTarget = new Vector2[] { new Vector2(0, MathF.Tau) };
+        }
     }
 
     public override void UpdateOnFrame(XIVPainter painter)

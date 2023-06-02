@@ -67,24 +67,6 @@ internal static class RaycastManager
         var xy = GetKey(point);
         territoryPt = point;
 
-        lock (_rayRelayLock)
-        {
-            if (_rayRelay.TryGetValue(xy, out var vector))
-            {
-                if (float.IsNaN(vector))
-                {
-                    return false;
-                }
-                else
-                {
-                    territoryPt.Y = vector;
-                    territoryPt.Y = Math.Max(territoryPt.Y, point.Y - height);
-                    territoryPt.Y = Math.Min(territoryPt.Y, point.Y + height);
-                    return true;
-                }
-            }
-        }
-
         //Start RayCasting!
         if (_canAdd)
         {
@@ -94,11 +76,35 @@ internal static class RaycastManager
             }
             RunRaycast();
         }
-        return true;
+
+        var vector = GetHeight(xy);
+        if (float.IsNaN(vector))
+        {
+            return false;
+        }
+        else
+        {
+            territoryPt.Y = vector;
+            territoryPt.Y = Math.Max(territoryPt.Y, point.Y - height);
+            territoryPt.Y = Math.Min(territoryPt.Y, point.Y + height);
+            return true;
+        }
+    }
+
+    static FieldInfo _keyInfo;
+    private static float GetHeight(Vector2 xy)
+    {
+        lock (_rayRelayLock)
+        {
+            _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
+            var index = Array.BinarySearch((Vector2[])_keyInfo.GetValue(_rayRelay), xy, new Vector2Comparer());
+            if (index < 0) index = -1 - index;
+            return _rayRelay.Values[index % _rayRelay.Count];
+        }
     }
 
     private static Vector2 GetKey(Vector3 point) 
-        => new Vector2(float.Round(point.X, 2), float.Round(point.Z, 2));
+        => new Vector2(float.Round(point.X, 1), float.Round(point.Z, 1));
 
     static bool _isRun = false;
     static void RunRaycast()
