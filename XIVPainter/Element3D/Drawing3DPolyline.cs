@@ -3,10 +3,10 @@ using XIVPainter.Enum;
 
 namespace XIVPainter.Element3D;
 
-public class Drawing3DPolylineF : Drawing3D
+public class Drawing3DPolyline : Drawing3D
 {
     uint showColor;
-    Drawing3DCircularSectorF _drawingCir;
+    Drawing3DCircularSector _drawingCir;
     public uint InsideColor { get; set; }
     public float Thickness { get; set; }
     public bool IsFill { get; set; } = true;
@@ -17,12 +17,12 @@ public class Drawing3DPolylineF : Drawing3D
     public IEnumerable<IEnumerable<Vector3>> BorderPoints { get; protected set; }
     public IEnumerable<IEnumerable<Vector3>> FillPoints { get; protected set; }
 
-    public Drawing3DPolylineF(IEnumerable<Vector3> pts, uint color, float thickness)
+    public Drawing3DPolyline(IEnumerable<Vector3> pts, uint color, float thickness)
         : this(new IEnumerable<Vector3>[] { pts ?? Array.Empty<Vector3>() }, color, thickness)
     {
     }
 
-    public Drawing3DPolylineF(IEnumerable<IEnumerable<Vector3>> borderPts, uint color, float thickness, IEnumerable<IEnumerable<Vector3>> fillPoints = null)
+    public Drawing3DPolyline(IEnumerable<IEnumerable<Vector3>> borderPts, uint color, float thickness, IEnumerable<IEnumerable<Vector3>> fillPoints = null)
     {
         BorderPoints = borderPts ?? Array.Empty<Vector3[]>();
         FillPoints = fillPoints;
@@ -104,7 +104,7 @@ public class Drawing3DPolylineF : Drawing3D
                 var r = MathF.Abs(ClosestPtDis);
                 var d = DateTime.Now.Millisecond / 1000f;
                 r *= (float)DrawingHelper.EaseFuncRemap(EaseFuncType.None, EaseFuncType.Cubic)(d);
-                _drawingCir = new Drawing3DCircularSectorF(loc, r, MovingColor, 2);
+                _drawingCir = new Drawing3DCircularSector(loc, r, MovingColor, 2);
                 _drawingCir.UpdateOnFrame(painter);
                 return;
             }

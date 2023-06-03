@@ -1,11 +1,11 @@
 ﻿namespace XIVPainter.Element3D;
 
-public class Drawing3DCircularSectorF : Drawing3DPolylineF
+public class Drawing3DCircularSector : Drawing3DPolyline
 {
     public Vector3 Center { get; set; }
     public float Radius { get; set; }
     public Vector2[] ArcStartSpan { get; set; }
-    public Drawing3DCircularSectorF(Vector3 center, float radius, uint color, float thickness, params Vector2[] arcStartSpan)
+    public Drawing3DCircularSector(Vector3 center, float radius, uint color, float thickness, params Vector2[] arcStartSpan)
         : base(null, color, thickness)
     {
         Center = center;

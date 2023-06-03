@@ -1,21 +1,20 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Logging;
 using XIVPainter.Enum;
 
 namespace XIVPainter.Element3D;
 
-public class Drawing3DAnnulusFO : Drawing3DAnnulusF
+public class Drawing3DCircularSectorO : Drawing3DCircularSector
 {
     public RadiusInclude Including { get; set; }
-    public float RadiusTarget1 { get; set; }
-    public float RadiusTarget2 { get; set; }
+    public float RadiusTarget { get; set; }
     public GameObject Target { get; set; }
     public Vector2[] ArcStarSpanTarget { get; set; }
 
-    public Drawing3DAnnulusFO(GameObject target, float radius1, float radius2, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan) 
-        : base(target?.Position ?? default, include.GetRadius(target, radius1), include.GetRadius(target, radius2), color, thickness)
+    public Drawing3DCircularSectorO(GameObject target, float radius, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan) 
+        : base(target?.Position ?? default, include.GetRadius(target, radius), color, thickness)
     {
-        RadiusTarget1 = radius1;
-        RadiusTarget2 = radius2;
+        RadiusTarget = radius;
         Target = target;
         Including = include;
         ArcStarSpanTarget = arcStartSpan;
@@ -28,10 +27,10 @@ public class Drawing3DAnnulusFO : Drawing3DAnnulusF
     public override void UpdateOnFrame(XIVPainter painter)
     {
         Center = Target?.Position ?? default;
-        Radius1 = Including.GetRadius(Target, RadiusTarget1);
-        Radius2 = Including.GetRadius(Target, RadiusTarget2);
+        Radius = Including.GetRadius(Target, RadiusTarget);
+
         ArcStartSpan = ArcStarSpanTarget.Select(pt => new Vector2(pt.X + Target?.Rotation ?? 0, pt.Y)).ToArray();
-        
+
         base.UpdateOnFrame(painter);
     }
 }

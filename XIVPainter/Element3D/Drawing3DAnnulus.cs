@@ -2,14 +2,14 @@
 
 namespace XIVPainter.Element3D;
 
-public class Drawing3DAnnulusF : Drawing3DPolylineF
+public class Drawing3DAnnulus : Drawing3DPolyline
 {
     public Vector3 Center { get; set; }
     public float Radius1 { get; set; }
     public float Radius2 { get; set; }
     public Vector2[] ArcStartSpan { get; set; }
 
-    public Drawing3DAnnulusF(Vector3 center, float radius1, float radius2, uint color,
+    public Drawing3DAnnulus(Vector3 center, float radius1, float radius2, uint color,
         float thickness, params Vector2[] arcStartSpan)
         : base(null, color, thickness)
     {
