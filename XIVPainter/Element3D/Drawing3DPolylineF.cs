@@ -1,14 +1,18 @@
 ﻿using XIVPainter.Element2D;
+using XIVPainter.Enum;
 
 namespace XIVPainter.Element3D;
 
 public class Drawing3DPolylineF : Drawing3D
 {
     uint showColor;
+    Drawing3DCircularSectorF _drawingCir;
     public uint InsideColor { get; set; }
     public float Thickness { get; set; }
-
     public bool IsFill { get; set; } = true;
+
+    public float ClosestPtDis { get; set; } = 0;
+    public uint MovingColor { get; set; }
 
     public IEnumerable<IEnumerable<Vector3>> BorderPoints { get; protected set; }
     public IEnumerable<IEnumerable<Vector3>> FillPoints { get; protected set; }
@@ -23,7 +27,7 @@ public class Drawing3DPolylineF : Drawing3D
         BorderPoints = borderPts ?? Array.Empty<Vector3[]>();
         FillPoints = fillPoints;
         AlphaRatio = 1;
-        showColor = InsideColor = Color = color;
+        MovingColor = showColor = InsideColor = Color = color;
         Thickness = thickness;
     }
 
@@ -50,8 +54,7 @@ public class Drawing3DPolylineF : Drawing3D
 
                 baseColor.W *= 1 - AnimationRatio;
 
-                result = result.Append(new PolylineDrawing(offset, 
-                    ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
+                result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
             }
 
             if(!hasFill && IsFill) result = result.Union(DrawingHelper.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
@@ -66,6 +69,12 @@ public class Drawing3DPolylineF : Drawing3D
                 result = result.Union(DrawingHelper.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
             }
         }
+
+        if(_drawingCir != null)
+        {
+            result = result.Union(_drawingCir.To2D(owner));
+        }
+
         return result;
     }
 
@@ -74,14 +83,32 @@ public class Drawing3DPolylineF : Drawing3D
         base.UpdateOnFrame(painter);
 
         if (DeadTime != DateTime.MinValue && DateTime.Now > DeadTime) return;
+        var inside = DrawingHelper.IsPointInside(XIVPainter._clientState.LocalPlayer.Position, BorderPoints);
 
         showColor = Color;
-        if (Color != InsideColor && XIVPainter._clientState?.LocalPlayer != null)
+        if (XIVPainter._clientState?.LocalPlayer != null)
         {
-            if (DrawingHelper.IsPointInside(XIVPainter._clientState.LocalPlayer.Position, BorderPoints))
+            if (Color != InsideColor)
             {
-                showColor = InsideColor;
+                if (inside)
+                {
+                    showColor = InsideColor;
+                }
+            }
+
+            if (ClosestPtDis != 0 && ClosestPtDis > 0 != inside)
+            {
+                var pts = BorderPoints.Select(pt => DrawingHelper.OffSetPolyline(pt.ToArray(), ClosestPtDis));
+                var loc = DrawingHelper.GetClosestPoint(XIVPainter._clientState.LocalPlayer.Position, pts);
+
+                var r = MathF.Abs(ClosestPtDis);
+                var d = DateTime.Now.Millisecond / 1000f;
+                r *= (float)DrawingHelper.EaseFuncRemap(EaseFuncType.None, EaseFuncType.Cubic)(d);
+                _drawingCir = new Drawing3DCircularSectorF(loc, r, MovingColor, 2);
+                _drawingCir.UpdateOnFrame(painter);
+                return;
             }
         }
+        _drawingCir = null;
     }
 }
