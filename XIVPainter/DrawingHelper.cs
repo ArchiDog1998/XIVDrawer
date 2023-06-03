@@ -4,11 +4,12 @@ namespace XIVPainter;
 
 public static class DrawingHelper
 {
-    public static void Normalize(ref this Vector2 vec)
+    public static bool Normalize(ref this Vector2 vec)
     {
         var length = vec.Length();
-        if(length == 0) return;
+        if(length == 0) return false;
         vec /= length;
+        return true;
     }
 
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
@@ -77,6 +78,8 @@ public static class DrawingHelper
 
     public static Vector3[] OffSetPolyline(Vector3[] pts, float offset)
     {
+        if (pts.Length < 3) return pts;
+
         var length = pts.Length;
         var result = new Vector3[length];
         for (var i = 0; i < length; i++)
@@ -91,10 +94,11 @@ public static class DrawingHelper
             vec1.Normalize();
             vec2.Normalize();
 
-            var dir = vec2 - vec1;
+            var dot = Vector2.Dot(vec1, vec2);
+            var dir = dot >= 0.99f ? new Vector2(vec1.Y, -vec1.X) : vec2 - vec1;
             dir.Normalize();
 
-            var dis = offset / MathF.Cos(MathF.Acos(Vector2.Dot(vec1, vec2)) / 2);
+            var dis = offset / MathF.Cos(MathF.Acos(dot) / 2);
             dir *= dis;
             result[i] = new Vector3(pt.X + dir.X, pt.Y, pt.Z + dir.Y);
         }

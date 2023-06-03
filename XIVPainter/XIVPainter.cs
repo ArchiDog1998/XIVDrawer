@@ -351,9 +351,11 @@ public class XIVPainter
     {
         if (radius <= 0) return Array.Empty<Vector3>();
 
-        var seg = (int)(CircleSegment * round / Math.PI / 2);
-        var pts = new Vector3[seg + 1];
+        var seg = (int)(CircleSegment * round / MathF.Tau);
         var step = round / seg;
+
+        if (round == MathF.Tau) seg--;
+        var pts = new Vector3[seg + 1];
 
         for (int i = 0; i <= seg; i++)
         {
