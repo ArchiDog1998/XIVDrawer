@@ -6,12 +6,12 @@ namespace XIVPainter.Element3D;
 public class Drawing3DPolyline : Drawing3D
 {
     uint showColor;
-    Drawing3DCircularSector _drawingCir;
+    //Drawing3DCircularSector _drawingCir;
     public uint InsideColor { get; set; }
     public float Thickness { get; set; }
     public bool IsFill { get; set; } = true;
 
-    public float ClosestPtDis { get; set; } = 0;
+    //public float ClosestPtDis { get; set; } = 0;
     public uint MovingColor { get; set; }
 
     public IEnumerable<IEnumerable<Vector3>> BorderPoints { get; protected set; }
@@ -70,10 +70,10 @@ public class Drawing3DPolyline : Drawing3D
             }
         }
 
-        if(_drawingCir != null)
-        {
-            result = result.Union(_drawingCir.To2D(owner));
-        }
+        //if(_drawingCir != null)
+        //{
+        //    result = result.Union(_drawingCir.To2D(owner));
+        //}
 
         return result;
     }
@@ -83,7 +83,7 @@ public class Drawing3DPolyline : Drawing3D
         base.UpdateOnFrame(painter);
 
         if (DeadTime != DateTime.MinValue && DateTime.Now > DeadTime) return;
-        var inside = DrawingHelper.IsPointInside(XIVPainter._clientState.LocalPlayer.Position, BorderPoints);
+        var inside = XIVPainter._clientState.LocalPlayer != null && DrawingHelper.IsPointInside(XIVPainter._clientState.LocalPlayer.Position, BorderPoints);
 
         showColor = Color;
         if (XIVPainter._clientState?.LocalPlayer != null)
@@ -96,19 +96,19 @@ public class Drawing3DPolyline : Drawing3D
                 }
             }
 
-            if (ClosestPtDis != 0 && ClosestPtDis > 0 != inside)
-            {
-                var pts = BorderPoints.Select(pt => DrawingHelper.OffSetPolyline(pt.ToArray(), ClosestPtDis));
-                var loc = DrawingHelper.GetClosestPoint(XIVPainter._clientState.LocalPlayer.Position, pts);
+            //if (ClosestPtDis != 0 && ClosestPtDis > 0 != inside)
+            //{
+            //    var pts = BorderPoints.Select(pt => DrawingHelper.OffSetPolyline(pt.ToArray(), ClosestPtDis));
+            //    var loc = DrawingHelper.GetClosestPoint(XIVPainter._clientState.LocalPlayer.Position, pts);
 
-                var r = MathF.Abs(ClosestPtDis);
-                var d = DateTime.Now.Millisecond / 1000f;
-                r *= (float)DrawingHelper.EaseFuncRemap(EaseFuncType.None, EaseFuncType.Cubic)(d);
-                _drawingCir = new Drawing3DCircularSector(loc, r, MovingColor, 2);
-                _drawingCir.UpdateOnFrame(painter);
-                return;
-            }
+            //    var r = MathF.Abs(ClosestPtDis);
+            //    var d = DateTime.Now.Millisecond / 1000f;
+            //    r *= (float)DrawingHelper.EaseFuncRemap(EaseFuncType.None, EaseFuncType.Cubic)(d);
+            //    _drawingCir = new Drawing3DCircularSector(loc, r, MovingColor, 2);
+            //    _drawingCir.UpdateOnFrame(painter);
+            //    return;
+            //}
         }
-        _drawingCir = null;
+        //_drawingCir = null;
     }
 }
