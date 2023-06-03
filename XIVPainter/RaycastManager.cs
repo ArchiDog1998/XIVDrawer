@@ -79,7 +79,7 @@ internal static class RaycastManager
             RunRaycast();
         }
 
-        var vector = GetHeight(xy);
+        if (!GetHeight(xy, out var vector)) vector = territoryPt.Y;
         if (float.IsNaN(vector))
         {
             return false;
@@ -94,14 +94,20 @@ internal static class RaycastManager
     }
 
     static FieldInfo _keyInfo;
-    private static float GetHeight(Vector2 xy)
+    private static bool GetHeight(Vector2 xy, out float height)
     {
         lock (_rayRelayLock)
         {
-            _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
-            var index = Array.BinarySearch((Vector2[])_keyInfo.GetValue(_rayRelay), xy, _comparer);
-            if (index < 0) index = -1 - index;
-            return _rayRelay.Values[index % _rayRelay.Count];
+            if(_rayRelay.Count > 0)
+            {
+                _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
+                var index = Array.BinarySearch((Vector2[])_keyInfo.GetValue(_rayRelay), xy, _comparer);
+                if (index < 0) index = -1 - index;
+                height = _rayRelay.Values[index % _rayRelay.Count];
+                return true;
+            }
+            height = 0;
+            return false;
         }
     }
 
