@@ -16,8 +16,10 @@ internal static class RaycastManager
         }
     }
 
+    static readonly Vector2Comparer _comparer = new Vector2Comparer();
+
     static readonly object _rayRelayLock = new object();
-    static readonly SortedList<Vector2, float> _rayRelay = new (new Vector2Comparer());
+    static readonly SortedList<Vector2, float> _rayRelay = new (_comparer);
 
     static readonly object _calculatingPtsLock = new object();
     static readonly Queue<Vector3> _calculatingPts = new ();
@@ -97,7 +99,7 @@ internal static class RaycastManager
         lock (_rayRelayLock)
         {
             _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
-            var index = Array.BinarySearch((Vector2[])_keyInfo.GetValue(_rayRelay), xy, new Vector2Comparer());
+            var index = Array.BinarySearch((Vector2[])_keyInfo.GetValue(_rayRelay), xy, _comparer);
             if (index < 0) index = -1 - index;
             return _rayRelay.Values[index % _rayRelay.Count];
         }

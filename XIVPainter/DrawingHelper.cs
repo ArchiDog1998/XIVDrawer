@@ -6,9 +6,9 @@ public static class DrawingHelper
 {
     public static void Normalize(ref this Vector2 vec)
     {
-        var lenth = vec.Length();
-        if(lenth == 0) return;
-        vec /= lenth;
+        var length = vec.Length();
+        if(length == 0) return;
+        vec /= length;
     }
 
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
@@ -26,6 +26,53 @@ public static class DrawingHelper
         }
 
         return count % 2 == 1;
+    }
+
+    public static Vector3 GetClosestPoint(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
+    {
+        float minDis = float.MaxValue;
+        Vector3 result = default;
+
+        foreach (var partPts in pts)
+        {
+            SegmentAction(partPts, (a, b) =>
+            {
+                var dis = PointSegment(pt, a, b, out var res);
+                if(dis < minDis)
+                {
+                    minDis = dis;
+                    result = res;
+                }
+            });
+        }
+
+        return result;
+    }
+
+    static float PointSegment(Vector3 p, Vector3 a, Vector3 b, out Vector3 cp)
+    {
+        Vector3 ab = b - a;
+        Vector3 ap = p - a;
+
+        float proj = Vector3.Dot(ap, ab);
+        float abLenSq = ab.LengthSquared();
+        float d = proj / abLenSq;
+
+        switch(d)
+        {
+            case <= 0:
+                cp = a;
+                break;
+
+            case >= 1:
+                cp = b;
+                break;
+
+            default:
+                cp = a + ab * d;
+                break;
+        }
+        return Vector3.Distance(p, cp);
     }
 
     public static Vector3[] OffSetPolyline(Vector3[] pts, float offset)
