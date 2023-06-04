@@ -10,9 +10,25 @@ internal static class RaycastManager
     {
         public int Compare(Vector2 x, Vector2 y)
         {
-            var xCom = x.X.CompareTo(y.X);
+            var xX = (int)x.X;
+            var xY = (int)x.Y;
+
+            var yX = (int)y.X;
+            var yY = (int)y.Y;
+
+            var xCom = (xX / 10).CompareTo(yX / 10);
+            if (xCom != 0) return xCom;
+            xCom = (xY / 10).CompareTo(yY / 10);
+            if (xCom != 0) return xCom;
+
+            xCom = xX.CompareTo(yX);
+            if (xCom != 0) return xCom;
+            xCom = xY.CompareTo(yY);
+            if (xCom != 0) return xCom;
+
+            xCom = x.X.CompareTo(y.X);
             if(xCom != 0) return xCom;
-            return y.Y.CompareTo(x.Y);
+            return x.Y.CompareTo(y.Y);
         }
     }
 
