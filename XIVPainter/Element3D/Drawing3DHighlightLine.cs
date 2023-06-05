@@ -33,7 +33,15 @@ public class Drawing3DHighlightLine: Drawing3DPoly
     {
         var d = DateTime.Now.Millisecond / 1000f;
         var ratio = (float)DrawingHelper.EaseFuncRemap(EaseFuncType.None, EaseFuncType.Cubic)(d);
-        cir1.Radius = cir2.Radius = ratio * Radius;
+        if(Radius == 0)
+        {
+            cir1.Radius = cir2.Radius = 0;
+        }
+        else
+        {
+            cir1.Radius = MathF.Max(0.01f, (1 - ratio) * Radius / 2);
+            cir2.Radius = MathF.Max(0.01f, ratio * Radius);
+        }
         cir1.Thickness = cir2.Thickness = Thickness;
         cir1.Color = cir2.Color = Color;
 
