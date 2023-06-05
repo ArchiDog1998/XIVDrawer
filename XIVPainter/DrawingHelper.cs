@@ -12,6 +12,14 @@ public static class DrawingHelper
         return true;
     }
 
+    public static bool Normalize(ref this Vector3 vec)
+    {
+        var length = vec.Length();
+        if (length == 0) return false;
+        vec /= length;
+        return true;
+    }
+
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
     {
         var count = 0;

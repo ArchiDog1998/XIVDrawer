@@ -36,7 +36,7 @@ public abstract class Drawing3D : IDrawing3D
             AnimationRatio = (WarningTime + (float)time) % 1;
             var inFunc = DrawingHelper.EaseFuncRemap(WarningType, EaseFuncType.None);
             var outFunc = DrawingHelper.EaseFuncRemap(WarningType, WarningType);
-            AlphaRatio = (float)AnimationRatio;
+
             if (WarningRatio <= 0)
             {
                 AlphaRatio = (float)outFunc(AnimationRatio) * (1 - percent) + percent;

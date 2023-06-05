@@ -6,12 +6,9 @@ namespace XIVPainter.Element3D;
 public class Drawing3DPolyline : Drawing3D
 {
     uint showColor;
-    //Drawing3DCircularSector _drawingCir;
     public uint InsideColor { get; set; }
     public float Thickness { get; set; }
     public bool IsFill { get; set; } = true;
-
-    //public float ClosestPtDis { get; set; } = 0;
     public uint MovingColor { get; set; }
 
     public IEnumerable<IEnumerable<Vector3>> BorderPoints { get; protected set; }
@@ -34,6 +31,9 @@ public class Drawing3DPolyline : Drawing3D
     public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
         var baseColor = ImGui.ColorConvertU32ToFloat4(showColor);
+
+        if(baseColor.W == 0) return Array.Empty<IDrawing2D>();
+
         baseColor.W *= AlphaRatio;
         var fillColor = ImGui.ColorConvertFloat4ToU32(baseColor);
         baseColor.W = AlphaRatio;
@@ -48,13 +48,20 @@ public class Drawing3DPolyline : Drawing3D
 
             if(hasBorder)
             {
-                result = result.Append(new PolylineDrawing(pts, boarderColor, Thickness));
+                if (IsFill)
+                {
+                    result = result.Append(new PolylineDrawing(pts, boarderColor, Thickness));
 
-                var offset = owner.GetPtsOnScreen(DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio * 2), true);
+                    var offset = owner.GetPtsOnScreen(DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio * 2), true);
 
-                baseColor.W *= 1 - AnimationRatio;
+                    baseColor.W *= 1 - AnimationRatio;
 
-                result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
+                    result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
+                }
+                else
+                {
+                    result = result.Append(new PolylineDrawing(pts, fillColor, Thickness));
+                }
             }
 
             if(!hasFill && IsFill) result = result.Union(DrawingHelper.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
@@ -69,11 +76,6 @@ public class Drawing3DPolyline : Drawing3D
                 result = result.Union(DrawingHelper.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
             }
         }
-
-        //if(_drawingCir != null)
-        //{
-        //    result = result.Union(_drawingCir.To2D(owner));
-        //}
 
         return result;
     }
@@ -95,20 +97,6 @@ public class Drawing3DPolyline : Drawing3D
                     showColor = InsideColor;
                 }
             }
-
-            //if (ClosestPtDis != 0 && ClosestPtDis > 0 != inside)
-            //{
-            //    var pts = BorderPoints.Select(pt => DrawingHelper.OffSetPolyline(pt.ToArray(), ClosestPtDis));
-            //    var loc = DrawingHelper.GetClosestPoint(XIVPainter._clientState.LocalPlayer.Position, pts);
-
-            //    var r = MathF.Abs(ClosestPtDis);
-            //    var d = DateTime.Now.Millisecond / 1000f;
-            //    r *= (float)DrawingHelper.EaseFuncRemap(EaseFuncType.None, EaseFuncType.Cubic)(d);
-            //    _drawingCir = new Drawing3DCircularSector(loc, r, MovingColor, 2);
-            //    _drawingCir.UpdateOnFrame(painter);
-            //    return;
-            //}
         }
-        //_drawingCir = null;
     }
 }

@@ -1,10 +1,16 @@
 ﻿using Dalamud.Game;
+using Dalamud.Hooking;
 using Dalamud.Logging;
+using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
 namespace XIVPainter;
 
+#if DEBUG
+internal class RaycastManager
+#else
 internal static class RaycastManager
+#endif
 {
     class Vector2Comparer : IComparer<Vector2>
     {
@@ -41,6 +47,49 @@ internal static class RaycastManager
     static readonly Queue<Vector3> _calculatingPts = new ();
     static bool _canAdd = false;
 
+
+#if DEBUG
+    unsafe delegate bool RayCastDelegate(Vector3 origin, Vector3 direction, float maxDistance, RaycastHit* hitInfo, int* flags);
+    unsafe delegate bool RayCastExDelegate(RaycastHit* hitInfo, Vector3 origin, Vector3 direction, float maxDistance, int layerMask, int* flags);
+
+    [Signature("E8 ?? ?? ?? ?? 44 0F B6 F0 84 C0 74 ?? 40 38 BD", DetourName = nameof(RayCastH))]
+    static Hook<RayCastDelegate> RayCastHook = null;
+
+    [Signature("48 83 EC 48 48 8B 05 ?? ?? ?? ?? 4D 8B D1", DetourName = nameof(RayCastH2))]
+    static Hook<RayCastDelegate> RayCastHook2 = null;
+
+    [Signature("E8 ?? ?? ?? ?? 84 C0 41 0F B6 D6", DetourName = nameof(RayCastEx))]
+    static Hook<RayCastExDelegate> RayCastExHook = null;
+
+    static unsafe bool RayCastH(Vector3 origin, Vector3 direction, float maxDistance, RaycastHit* hitInfo, int* flags)
+    {
+        PluginLog.Information($"RayCast1: {GetArray(flags)}");
+        return RayCastHook.Original(origin, direction, maxDistance, hitInfo, flags);
+    }
+
+    static unsafe bool RayCastH2(Vector3 origin, Vector3 direction, float maxDistance, RaycastHit* hitInfo, int* flags)
+    {
+        PluginLog.Information($"RayCast2: {GetArray(flags)}");
+        return RayCastHook2.Original(origin, direction, maxDistance, hitInfo, flags);
+    }
+
+    static unsafe bool RayCastEx(RaycastHit* hitInfo, Vector3 origin, Vector3 direction, float maxDistance, int layerMask, int* flags)
+    {
+        PluginLog.Information($"RayCastEx: {GetArray(flags)}; {layerMask}");
+        return RayCastExHook.Original(hitInfo, origin, direction, maxDistance, layerMask, flags);
+    }
+
+    unsafe static string GetArray(int* flags)
+    {
+        int count = 4;
+        var result = "";
+        for (int i = 0; i < count; i++)
+        {
+            result += flags[i].ToString() + ", ";
+        }
+        return result;
+    }
+#endif
     public static void Enable()
     {
         if(XIVPainter._clientState != null)
@@ -56,6 +105,13 @@ internal static class RaycastManager
         {
             XIVPainter._framework.Update += Update;
         }
+
+#if DEBUG
+        SignatureHelper.Initialise(new RaycastManager());
+        RayCastHook?.Enable();
+        RayCastHook2?.Enable();
+        RayCastExHook?.Enable();
+#endif
     }
 
     public static void Dispose()
@@ -65,6 +121,12 @@ internal static class RaycastManager
 
         if (XIVPainter._framework != null)
             XIVPainter._framework.Update -= Update;
+
+#if DEBUG
+        RayCastHook?.Dispose();
+        RayCastHook2?.Dispose();
+        RayCastExHook?.Dispose();
+#endif
     }
 
     private static void Update(Framework framework)
@@ -166,6 +228,6 @@ internal static class RaycastManager
 
         RaycastHit hit = default;
 
-        return BGCollisionModule.Raycast2(point + Vector3.UnitY * 10, -Vector3.UnitY, 20, &hit, unknown) ? hit.Point.Y : float.NaN;
+        return BGCollisionModule.Raycast2(point + Vector3.UnitY * 5, -Vector3.UnitY, 100, &hit, unknown) ? hit.Point.Y : float.NaN;
     }
 }

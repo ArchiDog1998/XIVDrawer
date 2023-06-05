@@ -32,9 +32,9 @@ public class XIVPainter
     #region Config
     public bool UseTaskForAccelerate { get; set; } = true;
     public ushort CircleSegment { get; set; } = 100;
-    public bool RemovePtsNotOnGround { get; set; } = true;
+    public bool RemovePtsNotOnGround { get; set; } = false;
     public float DrawingHeight { get; set; } = 3;
-    public float SampleLength { get; set; } = 0.5f;
+    public float SampleLength { get; set; } = 0.2f;
     public float TimeToDisappear { get; set; } = 1.5f;
     public EaseFuncType DisappearType { get; set; } = EaseFuncType.Back;
     public byte DefaultWarningTime { get; set; } = 3;
