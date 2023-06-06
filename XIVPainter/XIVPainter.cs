@@ -35,7 +35,7 @@ public class XIVPainter
     public bool RemovePtsNotOnGround { get; set; } = false;
     public float DrawingHeight { get; set; } = 3;
     public float SampleLength { get; set; } = 0.2f;
-    public float TimeToDisappear { get; set; } = 1.5f;
+    public float TimeToDisappear { get; set; } = 1f;
     public EaseFuncType DisappearType { get; set; } = EaseFuncType.Back;
     public byte DefaultWarningTime { get; set; } = 3;
     public float WarningRatio { get; set; } = 0.8f;
@@ -344,7 +344,7 @@ public class XIVPainter
 
     public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round)
     {
-        if (radius <= 0) return Array.Empty<Vector3>();
+        if (radius <= 0 || CircleSegment < 2) return Array.Empty<Vector3>();
 
         var seg = (int)(CircleSegment * round / MathF.Tau);
         var step = round / seg;
