@@ -74,8 +74,10 @@ public class XIVPainter
             ImGui.SetNextWindowSize(ImGuiHelpers.MainViewport.Size);
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-            if (ImGui.Begin(_name, ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoTitleBar
-                | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.AlwaysUseWindowPadding))
+            if (ImGui.Begin(_name, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus
+            | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoDocking
+            | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav
+            ))
             {
                 try
                 {
@@ -222,14 +224,7 @@ public class XIVPainter
     #region Trasform
     public unsafe Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed)
     {
-        //var camera = (Vector3)CameraManager.Instance()->CurrentCamera->Object.Position;
         var cameraPts = ProjectPtsOnGround(DivideCurve(pts, SampleLength, isClosed), DrawingHeight)
-            //.Where(p =>
-            //{
-            //    var vec = p - camera;
-            //    var dis = vec.Length() - 0.1f;
-            //    return !BGCollisionModule.Raycast(camera, vec, out _, dis);
-            //})
             .Select(WorldToCamera).ToArray();
         var changedPts = ChangePtsBehindCamera(cameraPts);
 
@@ -316,7 +311,7 @@ public class XIVPainter
     const float PLANE_Z = 0.001f;
     void GetPointOnPlane(Vector3 front, ref Vector3 back)
     {
-        if (front.Z < 0) return;
+        if (front.Z <= 0) return;
         if (back.Z > 0) return;
 
         var ratio = (PLANE_Z - back.Z) / (front.Z - back.Z);

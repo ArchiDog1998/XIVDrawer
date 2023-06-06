@@ -1,4 +1,6 @@
 ﻿using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
 namespace XIVPainter;
 
@@ -12,12 +14,13 @@ public static class DrawingHelper
         return true;
     }
 
-    public static bool Normalize(ref this Vector3 vec)
+    public unsafe static bool CanSee(this Vector3 point)
     {
-        var length = vec.Length();
-        if (length == 0) return false;
-        vec /= length;
-        return true;
+        var camera = (Vector3)CameraManager.Instance()->CurrentCamera->Object.Position;
+
+        var vec = point - camera;
+        var dis = vec.Length() - 0.1f;
+        return !BGCollisionModule.Raycast(camera, vec, out _, dis);
     }
 
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
@@ -197,6 +200,7 @@ public static class DrawingHelper
                     if (Math.Abs(i + points.Length - breakIndex) < 2) continue;
                     if (Math.Abs(i - points.Length - breakIndex) < 2) continue;
                     var d = points[i] - pt;
+
                     d.Normalize();
 
                     var angle = Vector2.Dot(d, dir);
