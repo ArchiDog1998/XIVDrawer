@@ -31,8 +31,10 @@ public class Drawing3DAnnulus : Drawing3DPolyline
             fill = Array.Empty<IEnumerable<Vector3>>();
         foreach (var pair in ArcStartSpan)
         {
-            var sect1 = painter.SectorPlots(Center, Radius1, pair.X, pair.Y);
-            var sect2 = painter.SectorPlots(Center, Radius2, pair.X, pair.Y);
+            var circleSegment = (int)(MathF.PI * (Radius1 + Radius2) / painter.SampleLength);
+
+            var sect1 = painter.SectorPlots(Center, Radius1, pair.X, pair.Y, circleSegment);
+            var sect2 = painter.SectorPlots(Center, Radius2, pair.X, pair.Y, circleSegment);
             boarder = boarder.Append(sect1);
             boarder = boarder.Append(sect2);
             fill = fill.Union(GetAnnulusFill(sect1, sect2));

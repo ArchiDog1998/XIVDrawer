@@ -124,11 +124,11 @@ internal static class RaycastManager
             {
                 _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
                 var keys = (Vector2[])_keyInfo.GetValue(_rayRelay);
-                var index = Array.BinarySearch(keys, xy, _comparer);
+                var index = Array.BinarySearch(keys, 0, _rayRelay.Count, xy, _comparer);
                 if (index < 0) index = -1 - index;
                 index %= _rayRelay.Count;
 
-                if (Vector2.Distance(keys[index], xy) > 1) return false;
+                if (Vector2.Distance(keys[index], xy) > 3) return false;
                 height = _rayRelay.Values[index];
                 return true;
             }

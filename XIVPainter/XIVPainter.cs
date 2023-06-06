@@ -30,7 +30,7 @@ public class XIVPainter
     internal static ClientState _clientState { get; set; }
 
     #region Config
-    public bool UseTaskForAccelerate { get; set; } = true;
+    public bool UseTaskForAccelerate { get; set; } = false;
     public bool RemovePtsNotOnGround { get; set; } = false;
     public float DrawingHeight { get; set; } = 3;
     public float SampleLength { get; set; } = 0.2f;
@@ -343,10 +343,16 @@ public class XIVPainter
 
     public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round)
     {
-        if (radius <= 0) return Array.Empty<Vector3>();
-
         var circleSegment = (int)(MathF.Tau * radius / SampleLength);
+
+        return SectorPlots(center, radius, rotation, round, circleSegment);
+    }
+
+    public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round, int circleSegment)
+    {
+        if (radius <= 0) return Array.Empty<Vector3>();
         circleSegment = Math.Max(circleSegment, 8);
+
         var seg = (int)(circleSegment * round / MathF.Tau);
         var step = round / seg;
 
