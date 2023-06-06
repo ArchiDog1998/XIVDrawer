@@ -31,7 +31,6 @@ public class XIVPainter
 
     #region Config
     public bool UseTaskForAccelerate { get; set; } = true;
-    public ushort CircleSegment { get; set; } = 100;
     public bool RemovePtsNotOnGround { get; set; } = false;
     public float DrawingHeight { get; set; } = 3;
     public float SampleLength { get; set; } = 0.2f;
@@ -344,9 +343,11 @@ public class XIVPainter
 
     public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round)
     {
-        if (radius <= 0 || CircleSegment < 2) return Array.Empty<Vector3>();
+        if (radius <= 0) return Array.Empty<Vector3>();
 
-        var seg = (int)(CircleSegment * round / MathF.Tau);
+        var circleSegment = (int)(MathF.Tau * radius / SampleLength);
+        circleSegment = Math.Max(circleSegment, 8);
+        var seg = (int)(circleSegment * round / MathF.Tau);
         var step = round / seg;
 
         if (round == MathF.Tau) seg--;

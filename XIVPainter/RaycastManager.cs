@@ -18,18 +18,20 @@ internal static class RaycastManager
             var yX = (int)y.X;
             var yY = (int)y.Y;
 
-            var xCom = (xX / 10).CompareTo(yX / 10);
-            if (xCom != 0) return xCom;
-            xCom = (xY / 10).CompareTo(yY / 10);
-            if (xCom != 0) return xCom;
+            int com;
 
-            xCom = xX.CompareTo(yX);
-            if (xCom != 0) return xCom;
-            xCom = xY.CompareTo(yY);
-            if (xCom != 0) return xCom;
+            //com = (xX / 10).CompareTo(yX / 10);
+            //if (com != 0) return com;
+            //com = (xY / 10).CompareTo(yY / 10);
+            //if (com != 0) return com;
 
-            xCom = x.X.CompareTo(y.X);
-            if(xCom != 0) return xCom;
+            com = xX.CompareTo(yX);
+            if (com != 0) return com;
+            com = xY.CompareTo(yY);
+            if (com != 0) return com;
+
+            com = x.X.CompareTo(y.X);
+            if(com != 0) return com;
             return x.Y.CompareTo(y.Y);
         }
     }
@@ -114,17 +116,22 @@ internal static class RaycastManager
     static FieldInfo _keyInfo;
     private static bool GetHeight(Vector2 xy, out float height)
     {
+        height = 0;
+
         lock (_rayRelayLock)
         {
             if(_rayRelay.Count > 0)
             {
                 _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
-                var index = Array.BinarySearch((Vector2[])_keyInfo.GetValue(_rayRelay), xy, _comparer);
+                var keys = (Vector2[])_keyInfo.GetValue(_rayRelay);
+                var index = Array.BinarySearch(keys, xy, _comparer);
                 if (index < 0) index = -1 - index;
-                height = _rayRelay.Values[index % _rayRelay.Count];
+                index %= _rayRelay.Count;
+
+                if (Vector2.Distance(keys[index], xy) > 1) return false;
+                height = _rayRelay.Values[index];
                 return true;
             }
-            height = 0;
             return false;
         }
     }
@@ -164,10 +171,11 @@ internal static class RaycastManager
 
     static unsafe float Raycast(Vector3 point)
     {
-        int* unknown = stackalloc int[] { 0x2000, 0x2000, 0 };
+        int* unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
 
         RaycastHit hit = default;
 
-        return BGCollisionModule.Raycast2(point + Vector3.UnitY * 8, -Vector3.UnitY, 100, &hit, unknown) ? hit.Point.Y : float.NaN;
+        return FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule
+            ->RaycastEx(&hit, point + Vector3.UnitY * 8, -Vector3.UnitY, 100, 1, unknown) ? hit.Point.Y : float.NaN;
     }
 }

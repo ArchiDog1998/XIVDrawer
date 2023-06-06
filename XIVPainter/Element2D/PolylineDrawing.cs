@@ -30,11 +30,11 @@ internal class PolylineDrawing : IDrawing2D
         }
         else if (_thickness < 0)
         {
-            ImGui.GetWindowDrawList().PathStroke(_color, ImDrawFlags.None, -_thickness);
+            ImGui.GetWindowDrawList().PathStroke(_color, ImDrawFlags.RoundCornersAll, -_thickness);
         }
         else
         {
-            ImGui.GetWindowDrawList().PathStroke(_color, ImDrawFlags.Closed, _thickness);
+            ImGui.GetWindowDrawList().PathStroke(_color, ImDrawFlags.Closed | ImDrawFlags.RoundCornersAll, _thickness);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
@@ -20,7 +21,13 @@ public static class DrawingHelper
 
         var vec = point - camera;
         var dis = vec.Length() - 0.1f;
-        return !BGCollisionModule.Raycast(camera, vec, out _, dis);
+
+        int* unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
+
+        RaycastHit hit = default;
+
+        return !FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule
+            ->RaycastEx(&hit, camera, vec, dis, 1, unknown);
     }
 
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
