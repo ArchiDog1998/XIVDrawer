@@ -28,9 +28,16 @@ public class Drawing3DAnnulusO : Drawing3DAnnulus
     public override void UpdateOnFrame(XIVPainter painter)
     {
         Center = Target?.Position ?? default;
-        Radius1 = Including.GetRadius(Target, RadiusTarget1);
-        Radius2 = Including.GetRadius(Target, RadiusTarget2);
-        ArcStartSpan = ArcStarSpanTarget.Select(pt => new Vector2(pt.X + Target?.Rotation ?? 0, pt.Y)).ToArray();
+        if (Target == null)
+        {
+            Radius1 = Radius2 = 0;
+        }
+        else
+        {
+            Radius1 = Including.GetRadius(Target, RadiusTarget1);
+            Radius2 = Including.GetRadius(Target, RadiusTarget2);
+            ArcStartSpan = ArcStarSpanTarget.Select(pt => new Vector2(pt.X + Target?.Rotation ?? 0, pt.Y)).ToArray();
+        }
         
         base.UpdateOnFrame(painter);
     }

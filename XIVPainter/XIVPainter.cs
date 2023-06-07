@@ -5,6 +5,8 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
 
@@ -128,11 +130,12 @@ public class XIVPainter
         {
             IDrawing2D[] elements = Array.Empty<IDrawing2D>();
             IEnumerable<IDrawing2D> relay = elements;
+            List<Task<IEnumerable<IDrawing2D>>> tasks;
             lock (_drawing3DLock)
             {
                 var length = _drawing3DElements.Count;
                 var remove = new List<IDrawing3D>(length);
-                var tasks = new List<Task<IEnumerable<IDrawing2D>>>(length);
+                tasks = new(length);
                 for (int i = 0; i < length; i++)
                 {
                     var ele = _drawing3DElements[i];
@@ -156,16 +159,16 @@ public class XIVPainter
                 {
                     _drawing3DElements.Remove(r);
                 }
-
-                Task.WaitAll(tasks.ToArray());
-
-                foreach (var task in tasks)
-                {
-                    relay = relay.Union(task.Result);
-                }
             }
 
-            elements = relay.OrderBy(drawing =>
+            Task.WaitAll(tasks.ToArray());
+
+            foreach (var task in tasks)
+            {
+                relay = relay.Union(task.Result);
+            }
+
+            relay = relay.OrderBy(drawing =>
             {
                 if (drawing is PolylineDrawing poly)
                 {
@@ -175,7 +178,9 @@ public class XIVPainter
                 {
                     return 2;
                 }
-            }).ToArray();
+            });
+
+            elements = relay.ToArray();
 
             lock (_drawing2DLock)
             {
@@ -344,7 +349,6 @@ public class XIVPainter
     public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round)
     {
         var circleSegment = (int)(MathF.Tau * radius / SampleLength);
-
         return SectorPlots(center, radius, rotation, round, circleSegment);
     }
 

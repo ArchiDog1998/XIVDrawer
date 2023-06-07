@@ -1,5 +1,4 @@
 ﻿using XIVPainter.Element2D;
-using XIVPainter.Enum;
 
 namespace XIVPainter.Element3D;
 
@@ -52,11 +51,14 @@ public class Drawing3DPolyline : Drawing3D
                 {
                     result = result.Append(new PolylineDrawing(pts, boarderColor, Thickness));
 
-                    var offset = owner.GetPtsOnScreen(DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio * 2), true);
+                    if(AnimationRatio != 0)
+                    {
+                        var offset = owner.GetPtsOnScreen(DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio * 2), true);
 
-                    baseColor.W *= 1 - AnimationRatio;
+                        baseColor.W *= 1 - AnimationRatio;
 
-                    result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
+                        result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
+                    }
                 }
                 else
                 {

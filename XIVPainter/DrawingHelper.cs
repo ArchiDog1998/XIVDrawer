@@ -1,5 +1,4 @@
 ﻿using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
