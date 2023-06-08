@@ -1,4 +1,5 @@
-﻿using XIVPainter.Element2D;
+﻿using Lumina.Excel.GeneratedSheets;
+using XIVPainter.Element2D;
 
 namespace XIVPainter.Element3D;
 
@@ -40,10 +41,10 @@ public class Drawing3DPolyline : Drawing3D
 
         IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
         var hasFill = FillPoints != null && FillPoints.Any();
-        var hasBorder = Thickness > 0;
+        var hasBorder = Thickness != 0;
         foreach (var points in BorderPoints)
         {
-            var pts = owner.GetPtsOnScreen(points, true);
+            var pts = owner.GetPtsOnScreen(points, Thickness > 0);
 
             if(hasBorder)
             {
@@ -53,11 +54,14 @@ public class Drawing3DPolyline : Drawing3D
 
                     if(AnimationRatio != 0)
                     {
-                        var offset = owner.GetPtsOnScreen(DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio * 2), true);
+                        foreach (var item in DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio))
+                        {
+                            var offset = owner.GetPtsOnScreen(item, true);
 
-                        baseColor.W *= 1 - AnimationRatio;
+                            baseColor.W *= 1 - AnimationRatio;
 
-                        result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
+                            result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
+                        }
                     }
                 }
                 else

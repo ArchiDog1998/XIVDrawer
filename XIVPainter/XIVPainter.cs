@@ -41,7 +41,7 @@ public class XIVPainter
     public byte DefaultWarningTime { get; set; } = 3;
     public float WarningRatio { get; set; } = 0.8f;
     public EaseFuncType WarningType { get; set; } = EaseFuncType.Cubic;
-
+    public uint MovingSuggestionColor { get; set; } = ImGui.ColorConvertFloat4ToU32(new Vector4(0.3f, 0.8f, 0.2f, 0.15f));
     #endregion
 
     /// <summary>

@@ -24,7 +24,7 @@ public class Drawing3DCircularSector : Drawing3DPolyline
         BorderPoints = ArcStartSpan.Select(pair =>
         {
             IEnumerable<Vector3> pts = painter.SectorPlots(Center, Radius, pair.X, pair.Y);
-            if (pair.Y != MathF.Tau && pts.Any())
+            if (pair.Y != MathF.Tau && pts.Any() && IsFill)
             {
                 pts = pts.Append(Center);
             }

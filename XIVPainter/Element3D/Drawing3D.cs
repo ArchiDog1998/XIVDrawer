@@ -14,7 +14,7 @@ public abstract class Drawing3D : IDrawing3D
     public float WarningRatio { get; set; }
     public EaseFuncType WarningType { get; set; }
 
-    protected float AnimationRatio = 0;
+    protected float AnimationRatio { get; set; } = 0;
     public abstract IEnumerable<IDrawing2D> To2D(XIVPainter owner);
 
     public virtual void UpdateOnFrame(XIVPainter painter)
@@ -32,8 +32,9 @@ public abstract class Drawing3D : IDrawing3D
         }
         else if (time > -WarningTime) //Warning.
         {
-            var percent = ((int)(-time + 1) / (float)(WarningTime + 1)) / 3;
             AnimationRatio = (WarningTime + (float)time) % 1;
+
+            var percent = ((int)(-time + 1) / (float)(WarningTime + 1)) / 3;
             var inFunc = DrawingHelper.EaseFuncRemap(WarningType, EaseFuncType.None);
             var outFunc = DrawingHelper.EaseFuncRemap(WarningType, WarningType);
 

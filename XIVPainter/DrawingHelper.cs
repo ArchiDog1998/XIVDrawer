@@ -1,4 +1,5 @@
-﻿using Dalamud.Logging;
+﻿using Clipper2Lib;
+using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
@@ -93,31 +94,41 @@ public static class DrawingHelper
         return Vector3.Distance(p, cp);
     }
 
-    public static Vector3[] OffSetPolyline(Vector3[] pts, float offset)
+    public static IEnumerable<Vector3[]> OffSetPolyline(Vector3[] pts, float offset)
     {
-        if (pts.Length < 3) return pts;
+        if (pts.Length < 3) return new Vector3[][] { pts };
 
-        var length = pts.Length;
-        var result = new Vector3[length];
-        for (var i = 0; i < length; i++)
+        var path = Vec3ToPathD(pts);
+        var result = Clipper.InflatePaths(new PathsD(new PathD[] { path }), offset, JoinType.Round, EndType.Joined);
+
+        float height = 0;
+        foreach (var p in pts)
         {
-            var prePt = pts[(i - 1 + length) % length];
-            var pt = pts[i];
-            var nextPt = pts[(i + 1) % length];
+            height += p.Y;
+        }
+        height /= pts.Length;
 
-            var vec1 = new Vector2(pt.X - prePt.X, pt.Z - prePt.Z);
-            var vec2 = new Vector2(nextPt.X - pt.X, nextPt.Z - pt.Z);
+        return result.Select(p => PathDToVec3(p, height));
+    }
 
-            vec1.Normalize();
-            vec2.Normalize();
+    private static PathD Vec3ToPathD(Vector3[] pts)
+    {
+        if(pts == null) return null;
+        var result = new PathD(pts.Length);
+        foreach (var item in pts)
+        {
+            result.Add(new PointD(item.X, item.Z));
+        }
+        return result;
+    }
 
-            var dot = Vector2.Dot(vec1, vec2);
-            var dir = dot >= 0.99f ? new Vector2(vec1.Y, -vec1.X) : vec2 - vec1;
-            dir.Normalize();
-
-            var dis = offset / MathF.Cos(MathF.Acos(dot) / 2);
-            dir *= dis;
-            result[i] = new Vector3(pt.X + dir.X, pt.Y, pt.Z + dir.Y);
+    public static Vector3[] PathDToVec3(PathD path, float height)
+    {
+        var result = new Vector3[path.Count];
+        for (int i = 0; i < path.Count; i++)
+        {
+            var p = path[i];
+            result[i] = new Vector3((float)p.x, height, (float)p.y);
         }
         return result;
     }
