@@ -1,5 +1,6 @@
 ﻿using Lumina.Excel.GeneratedSheets;
 using XIVPainter.Element2D;
+using XIVPainter.Enum;
 
 namespace XIVPainter.Element3D;
 
@@ -9,8 +10,7 @@ public class Drawing3DPolyline : Drawing3D
     public uint InsideColor { get; set; }
     public float Thickness { get; set; }
     public bool IsFill { get; set; } = true;
-    public uint MovingColor { get; set; }
-
+    public PolylineType PolylineType { get; set; } = PolylineType.None;
     public IEnumerable<IEnumerable<Vector3>> BorderPoints { get; protected set; }
     public IEnumerable<IEnumerable<Vector3>> FillPoints { get; protected set; }
 
@@ -24,7 +24,7 @@ public class Drawing3DPolyline : Drawing3D
         BorderPoints = borderPts ?? Array.Empty<Vector3[]>();
         FillPoints = fillPoints;
         AlphaRatio = 1;
-        MovingColor = showColor = InsideColor = Color = color;
+        showColor = InsideColor = Color = color;
         Thickness = thickness;
     }
 
@@ -54,7 +54,7 @@ public class Drawing3DPolyline : Drawing3D
 
                     if(AnimationRatio != 0)
                     {
-                        foreach (var item in DrawingHelper.OffSetPolyline(points.ToArray(), AnimationRatio))
+                        foreach (var item in DrawingHelper.OffSetPolyline(points.ToArray(), -AnimationRatio))
                         {
                             var offset = owner.GetPtsOnScreen(item, true);
 

@@ -1,4 +1,5 @@
-﻿using Dalamud.Game;
+﻿using Clipper2Lib;
+using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.IoC;
 using Dalamud.Logging;
@@ -42,6 +43,8 @@ public class XIVPainter
     public float WarningRatio { get; set; } = 0.8f;
     public EaseFuncType WarningType { get; set; } = EaseFuncType.Cubic;
     public uint MovingSuggestionColor { get; set; } = ImGui.ColorConvertFloat4ToU32(new Vector4(0.3f, 0.8f, 0.2f, 0.15f));
+    public bool MovingSuggestion { get; set; } = true;
+    public float MovingSuggestionRadius { get; set; } = 0.5f;
     #endregion
 
     /// <summary>
@@ -131,11 +134,16 @@ public class XIVPainter
             IDrawing2D[] elements = Array.Empty<IDrawing2D>();
             IEnumerable<IDrawing2D> relay = elements;
             List<Task<IEnumerable<IDrawing2D>>> tasks;
+            List<Drawing3DPolyline> outPoly;
+            List<Drawing3DPolyline> inPoly;
+
             lock (_drawing3DLock)
             {
                 var length = _drawing3DElements.Count;
                 var remove = new List<IDrawing3D>(length);
                 tasks = new(length);
+                outPoly = new(length);
+                inPoly = new(length);
                 for (int i = 0; i < length; i++)
                 {
                     var ele = _drawing3DElements[i];
@@ -146,6 +154,20 @@ public class XIVPainter
                         {
                             remove.Add(ele);
                             continue;
+                        }
+
+                        if (ele is Drawing3DPolyline poly)
+                        {
+                            switch (poly.PolylineType)
+                            {
+                                case Enum.PolylineType.ShouldGoOut:
+                                    outPoly.Add(poly);
+                                    break;
+
+                                case Enum.PolylineType.ShouldGoIn:
+                                    inPoly.Add(poly);
+                                    break;
+                            }
                         }
                     }
 
@@ -180,6 +202,50 @@ public class XIVPainter
                 }
             });
 
+            tasks.Clear();
+            if (MovingSuggestion)
+            {
+                tasks.Add(Task.Run(() =>
+                {
+                    IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
+
+                    Vector3 start = _clientState.LocalPlayer.Position;
+                    foreach (var pair in outPoly.GroupBy(poly => poly.DeadTime).OrderBy(p => p.Key))
+                    {
+                        var pts = DrawingHelper.OffSetPolyline(GetUnion(pair), MovingSuggestionRadius);
+
+                        if (!DrawingHelper.IsPointInside(start, pts)) continue;
+
+#if DEBUG
+                        var poly = new Drawing3DPolyline(pts, MovingSuggestionColor, 2)
+                        {
+                            IsFill = false,
+                        };
+                        poly.UpdateOnFrame(this);
+                        result = result.Union(poly.To2D(this));
+#endif
+
+                        var to = DrawingHelper.GetClosestPoint(start, pts);
+                        var line = new Drawing3DHighlightLine(start, to, MovingSuggestionRadius, MovingSuggestionColor, 2);
+                        line.UpdateOnFrame(this);
+                        result = result.Union(line.To2D(this));
+                    }
+                    return result;
+                }));
+
+                //tasks.Add(Task.Run(() =>
+                //{
+                //    DrawingHelper.OffSetPolyline(GetUnion(inPoly), -MovingSuggestionRadius);
+                //}));
+            }
+
+            Task.WaitAll(tasks.ToArray());
+
+            foreach (var task in tasks)
+            {
+                relay = relay.Union(task.Result);
+            }
+
             elements = relay.ToArray();
 
             lock (_drawing2DLock)
@@ -193,6 +259,25 @@ public class XIVPainter
         }
 
         _started = false;
+    }
+
+    private static IEnumerable<Vector3[]> GetUnion(IEnumerable<Drawing3DPolyline> polys)
+    {
+        PathsD result = null;
+        float height = 0;
+
+        foreach (var p in polys)
+        {
+            height += p.BorderPoints.Sum(poly => poly.Sum(p => p.Y) / poly.Count()) / p.BorderPoints.Count();
+            var path = DrawingHelper.Vec3ToPathsD(p.BorderPoints);
+            if (path == null) continue;
+
+            result = result == null ? Clipper.Union(path, FillRule.NonZero)
+                : Clipper.Union(result, path, FillRule.NonZero);
+        }
+
+        height /= polys.Count();
+        return DrawingHelper.PathsDToVec3(result, height);
     }
 
     #region Add Remove
@@ -355,7 +440,7 @@ public class XIVPainter
     public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round, int circleSegment)
     {
         if (radius <= 0) return Array.Empty<Vector3>();
-        circleSegment = Math.Max(circleSegment, 8);
+        circleSegment = Math.Max(circleSegment, 16);
 
         var seg = (int)(circleSegment * round / MathF.Tau);
         var step = round / seg;

@@ -2,6 +2,7 @@
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using Lumina.Excel.GeneratedSheets;
 
 namespace XIVPainter;
 
@@ -94,12 +95,18 @@ public static class DrawingHelper
         return Vector3.Distance(p, cp);
     }
 
+    public static IEnumerable<Vector3[]> OffSetPolyline(IEnumerable<Vector3[]> pts, float offset)
+        => pts.SelectMany(p => OffSetPolyline(p, offset));
+
     public static IEnumerable<Vector3[]> OffSetPolyline(Vector3[] pts, float offset)
     {
         if (pts.Length < 3) return new Vector3[][] { pts };
 
+        if (!IsOrdered(pts.Select(p => new Vector2(p.X, p.Z)).ToArray()))
+            offset = -offset;
+
         var path = Vec3ToPathD(pts);
-        var result = Clipper.InflatePaths(new PathsD(new PathD[] { path }), offset, JoinType.Round, EndType.Joined);
+        var result = Clipper.InflatePaths(new PathsD(new PathD[] { path }), offset, JoinType.Round, EndType.Polygon);
 
         float height = 0;
         foreach (var p in pts)
@@ -111,16 +118,16 @@ public static class DrawingHelper
         return result.Select(p => PathDToVec3(p, height));
     }
 
-    private static PathD Vec3ToPathD(Vector3[] pts)
+    public static PathsD Vec3ToPathsD(IEnumerable<IEnumerable<Vector3>> pts)
+        => new PathsD(pts.Select(Vec3ToPathD));
+
+    public static PathD Vec3ToPathD(IEnumerable<Vector3> pts)
     {
         if(pts == null) return null;
-        var result = new PathD(pts.Length);
-        foreach (var item in pts)
-        {
-            result.Add(new PointD(item.X, item.Z));
-        }
-        return result;
+        return new PathD(pts.Select(p => new PointD(p.X, p.Z)));
     }
+    public static IEnumerable<Vector3[]> PathsDToVec3(PathsD path, float height)
+    => path.Select(p => PathDToVec3(p, height));
 
     public static Vector3[] PathDToVec3(PathD path, float height)
     {
@@ -160,6 +167,15 @@ public static class DrawingHelper
         if (points == null || points.Length < 3) 
             return new Vector2[][] { points };
 
+        if (!IsOrdered(points))
+        {
+            points = points.Reverse().ToArray();
+        }
+        return ConvexPointsOrdered(points);
+    }
+
+    public static bool IsOrdered(Vector2[] points)
+    {
         int index = 0;
         float leftBottom = float.MaxValue;
         for (int i = 0; i < points.Length; i++)
@@ -173,11 +189,7 @@ public static class DrawingHelper
             }
         }
 
-        if (PointCross(points, index, out _, out _) > 0.1f)
-        {
-            points = points.Reverse().ToArray();
-        }
-        return ConvexPointsOrdered(points);
+        return PointCross(points, index, out _, out _) <= 0.01f;
     }
 
     static IEnumerable<Vector2[]> ConvexPointsOrdered(Vector2[] points)
@@ -191,7 +203,7 @@ public static class DrawingHelper
         Vector2 dir = Vector2.Zero;
         for (int i = 0; i < points.Length; i++)
         {
-            if (PointCross(points, i, out var vec1, out var vec2) > 0.1f)
+            if (PointCross(points, i, out var vec1, out var vec2) > 0.01f)
             {
                 breakIndex = i;
                 dir = vec1 - vec2;

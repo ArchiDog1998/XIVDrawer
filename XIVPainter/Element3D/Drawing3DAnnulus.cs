@@ -42,7 +42,7 @@ public class Drawing3DAnnulus : Drawing3DPolyline
 
             var sect1 = painter.SectorPlots(Center, Radius1, pair.X, pair.Y, circleSegment);
             var sect2 = painter.SectorPlots(Center, Radius2, pair.X, pair.Y, circleSegment);
-            boarder = boarder.Append(sect1);
+            boarder = boarder.Append(sect1.Reverse().ToArray());
             boarder = boarder.Append(sect2);
             fill = fill.Union(GetAnnulusFill(sect1, sect2));
         }
