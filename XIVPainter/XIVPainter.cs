@@ -58,7 +58,7 @@ public class XIVPainter
         _pluginInterface.UiBuilder.Draw += Draw;
         _framework.Update += Update;
 
-        RaycastManager.Enable();
+        RaycastManager.Enable(Directory.GetParent(_pluginInterface.ConfigDirectory.FullName)?.FullName);
     }
 
     public void Dispose()

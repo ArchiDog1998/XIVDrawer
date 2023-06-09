@@ -39,15 +39,23 @@ internal static class RaycastManager
     static readonly Vector2Comparer _comparer = new Vector2Comparer();
 
     static readonly object _rayRelayLock = new object();
-    static readonly SortedList<Vector2, float> _rayRelay = new (_comparer);
+    static SortedList<Vector2, float> _rayRelay = new (_comparer);
 
     static readonly object _calculatingPtsLock = new object();
     static readonly Queue<Vector3> _calculatingPts = new ();
     static bool _canAdd = false;
 
-    public static void Enable()
+    static string _directory;
+    static ushort _territory;
+    public static void Enable(string directory)
     {
-        if(XIVPainter._clientState != null)
+        _directory = directory + "\\XIVPainter";
+
+#if DEBUG
+        PluginLog.Warning("XIVPainter: " + directory);
+#endif
+
+        if (XIVPainter._clientState != null)
         {
             XIVPainter._clientState.TerritoryChanged += TerritoryChanged;
         }
@@ -80,8 +88,36 @@ internal static class RaycastManager
     {
         lock (_rayRelayLock)
         {
+            var saveStr = JsonConvert.SerializeObject(_rayRelay);
+            File.WriteAllTextAsync(Path.Combine(_directory, _territory.ToString() + ".json"), saveStr);
             _rayRelay.Clear();
         }
+
+        Task.Run(() =>
+        {
+            var path = Path.Combine(_directory, e.ToString() + ".json");
+            _territory = e;
+
+            try
+            {
+                if (!File.Exists(path)) return;
+
+                var relay = JsonConvert.DeserializeObject<SortedList<Vector2, float>>(File.ReadAllText(path));
+
+                if (relay == null) return;
+
+                lock (_rayRelayLock)
+                {
+                    _rayRelay = relay;
+                }
+
+                PluginLog.Information($"Loaded territory {e} with {relay.Count} points.");
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Warning(ex, "Failed to load territory relay values!");
+            }
+        });
     }
 
     public static bool Raycast(Vector3 point, float height, out Vector3 territoryPt)
