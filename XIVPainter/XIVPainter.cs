@@ -33,6 +33,7 @@ public class XIVPainter
     internal static ClientState _clientState { get; set; }
 
     #region Config
+    public bool Enable { get; set; } = true;
     public bool UseTaskForAccelerate { get; set; } = false;
     public bool RemovePtsNotOnGround { get; set; } = false;
     public float DrawingHeight { get; set; } = 3;
@@ -71,6 +72,7 @@ public class XIVPainter
 
     private void Draw()
     {
+        if(!Enable) return;
         try
         {
             ImGuiHelpers.ForceNextWindowMainViewport();
@@ -113,6 +115,8 @@ public class XIVPainter
 
     private void Update(Framework framework)
     {
+        if (!Enable) return;
+
         if (UseTaskForAccelerate)
         {
             Task.Run(UpdateData);

@@ -1,7 +1,5 @@
 ﻿using Dalamud.Game;
-using Dalamud.Hooking;
 using Dalamud.Logging;
-using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
 namespace XIVPainter;
