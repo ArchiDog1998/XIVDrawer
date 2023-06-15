@@ -9,9 +9,8 @@ public class Drawing3DImage : Drawing3D
     public float Width { get; set; }
     public float Height { get; set; }
     public bool HideIfInvisiable { get; set; }
-
-    public Drawing3DImage(TextureWrap wrap, Vector3 position)
-       : this(wrap.ImGuiHandle, position, wrap.Width, wrap.Height)
+    public Drawing3DImage(TextureWrap wrap, Vector3 position, float size = 1)
+       : this(wrap.ImGuiHandle, position, wrap.Width * size, wrap.Height * size)
     {
         
     }

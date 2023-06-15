@@ -6,8 +6,6 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
 
@@ -128,7 +126,7 @@ public class XIVPainter
     }
 
     bool _started = false;
-    private void UpdateData()
+    private async void UpdateData()
     {
         if (_started) return;
         _started = true;
@@ -137,7 +135,7 @@ public class XIVPainter
         {
             IDrawing2D[] elements = Array.Empty<IDrawing2D>();
             IEnumerable<IDrawing2D> relay = elements;
-            List<Task<IEnumerable<IDrawing2D>>> tasks;
+            List<Task<IEnumerable<IDrawing2D>>> tasks, outLineTasks = new List<Task<IEnumerable<IDrawing2D>>>(8);
             List<Drawing3DPolyline> outPoly;
             List<Drawing3DPolyline> inPoly;
 
@@ -187,29 +185,9 @@ public class XIVPainter
                 }
             }
 
-            Task.WaitAll(tasks.ToArray());
-
-            foreach (var task in tasks)
-            {
-                relay = relay.Union(task.Result);
-            }
-
-            relay = relay.OrderBy(drawing =>
-            {
-                if (drawing is PolylineDrawing poly)
-                {
-                    return poly._thickness == 0 ? 0 : 1;
-                }
-                else
-                {
-                    return 2;
-                }
-            });
-
-            tasks.Clear();
             if (MovingSuggestion)
             {
-                tasks.Add(Task.Run(() =>
+                outLineTasks.Add(Task.Run(() =>
                 {
                     IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
 
@@ -237,15 +215,34 @@ public class XIVPainter
                     return result;
                 }));
 
-                //tasks.Add(Task.Run(() =>
+                //outLineTasks.Add(Task.Run(() =>
                 //{
                 //    DrawingHelper.OffSetPolyline(GetUnion(inPoly), -MovingSuggestionRadius);
                 //}));
             }
 
-            Task.WaitAll(tasks.ToArray());
+            await Task.WhenAll(tasks.ToArray());
 
             foreach (var task in tasks)
+            {
+                relay = relay.Union(task.Result);
+            }
+
+            relay = relay.OrderBy(drawing =>
+            {
+                if (drawing is PolylineDrawing poly)
+                {
+                    return poly._thickness == 0 ? 0 : 1;
+                }
+                else
+                {
+                    return 2;
+                }
+            });
+
+            await Task.WhenAll(outLineTasks.ToArray());
+
+            foreach (var task in outLineTasks)
             {
                 relay = relay.Union(task.Result);
             }

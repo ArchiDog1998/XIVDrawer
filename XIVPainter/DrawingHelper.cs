@@ -2,7 +2,6 @@
 using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using Lumina.Excel.GeneratedSheets;
 
 namespace XIVPainter;
 
@@ -167,11 +166,31 @@ public static class DrawingHelper
         if (points == null || points.Length < 3) 
             return new Vector2[][] { points };
 
-        if (!IsOrdered(points))
+        var tess = new LibTessDotNet.Tess();
+        tess.AddContour(points.Select(p => new LibTessDotNet.ContourVertex(new LibTessDotNet.Vec3(p.X, p.Y, 0))).ToArray(), LibTessDotNet.ContourOrientation.CounterClockwise);
+
+        tess.Tessellate();
+
+        int numTriangles = tess.ElementCount;
+        var result = new Vector2[numTriangles][];
+        for (int i = 0; i < numTriangles; i++)
         {
-            points = points.Reverse().ToArray();
+            var v0 = tess.Vertices[tess.Elements[i * 3]].Position;
+            var v1 = tess.Vertices[tess.Elements[i * 3 + 1]].Position;
+            var v2 = tess.Vertices[tess.Elements[i * 3 + 2]].Position;
+            result[i] = new Vector2[]
+            {
+                new Vector2(v0.X, v0.Y),
+                new Vector2(v1.X, v1.Y),
+                new Vector2(v2.X, v2.Y),
+            };
         }
-        return ConvexPointsOrdered(points);
+        return result;
+        //if (!IsOrdered(points))
+        //{
+        //    points = points.Reverse().ToArray();
+        //}
+        //return ConvexPointsOrdered(points);
     }
 
     public static bool IsOrdered(Vector2[] points)
