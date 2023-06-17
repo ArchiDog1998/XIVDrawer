@@ -21,6 +21,8 @@ public class XIVPainter
     readonly object _drawing3DLock = new object();
     List<IDrawing3D> _drawing3DElements = new List<IDrawing3D>();
 
+    readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
+
     [PluginService]
     internal static DalamudPluginInterface _pluginInterface { get; set; }
 
@@ -32,7 +34,7 @@ public class XIVPainter
 
     #region Config
     public bool Enable { get; set; } = true;
-    public bool UseTaskForAccelerate { get; set; } = false;
+    //public bool UseTaskForAccelerate { get; set; } = false;
     public bool RemovePtsNotOnGround { get; set; } = false;
     public float DrawingHeight { get; set; } = 3;
     public float SampleLength { get; set; } = 0.2f;
@@ -41,9 +43,9 @@ public class XIVPainter
     public byte DefaultWarningTime { get; set; } = 3;
     public float WarningRatio { get; set; } = 0.8f;
     public EaseFuncType WarningType { get; set; } = EaseFuncType.Cubic;
-    public uint MovingSuggestionColor { get; set; } = ImGui.ColorConvertFloat4ToU32(new Vector4(0.3f, 0.8f, 0.2f, 0.15f));
+    public uint MovingSuggestionColor { get; set; } = ImGui.ColorConvertFloat4ToU32(new Vector4(0.3f, 0.8f, 0.2f, 1));
     public bool MovingSuggestion { get; set; } = true;
-    public float MovingSuggestionRadius { get; set; } = 0.5f;
+    public float MovingSuggestionRadius { get; set; } = 0.1f;
     #endregion
 
     /// <summary>
@@ -83,18 +85,32 @@ public class XIVPainter
             | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav
             ))
             {
+                ImGui.GetStyle().AntiAliasedFill = false;
+
                 try
                 {
-                    lock(_drawing2DLock)
+                    //lock (_drawing2DLock)
+                    //{
+                    //    if (_drawing2DElements != null)
+                    //    {
+                    //        foreach (var element in _drawing2DElements)
+                    //        {
+                    //            element.Draw();
+                    //        }
+                    //    }
+                    //}
+                    if (_drawing3DElements != null)
                     {
-                        if (_drawing2DElements != null)
+                        foreach (var item in _drawing3DElements)
                         {
-                            foreach (var element in _drawing2DElements)
-                            {
-                                element.Draw();
-                            }
+                            foreach (var item2 in item.To2D(this))
+                                item2.Draw();
                         }
                     }
+                        foreach(var item3 in _outLineGo)
+                        foreach (var item in item3.To2D(this))
+                            item.Draw();
+
                 }
                 catch (Exception ex)
                 {
@@ -114,15 +130,7 @@ public class XIVPainter
     private void Update(Framework framework)
     {
         if (!Enable) return;
-
-        if (UseTaskForAccelerate)
-        {
-            Task.Run(UpdateData);
-        }
-        else
-        {
-            UpdateData();
-        }
+        Task.Run(UpdateData);
     }
 
     bool _started = false;
@@ -190,27 +198,20 @@ public class XIVPainter
                 outLineTasks.Add(Task.Run(() =>
                 {
                     IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
+                    _outLineGo.Clear();
 
                     Vector3 start = _clientState.LocalPlayer.Position;
                     foreach (var pair in outPoly.GroupBy(poly => poly.DeadTime).OrderBy(p => p.Key))
                     {
-                        var pts = DrawingHelper.OffSetPolyline(GetUnion(pair), MovingSuggestionRadius);
-
+                        var pts = GetUnion(pair);
                         if (!DrawingHelper.IsPointInside(start, pts)) continue;
 
-#if DEBUG
-                        var poly = new Drawing3DPolyline(pts, MovingSuggestionColor, 2)
-                        {
-                            IsFill = false,
-                        };
-                        poly.UpdateOnFrame(this);
-                        result = result.Union(poly.To2D(this));
-#endif
+                        pts = DrawingHelper.OffSetPolyline(pts, -MovingSuggestionRadius);
 
                         var to = DrawingHelper.GetClosestPoint(start, pts);
-                        var line = new Drawing3DHighlightLine(start, to, MovingSuggestionRadius, MovingSuggestionColor, 2);
-                        line.UpdateOnFrame(this);
-                        result = result.Union(line.To2D(this));
+                        var go = new Drawing3DHighlightLine(start, to, 0.5f, MovingSuggestionColor, 4);
+                        go.UpdateOnFrame(this);
+                        _outLineGo.Add(go);
                     }
                     return result;
                 }));

@@ -26,10 +26,7 @@ internal class PolylineDrawing : IDrawing2D
 
         if (_thickness == 0)
         {
-            var flags = ImGui.GetWindowDrawList().Flags;
-            ImGui.GetWindowDrawList().Flags |= ImDrawListFlags.AntiAliasedFill;
             ImGui.GetWindowDrawList().PathFillConvex(_color);
-            ImGui.GetWindowDrawList().Flags = flags;
         }
         else if (_thickness < 0)
         {

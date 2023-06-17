@@ -186,11 +186,6 @@ public static class DrawingHelper
             };
         }
         return result;
-        //if (!IsOrdered(points))
-        //{
-        //    points = points.Reverse().ToArray();
-        //}
-        //return ConvexPointsOrdered(points);
     }
 
     public static bool IsOrdered(Vector2[] points)
@@ -209,83 +204,6 @@ public static class DrawingHelper
         }
 
         return PointCross(points, index, out _, out _) <= 0.01f;
-    }
-
-    static IEnumerable<Vector2[]> ConvexPointsOrdered(Vector2[] points)
-    {
-        if (points.Length < 4)
-        {
-            return new Vector2[][] { points };
-        }
-
-        int breakIndex = -1;
-        Vector2 dir = Vector2.Zero;
-        for (int i = 0; i < points.Length; i++)
-        {
-            if (PointCross(points, i, out var vec1, out var vec2) > 0.01f)
-            {
-                breakIndex = i;
-                dir = vec1 - vec2;
-                dir.Normalize();
-                break;
-            }
-        }
-
-        if (breakIndex < 0)
-        {
-            return new Vector2[][] { points };
-        }
-        else
-        {
-            try
-            {
-                var pt = points[breakIndex];
-                var index = 0;
-                double maxValue = double.MinValue;
-                for (int i = 0; i < points.Length; i++)
-                {
-                    if (Math.Abs(i - breakIndex) < 2) continue;
-                    if (Math.Abs(i + points.Length - breakIndex) < 2) continue;
-                    if (Math.Abs(i - points.Length - breakIndex) < 2) continue;
-                    var d = points[i] - pt;
-
-                    d.Normalize();
-
-                    var angle = Vector2.Dot(d, dir);
-
-                    if (angle > maxValue)
-                    {
-                        maxValue = angle;
-                        index = i;
-                    }
-                }
-
-                var minIndex = Math.Min(breakIndex, index);
-                var maxIndex = Math.Max(breakIndex, index);
-
-                var list1 = new List<Vector2>(points.Length);
-                var list2 = new List<Vector2>(points.Length);
-                for (int i = 0; i < points.Length; i++)
-                {
-                    if (i <= minIndex || i >= maxIndex)
-                    {
-                        list1.Add(points[i]);
-                    }
-
-                    if (i >= minIndex && i <= maxIndex)
-                    {
-                        list2.Add(points[i]);
-                    }
-                }
-
-                return ConvexPointsOrdered(list1.ToArray()).Union(ConvexPointsOrdered(list2.ToArray())).Where(l => l.Count() > 2);
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Warning(ex, "Bad at drawing");
-                return new Vector2[][] { points };
-            }
-        }
     }
 
     private static float PointCross(Vector2[] pts, int index, out Vector2 vec1, out Vector2 vec2)
