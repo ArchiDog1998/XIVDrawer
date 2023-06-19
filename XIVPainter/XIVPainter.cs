@@ -15,7 +15,7 @@ public class XIVPainter
 {
     readonly string _name;
 
-    readonly object _drawing3DLock = new object();
+    //readonly object _drawing3DLock = new object();
     List<IDrawing3D> _drawing3DElements = new List<IDrawing3D>();
 
     readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
@@ -31,7 +31,6 @@ public class XIVPainter
 
     #region Config
     public bool Enable { get; set; } = true;
-    //public bool UseTaskForAccelerate { get; set; } = false;
     public bool RemovePtsNotOnGround { get; set; } = false;
     public float DrawingHeight { get; set; } = 3;
     public float SampleLength { get; set; } = 0.2f;
@@ -152,7 +151,7 @@ public class XIVPainter
             List<Drawing3DPolyline> outPoly;
             List<Drawing3DPolyline> inPoly;
 
-            lock (_drawing3DLock)
+            //lock (_drawing3DLock)
             {
                 var length = _drawing3DElements.Count;
                 var remove = new List<IDrawing3D>(length);
@@ -265,7 +264,7 @@ public class XIVPainter
             drawing.WarningTime = DefaultWarningTime;
         }
 
-        lock (_drawing3DLock)
+        //lock (_drawing3DLock)
         {
             _drawing3DElements.AddRange(drawings);
         }
