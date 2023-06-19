@@ -44,11 +44,6 @@ public class XIVPainter
     public bool MovingSuggestion { get; set; } = true;
     public float MovingSuggestionRadius { get; set; } = 0.1f;
 
-    public bool SaveHeightForRaycast 
-    {
-        get => RaycastManager.SaveHeight;
-        set => RaycastManager.SaveHeight = value;
-    }
     #endregion
 
     /// <summary>
@@ -62,7 +57,7 @@ public class XIVPainter
         _pluginInterface.UiBuilder.Draw += Draw;
         _framework.Update += Update;
 
-        RaycastManager.Enable(Directory.GetParent(_pluginInterface.ConfigDirectory.FullName)?.FullName);
+        RaycastManager.Enable();
     }
 
     public void Dispose()

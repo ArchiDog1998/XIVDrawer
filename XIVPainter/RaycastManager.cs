@@ -6,6 +6,8 @@ namespace XIVPainter;
 
 internal static class RaycastManager
 {
+    const int MaxDistance = 80;
+    const int compacity = MaxDistance * MaxDistance * 400;
     class Vector2Comparer : IComparer<Vector2>
     {
         public int Compare(Vector2 x, Vector2 y)
@@ -36,39 +38,14 @@ internal static class RaycastManager
 
     static readonly Vector2Comparer _comparer = new Vector2Comparer();
 
-    static readonly object _rayRelayLock = new object();
-    static SortedList<Vector2, float> _rayRelay = new (_comparer);
+    static SortedList<Vector2, float> _rayRelay = new (compacity + 2000, _comparer);
 
     static readonly object _calculatingPtsLock = new object();
     static readonly Queue<Vector3> _calculatingPts = new ();
     static bool _canAdd = false;
 
-    static string _directory;
-    static ushort _territory;
-
-    public static bool SaveHeight { get; set; } = false;
-    public static void Enable(string directory)
+    public static void Enable()
     {
-        _directory = directory + "\\XIVPainter";
-
-        if (!Directory.Exists(_directory))
-        {
-            Directory.CreateDirectory (_directory);
-        }
-
-#if DEBUG
-        PluginLog.Warning("XIVPainter: " + _directory);
-#endif
-
-        if (XIVPainter._clientState != null)
-        {
-            XIVPainter._clientState.TerritoryChanged += TerritoryChanged;
-        }
-        else
-        {
-            PluginLog.Warning("Failed to find ClientState!");
-        }
-
         if(XIVPainter._framework != null)
         {
             XIVPainter._framework.Update += Update;
@@ -77,54 +54,41 @@ internal static class RaycastManager
 
     public static void Dispose()
     {
-        if (XIVPainter._clientState != null) 
-            XIVPainter._clientState.TerritoryChanged -= TerritoryChanged;
 
         if (XIVPainter._framework != null)
             XIVPainter._framework.Update -= Update;
     }
 
+    static bool _isUpdateRun = false;
+    static bool _lastCanAdd = false;
     private static void Update(Framework framework)
     {
-        _canAdd = !_calculatingPts.Any();
-    }
-
-    private static void TerritoryChanged(object sender, ushort e)
-    {
-        lock (_rayRelayLock)
-        {
-            if (SaveHeight && _territory != 0)
-            {
-                var saveStr = JsonConvert.SerializeObject(_rayRelay);
-                File.WriteAllTextAsync(Path.Combine(_directory, _territory.ToString() + ".json"), saveStr);
-            }
-            _rayRelay.Clear();
-        }
-
+        if (_isUpdateRun) return;
+        _isUpdateRun = true;
         Task.Run(() =>
         {
-            var path = Path.Combine(_directory, e.ToString() + ".json");
-            _territory = e;
-
-            try
+            if(XIVPainter._clientState != null && XIVPainter._clientState.LocalPlayer != null)
             {
-                if (!File.Exists(path)) return;
-
-                var relay = JsonConvert.DeserializeObject<SortedList<Vector2, float>>(File.ReadAllText(path));
-
-                if (relay == null) return;
-
-                lock (_rayRelayLock)
+                var loc = XIVPainter._clientState.LocalPlayer.Position;
+                var pos = GetKey(loc);
+                while (_rayRelay.Count > compacity)
                 {
-                    _rayRelay = relay;
+                    var removed = _rayRelay.MaxBy(p => Vector2.Distance(p.Key, pos));
+                    _rayRelay.Remove(removed.Key);
                 }
+            }
 
-                PluginLog.Information($"Loaded territory {e} with {relay.Count} points.");
-            }
-            catch (Exception ex)
+            _canAdd = !_calculatingPts.Any();
+
+            var addPts = _canAdd && _lastCanAdd;
+            _lastCanAdd = _canAdd;
+
+            if (addPts)
             {
-                PluginLog.Warning(ex, "Failed to load territory relay values!");
+                //Add some points!
             }
+
+            _isUpdateRun = false;
         });
     }
 
@@ -162,32 +126,29 @@ internal static class RaycastManager
     {
         height = 0;
 
-        lock (_rayRelayLock)
+        if (_rayRelay.Count > 0)
         {
-            if(_rayRelay.Count > 0)
-            {
-                _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
-                var keys = (Vector2[])_keyInfo.GetValue(_rayRelay);
-                var index = Array.BinarySearch(keys, 0, _rayRelay.Count, xy, _comparer);
-                if (index < 0) index = -1 - index;
-                index %= _rayRelay.Count;
+            _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
+            var keys = (Vector2[])_keyInfo.GetValue(_rayRelay);
+            var index = Array.BinarySearch(keys, 0, _rayRelay.Count, xy, _comparer);
+            if (index < 0) index = -1 - index;
+            index %= _rayRelay.Count;
 
-                if (Vector2.Distance(keys[index], xy) > 3) return false;
-                height = _rayRelay.Values[index];
-                return true;
-            }
-            return false;
+            if (Vector2.Distance(keys[index], xy) > 3) return false;
+            height = _rayRelay.Values[index];
+            return true;
         }
+        return false;
     }
 
     private static Vector2 GetKey(Vector3 point) 
         => new Vector2(float.Round(point.X, 1), float.Round(point.Z, 1));
 
-    static bool _isRun = false;
+    static bool _isRaycastRun = false;
     static void RunRaycast()
     {
-        if(_isRun) return;
-        _isRun = true;
+        if(_isRaycastRun) return;
+        _isRaycastRun = true;
 
         Task.Run(() =>
         {
@@ -196,12 +157,9 @@ internal static class RaycastManager
                 var key = GetKey(vector);
                 var value = Raycast(vector);
 
-                lock (_rayRelayLock)
-                {
-                    _rayRelay[key] = value;
-                }
+                _rayRelay[key] = value;
             }
-            _isRun = false;
+            _isRaycastRun = false;
         });
     }
 
