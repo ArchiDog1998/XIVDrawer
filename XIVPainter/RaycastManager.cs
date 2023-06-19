@@ -45,12 +45,19 @@ internal static class RaycastManager
 
     static string _directory;
     static ushort _territory;
+
+    public static bool SaveHeight { get; set; } = false;
     public static void Enable(string directory)
     {
         _directory = directory + "\\XIVPainter";
 
+        if (!Directory.Exists(_directory))
+        {
+            Directory.CreateDirectory (_directory);
+        }
+
 #if DEBUG
-        PluginLog.Warning("XIVPainter: " + directory);
+        PluginLog.Warning("XIVPainter: " + _directory);
 #endif
 
         if (XIVPainter._clientState != null)
@@ -86,8 +93,11 @@ internal static class RaycastManager
     {
         lock (_rayRelayLock)
         {
-            var saveStr = JsonConvert.SerializeObject(_rayRelay);
-            File.WriteAllTextAsync(Path.Combine(_directory, _territory.ToString() + ".json"), saveStr);
+            if (SaveHeight && _territory != 0)
+            {
+                var saveStr = JsonConvert.SerializeObject(_rayRelay);
+                File.WriteAllTextAsync(Path.Combine(_directory, _territory.ToString() + ".json"), saveStr);
+            }
             _rayRelay.Clear();
         }
 

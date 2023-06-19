@@ -15,9 +15,6 @@ public class XIVPainter
 {
     readonly string _name;
 
-    readonly object _drawing2DLock = new object();
-    IDrawing2D[] _drawing2DElements;
-
     readonly object _drawing3DLock = new object();
     List<IDrawing3D> _drawing3DElements = new List<IDrawing3D>();
 
@@ -46,6 +43,12 @@ public class XIVPainter
     public uint MovingSuggestionColor { get; set; } = ImGui.ColorConvertFloat4ToU32(new Vector4(0.3f, 0.8f, 0.2f, 1));
     public bool MovingSuggestion { get; set; } = true;
     public float MovingSuggestionRadius { get; set; } = 0.1f;
+
+    public bool SaveHeightForRaycast 
+    {
+        get => RaycastManager.SaveHeight;
+        set => RaycastManager.SaveHeight = value;
+    }
     #endregion
 
     /// <summary>
@@ -89,28 +92,35 @@ public class XIVPainter
 
                 try
                 {
-                    //lock (_drawing2DLock)
-                    //{
-                    //    if (_drawing2DElements != null)
-                    //    {
-                    //        foreach (var element in _drawing2DElements)
-                    //        {
-                    //            element.Draw();
-                    //        }
-                    //    }
-                    //}
+                    IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
+
                     if (_drawing3DElements != null)
                     {
                         foreach (var item in _drawing3DElements)
                         {
-                            foreach (var item2 in item.To2D(this))
-                                item2.Draw();
+                            result = result.Union(item.To2D(this));
                         }
                     }
-                        foreach(var item3 in _outLineGo)
-                        foreach (var item in item3.To2D(this))
-                            item.Draw();
 
+                    foreach (var item in _outLineGo)
+                    {
+                        result = result.Union(item.To2D(this));
+                    }
+
+                    foreach (var item in result.OrderBy(drawing =>
+                    {
+                        if (drawing is PolylineDrawing poly)
+                        {
+                            return poly._thickness == 0 ? 0 : 1;
+                        }
+                        else
+                        {
+                            return 2;
+                        }
+                    }))
+                    {
+                        item.Draw();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -143,7 +153,7 @@ public class XIVPainter
         {
             IDrawing2D[] elements = Array.Empty<IDrawing2D>();
             IEnumerable<IDrawing2D> relay = elements;
-            List<Task<IEnumerable<IDrawing2D>>> tasks, outLineTasks = new List<Task<IEnumerable<IDrawing2D>>>(8);
+            List<Task> tasks;
             List<Drawing3DPolyline> outPoly;
             List<Drawing3DPolyline> inPoly;
 
@@ -151,7 +161,7 @@ public class XIVPainter
             {
                 var length = _drawing3DElements.Count;
                 var remove = new List<IDrawing3D>(length);
-                tasks = new(length);
+                tasks = new(length + 8);
                 outPoly = new(length);
                 inPoly = new(length);
                 for (int i = 0; i < length; i++)
@@ -166,7 +176,7 @@ public class XIVPainter
                             continue;
                         }
 
-                        if (ele is Drawing3DPolyline poly)
+                        if (time <= 0 && ele is Drawing3DPolyline poly)
                         {
                             switch (poly.PolylineType)
                             {
@@ -184,7 +194,6 @@ public class XIVPainter
                     tasks.Add(Task.Run(() =>
                     {
                         ele.UpdateOnFrame(this);
-                        return ele.To2D(this);
                     }));
                 }
                 foreach (var r in remove)
@@ -195,9 +204,8 @@ public class XIVPainter
 
             if (MovingSuggestion)
             {
-                outLineTasks.Add(Task.Run(() =>
+                tasks.Add(Task.Run(() =>
                 {
-                    IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
                     _outLineGo.Clear();
 
                     Vector3 start = _clientState.LocalPlayer.Position;
@@ -213,7 +221,6 @@ public class XIVPainter
                         go.UpdateOnFrame(this);
                         _outLineGo.Add(go);
                     }
-                    return result;
                 }));
 
                 //outLineTasks.Add(Task.Run(() =>
@@ -223,37 +230,6 @@ public class XIVPainter
             }
 
             await Task.WhenAll(tasks.ToArray());
-
-            foreach (var task in tasks)
-            {
-                relay = relay.Union(task.Result);
-            }
-
-            relay = relay.OrderBy(drawing =>
-            {
-                if (drawing is PolylineDrawing poly)
-                {
-                    return poly._thickness == 0 ? 0 : 1;
-                }
-                else
-                {
-                    return 2;
-                }
-            });
-
-            await Task.WhenAll(outLineTasks.ToArray());
-
-            foreach (var task in outLineTasks)
-            {
-                relay = relay.Union(task.Result);
-            }
-
-            elements = relay.ToArray();
-
-            lock (_drawing2DLock)
-            {
-                _drawing2DElements = elements;
-            }
         }
         catch (Exception ex)
         {
