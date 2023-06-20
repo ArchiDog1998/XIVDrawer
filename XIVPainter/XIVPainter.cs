@@ -1,4 +1,5 @@
 ﻿using Clipper2Lib;
+using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.IoC;
@@ -8,6 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
+using XIVPainter.ElementSpecial;
 
 namespace XIVPainter;
 
@@ -16,18 +18,17 @@ public class XIVPainter
     readonly string _name;
 
     //readonly object _drawing3DLock = new object();
-    List<IDrawing3D> _drawing3DElements = new List<IDrawing3D>();
+    List<IDrawing> _drawingElements = new List<IDrawing>();
 
     readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
 
-    [PluginService]
-    internal static DalamudPluginInterface _pluginInterface { get; set; }
+    [PluginService] internal static DataManager Data { get; private set; }
 
-    [PluginService]
-    internal static Framework _framework { get; set; }
+    [PluginService] internal static DalamudPluginInterface _pluginInterface { get; private set; }
 
-    [PluginService]
-    internal static ClientState _clientState { get; set; }
+    [PluginService] internal static Framework _framework { get; private set; }
+
+    [PluginService] internal static ClientState _clientState { get; private set; }
 
     #region Config
     public bool Enable { get; set; } = true;
@@ -87,9 +88,9 @@ public class XIVPainter
                 {
                     IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
 
-                    if (_drawing3DElements != null)
+                    if (_drawingElements != null)
                     {
-                        foreach (var item in _drawing3DElements)
+                        foreach (var item in _drawingElements)
                         {
                             result = result.Union(item.To2D(this));
                         }
@@ -151,16 +152,16 @@ public class XIVPainter
 
             //lock (_drawing3DLock)
             {
-                var length = _drawing3DElements.Count;
-                var remove = new List<IDrawing3D>(length);
+                var length = _drawingElements.Count;
+                var remove = new List<IDrawing>(length);
                 tasks = new(length + 8);
                 movingPoly = new(length);
                 for (int i = 0; i < length; i++)
                 {
-                    var ele = _drawing3DElements[i];
-                    if (ele.DeadTime != DateTime.MinValue)
+                    var ele = _drawingElements[i];
+                    if (ele is IDrawing3D draw && draw.DeadTime != DateTime.MinValue)
                     {
-                        var time = (DateTime.Now - ele.DeadTime).TotalSeconds;
+                        var time = (DateTime.Now - draw.DeadTime).TotalSeconds;
                         if (time > TimeToDisappear) //Remove
                         {
                             remove.Add(ele);
@@ -186,7 +187,7 @@ public class XIVPainter
                 }
                 foreach (var r in remove)
                 {
-                    _drawing3DElements.Remove(r);
+                    _drawingElements.Remove(r);
                 }
             }
 
@@ -289,30 +290,40 @@ public class XIVPainter
     }
 
     #region Add Remove
-    public void AddDrawings(params IDrawing3D[] drawings)
+    public void AddDrawings(params IDrawing[] drawings)
     {
         foreach (var drawing in drawings)
         {
-            drawing.DisappearType = DisappearType;
-            drawing.TimeToDisappear = TimeToDisappear;
-            drawing.WarningRatio = WarningRatio;
-            drawing.WarningType = WarningType;
-            drawing.WarningTime = DefaultWarningTime;
+            if(drawing is IDrawing3D draw)
+            {
+                draw.DisappearType = DisappearType;
+                draw.TimeToDisappear = TimeToDisappear;
+                draw.WarningRatio = WarningRatio;
+                draw.WarningType = WarningType;
+                draw.WarningTime = DefaultWarningTime;
+            }
         }
 
         //lock (_drawing3DLock)
         {
-            _drawing3DElements.AddRange(drawings);
+            _drawingElements.AddRange(drawings);
         }
     }
 
-    public void RemoveDrawings(params IDrawing3D[] drawings)
+    public void RemoveDrawings(params IDrawing[] drawings)
     {
         foreach (var drawing in drawings)
         {
-            if(drawing.DeadTime == DateTime.MinValue)
+            if (drawing is IDrawing3D draw)
             {
-                drawing.DeadTime = DateTime.Now;
+                if (draw.DeadTime == DateTime.MinValue)
+                {
+                    draw.DeadTime = DateTime.Now;
+                }
+            }
+            else
+            {
+                _drawingElements.Remove(drawing);
             }
         }
     }
