@@ -9,7 +9,7 @@ using XIVPainter.Element2D;
 
 namespace XIVPainter.ElementSpecial;
 
-public class DrawingHightlightHotbar : IDrawing
+public class DrawingHighlightHotbar : IDrawing
 {
     static TexFile _tex = null;
     static readonly Vector2 _uv1 = new Vector2(96 * 5 / 288f, 0), 
@@ -30,7 +30,7 @@ public class DrawingHightlightHotbar : IDrawing
         }
     }
 
-    public DrawingHightlightHotbar()
+    public DrawingHighlightHotbar()
     {
         _tex ??= XIVPainter.Data.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
     }
@@ -79,7 +79,7 @@ public class DrawingHightlightHotbar : IDrawing
 
                 var bar = hotBarIndex > 9 ? null : hotBar->Slot[slotIndex];
 
-                if(IsActionSlotRight(slot, bar))
+                //if(IsActionSlotRight(slot, bar))
                 {
                     var pt1 = new Vector2(iconAddon->AtkResNode.ScreenX, iconAddon->AtkResNode.ScreenY);
                     var pt2 = pt1 + new Vector2(iconAddon->AtkResNode.Width, iconAddon->AtkResNode.Height);

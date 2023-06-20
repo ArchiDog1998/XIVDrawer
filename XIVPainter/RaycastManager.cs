@@ -41,7 +41,7 @@ internal static class RaycastManager
 
     readonly static SortedList<Vector2, float> _rayRelay = new (compacity + 2000, _comparer);
 
-    //static readonly object _calculatingPtsLock = new object();
+    static readonly object _calculatingPtsLock = new object();
     static readonly Queue<Vector3> _calculatingPts = new ();
     static bool _canAdd = false;
 
@@ -93,8 +93,10 @@ internal static class RaycastManager
         if (!_rayRelay.ContainsKey(pt + GetKey(loc)))
         {
             count++;
-            _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
-            RunRaycast();
+            lock (_calculatingPtsLock)
+            {
+                _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
+            }
         }
         while (count < maxCount && Vector2.Distance(pt, default) < distance)
         {
@@ -109,10 +111,21 @@ internal static class RaycastManager
             if (!_rayRelay.ContainsKey(pt + GetKey(loc)))
             {
                 count++;
-                _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
-                RunRaycast();
+                lock (_calculatingPtsLock)
+                {
+                    _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
+                }
             }
         }
+        if (count == 0)
+        {
+            lock (_calculatingPtsLock)
+            {
+                _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
+            }
+        }
+
+        RunRaycast();
     }
 
     public static bool Raycast(Vector3 point, float height, out Vector3 territoryPt)
@@ -127,9 +140,6 @@ internal static class RaycastManager
             {
                 AddCalculatingPts(point, 5, 1);
             });
-
-            //_calculatingPts.Enqueue(point);
-            //RunRaycast();
         }
 
         if (!GetHeight(xy, out var vector)) vector = territoryPt.Y;
@@ -177,7 +187,7 @@ internal static class RaycastManager
 
         Task.Run(() =>
         {
-            while (_calculatingPts.TryDequeue(out var vector))
+            while (TryGetCalPt(out var vector))
             {
                 var key = GetKey(vector);
                 var value = Raycast(vector);
@@ -188,6 +198,13 @@ internal static class RaycastManager
         });
     }
 
+    static bool TryGetCalPt(out Vector3 pt)
+    {
+        lock (_calculatingPtsLock)
+        {
+            return _calculatingPts.TryDequeue(out pt);
+        }
+    }
 
     static unsafe float Raycast(Vector3 point)
     {
