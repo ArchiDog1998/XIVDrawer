@@ -42,7 +42,6 @@ public class XIVPainter
     public uint MovingSuggestionColor { get; set; } = ImGui.ColorConvertFloat4ToU32(new Vector4(0.3f, 0.8f, 0.2f, 1));
     public bool MovingSuggestion { get; set; } = true;
     public float MovingSuggestionRadius { get; set; } = 0.1f;
-
     #endregion
 
     /// <summary>
@@ -148,16 +147,14 @@ public class XIVPainter
             IDrawing2D[] elements = Array.Empty<IDrawing2D>();
             IEnumerable<IDrawing2D> relay = elements;
             List<Task> tasks;
-            List<Drawing3DPolyline> outPoly;
-            List<Drawing3DPolyline> inPoly;
+            List<Drawing3DPolyline> movingPoly;
 
             //lock (_drawing3DLock)
             {
                 var length = _drawing3DElements.Count;
                 var remove = new List<IDrawing3D>(length);
                 tasks = new(length + 8);
-                outPoly = new(length);
-                inPoly = new(length);
+                movingPoly = new(length);
                 for (int i = 0; i < length; i++)
                 {
                     var ele = _drawing3DElements[i];
@@ -174,12 +171,9 @@ public class XIVPainter
                         {
                             switch (poly.PolylineType)
                             {
-                                case Enum.PolylineType.ShouldGoOut:
-                                    outPoly.Add(poly);
-                                    break;
-
                                 case Enum.PolylineType.ShouldGoIn:
-                                    inPoly.Add(poly);
+                                case Enum.PolylineType.ShouldGoOut:
+                                    movingPoly.Add(poly);
                                     break;
                             }
                         }
@@ -196,32 +190,69 @@ public class XIVPainter
                 }
             }
 
-            if (MovingSuggestion)
+            if (MovingSuggestion) tasks.Add(Task.Run(() =>
             {
-                tasks.Add(Task.Run(() =>
+                _outLineGo.Clear();
+
+                Vector3 start = _clientState.LocalPlayer.Position;
+                var color = ImGui.ColorConvertU32ToFloat4(MovingSuggestionColor);
+
+                foreach (var pair in movingPoly.GroupBy(poly => poly.DeadTime).OrderBy(p => p.Key))
                 {
-                    _outLineGo.Clear();
+                    var c = pair.Count();
+                    List<Drawing3DPolyline> outPoly = new List<Drawing3DPolyline>(c),
+                                            inPoly = new List<Drawing3DPolyline>(c);
 
-                    Vector3 start = _clientState.LocalPlayer.Position;
-                    foreach (var pair in outPoly.GroupBy(poly => poly.DeadTime).OrderBy(p => p.Key))
+                    foreach (var p in pair)
                     {
-                        var pts = GetUnion(pair);
-                        if (!DrawingHelper.IsPointInside(start, pts)) continue;
-
-                        pts = DrawingHelper.OffSetPolyline(pts, -MovingSuggestionRadius);
-
-                        var to = DrawingHelper.GetClosestPoint(start, pts);
-                        var go = new Drawing3DHighlightLine(start, to, 0.5f, MovingSuggestionColor, 4);
-                        go.UpdateOnFrame(this);
-                        _outLineGo.Add(go);
+                        if(p.PolylineType == Enum.PolylineType.ShouldGoIn) inPoly.Add(p);
+                        else if (p.PolylineType == Enum.PolylineType.ShouldGoOut) outPoly.Add(p);
                     }
-                }));
 
-                //outLineTasks.Add(Task.Run(() =>
-                //{
-                //    DrawingHelper.OffSetPolyline(GetUnion(inPoly), -MovingSuggestionRadius);
-                //}));
-            }
+                    var outPts = GetUnion(outPoly);
+                    var inPts = GetUnion(inPoly);
+
+
+                    if ((outPts == null || !DrawingHelper.IsPointInside(start, outPts))
+                    && (inPts == null || DrawingHelper.IsPointInside(start, inPts))) continue;
+
+                    outPts = DrawingHelper.OffSetPolyline(outPts, -MovingSuggestionRadius);
+                    inPts = DrawingHelper.OffSetPolyline(inPts, MovingSuggestionRadius);
+
+                    Vector3 to = Vector3.Zero;
+                    if(outPts != null && inPts != null)
+                    {
+                        var o = DrawingHelper.Vec3ToPathsD(outPts);
+                        var i = DrawingHelper.Vec3ToPathsD(inPts);
+                        var r = Clipper.Difference(i, o, FillRule.NonZero);
+                        if(r != null)
+                        {
+                            var h1 = outPts.Sum(poly => poly.Sum(p => p.Y) / poly.Length) / outPts.Count();
+                            var h2 = inPts.Sum(poly => poly.Sum(p => p.Y) / poly.Length) / inPts.Count();
+
+                            var pts = DrawingHelper.PathsDToVec3(r, (h1 + h2) /2);
+                            if(pts != null && pts.Any())
+                            {
+                                to = DrawingHelper.GetClosestPoint(start, pts);
+                            }
+                        }
+                    }
+
+                    if (to == Vector3.Zero)
+                    {
+                        if (outPts != null) to = DrawingHelper.GetClosestPoint(start, outPts);
+                        else if (inPts != null) to = DrawingHelper.GetClosestPoint(start, inPts);
+                        else continue;
+                    }
+
+                    var go = new Drawing3DHighlightLine(start, to, 0.5f, ImGui.ColorConvertFloat4ToU32(color), 4);
+                    start = to;
+                    color.W *= 0.8f;
+
+                    go.UpdateOnFrame(this);
+                    _outLineGo.Add(go);
+                }
+            }));
 
             await Task.WhenAll(tasks.ToArray());
         }
@@ -235,6 +266,11 @@ public class XIVPainter
 
     private static IEnumerable<Vector3[]> GetUnion(IEnumerable<Drawing3DPolyline> polys)
     {
+        if (polys == null || !polys.Any())
+        {
+            return null;
+        }
+
         PathsD result = null;
         float height = 0;
 

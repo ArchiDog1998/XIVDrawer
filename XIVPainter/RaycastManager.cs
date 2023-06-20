@@ -40,7 +40,6 @@ internal static class RaycastManager
     static readonly Vector2Comparer _comparer = new Vector2Comparer();
 
     readonly static SortedList<Vector2, float> _rayRelay = new (compacity + 2000, _comparer);
-    readonly static List<Vector3> _roundPts = new List<Vector3>();
 
     //static readonly object _calculatingPtsLock = new object();
     static readonly Queue<Vector3> _calculatingPts = new ();
@@ -90,6 +89,13 @@ internal static class RaycastManager
         var pt = default(Vector2);
 
         int count = 0;
+
+        if (!_rayRelay.ContainsKey(pt + GetKey(loc)))
+        {
+            count++;
+            _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
+            RunRaycast();
+        }
         while (count < maxCount && Vector2.Distance(pt, default) < distance)
         {
             var xAy = pt.X + pt.Y;
@@ -117,9 +123,13 @@ internal static class RaycastManager
         //Start RayCasting!
         if (_canAdd)
         {
-            _roundPts.Add(point);
-            _calculatingPts.Enqueue(point);
-            RunRaycast();
+            Task.Run(() =>
+            {
+                AddCalculatingPts(point, 5, 1);
+            });
+
+            //_calculatingPts.Enqueue(point);
+            //RunRaycast();
         }
 
         if (!GetHeight(xy, out var vector)) vector = territoryPt.Y;

@@ -95,7 +95,7 @@ public static class DrawingHelper
     }
 
     public static IEnumerable<Vector3[]> OffSetPolyline(IEnumerable<Vector3[]> pts, float offset)
-        => pts.SelectMany(p => OffSetPolyline(p, offset));
+        => pts?.SelectMany(p => OffSetPolyline(p, offset));
 
     public static IEnumerable<Vector3[]> OffSetPolyline(Vector3[] pts, float offset)
     {
@@ -126,7 +126,7 @@ public static class DrawingHelper
         return new PathD(pts.Select(p => new PointD(p.X, p.Z)));
     }
     public static IEnumerable<Vector3[]> PathsDToVec3(PathsD path, float height)
-    => path.Select(p => PathDToVec3(p, height));
+    => path?.Select(p => PathDToVec3(p, height));
 
     public static Vector3[] PathDToVec3(PathD path, float height)
     {
