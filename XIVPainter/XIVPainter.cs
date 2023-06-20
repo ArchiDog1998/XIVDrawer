@@ -2,6 +2,7 @@
 using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
@@ -29,6 +30,8 @@ public class XIVPainter
     [PluginService] internal static Framework _framework { get; private set; }
 
     [PluginService] internal static ClientState _clientState { get; private set; }
+
+    [PluginService] internal static GameGui GameGui { get; private set; }
 
     #region Config
     public bool Enable { get; set; } = true;
