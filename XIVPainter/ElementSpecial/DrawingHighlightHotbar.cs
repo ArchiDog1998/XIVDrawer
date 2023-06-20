@@ -1,8 +1,10 @@
-﻿using FFXIVClientStructs.Attributes;
+﻿using Dalamud.Utility;
+using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using ImGuiScene;
 using Lumina.Data.Files;
 using XIVPainter.Element2D;
@@ -12,8 +14,8 @@ namespace XIVPainter.ElementSpecial;
 public class DrawingHighlightHotbar : IDrawing
 {
     static TexFile _tex = null;
-    static readonly Vector2 _uv1 = new Vector2(96 * 5 / 288f, 0), 
-        _uv2 = new Vector2((96 * 5 + 144) / 288f, 0.5f);
+    static readonly Vector2 _uv1 = new Vector2(96 * 5 / 852f, 0), 
+        _uv2 = new Vector2((96 * 5 + 144) / 852f, 0.5f);
 
     TextureWrap _texture = null;
 
@@ -33,6 +35,7 @@ public class DrawingHighlightHotbar : IDrawing
     public DrawingHighlightHotbar()
     {
         _tex ??= XIVPainter.Data.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
+        SetTexture();
     }
 
     void SetTexture()
@@ -69,25 +72,51 @@ public class DrawingHighlightHotbar : IDrawing
         {
             if (intPtr == IntPtr.Zero) continue;
             var actionBar = (AddonActionBarBase*)intPtr;
-            var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBar[hotBarIndex];
-            var slotIndex = 0;
-            foreach (var slot in actionBar->Slot)
+            var s = actionBar->AtkUnitBase.Scale;
+            if (actionBar->AtkUnitBase.IsVisible)
             {
-                var iconAddon = slot.Icon;
-                if ((IntPtr)iconAddon == IntPtr.Zero) continue;
-                if (!iconAddon->AtkResNode.IsVisible) continue;
-
-                var bar = hotBarIndex > 9 ? null : hotBar->Slot[slotIndex];
-
-                //if(IsActionSlotRight(slot, bar))
+                var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBar[hotBarIndex];
+                var slotIndex = 0;
+                foreach (var slot in actionBar->Slot)
                 {
-                    var pt1 = new Vector2(iconAddon->AtkResNode.ScreenX, iconAddon->AtkResNode.ScreenY);
-                    var pt2 = pt1 + new Vector2(iconAddon->AtkResNode.Width, iconAddon->AtkResNode.Height);
+                    var iconAddon = slot.Icon;
+                    if ((IntPtr)iconAddon != IntPtr.Zero && iconAddon->AtkResNode.IsVisible)
+                    {
+                        AtkResNode node = default;
+                        HotBarSlot* bar;
 
-                    result.Add(new ImageDrawing(_texture.ImGuiHandle, pt1, pt2, _uv1, _uv2));
+                        if (hotBarIndex > 9)
+                        {
+                            if (slot.Icon->AtkResNode.ParentNode->ParentNode->IsVisible)
+                            {
+                                var manager = slot.Icon->AtkResNode.ParentNode->GetAsAtkComponentNode()->Component->UldManager.NodeList[2]->GetAsAtkComponentNode()->Component->UldManager;
+
+                                for (var i = 0; i < manager.NodeListCount; i++)
+                                {
+                                    node = *manager.NodeList[i];
+                                    if (node.Width == 72) break;
+                                }
+                            }
+
+                            bar = null;
+                        }
+                        else
+                        {
+                            node = *slot.Icon->AtkResNode.ParentNode->ParentNode;
+                            bar = hotBar->Slot[slotIndex];
+                        }
+
+                        if (IsActionSlotRight(slot, bar))
+                        {
+                            var pt1 = new Vector2(node.ScreenX, node.ScreenY);
+                            var pt2 = pt1 + new Vector2(node.Width * s, node.Height * s);
+
+                            result.Add(new ImageDrawing(_texture.ImGuiHandle, pt1, pt2, _uv1, _uv2));
+                        }
+                    }
+
+                    slotIndex++;
                 }
-
-                slotIndex++;
             }
             hotBarIndex++;
         }
