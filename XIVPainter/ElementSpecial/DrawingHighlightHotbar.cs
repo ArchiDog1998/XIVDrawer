@@ -1,5 +1,4 @@
-﻿using Dalamud.Utility;
-using FFXIVClientStructs.Attributes;
+﻿using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -73,7 +72,11 @@ public class DrawingHighlightHotbar : IDrawing
             if (intPtr == IntPtr.Zero) continue;
             var actionBar = (AddonActionBarBase*)intPtr;
             var s = actionBar->AtkUnitBase.Scale;
-            if (actionBar->AtkUnitBase.IsVisible)
+
+            var hotbarUnitBase = (AtkUnitBase*)intPtr;
+            var visibilityFlag = hotbarUnitBase->VisibilityFlags;
+
+            if (visibilityFlag != 1 && actionBar->AtkUnitBase.IsVisible)
             {
                 var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBar[hotBarIndex];
                 var slotIndex = 0;
