@@ -1,14 +1,39 @@
-﻿using System.Collections.Generic;
+﻿namespace XIVPainter.Element3D;
 
-namespace XIVPainter.Element3D;
-
+/// <summary>
+/// The annulus drawing.
+/// </summary>
 public class Drawing3DAnnulus : Drawing3DPolyline
 {
+    /// <summary>
+    /// The drawing center.
+    /// </summary>
     public Vector3 Center { get; set; }
+
+    /// <summary>
+    /// The radius 1 of annulus.
+    /// </summary>
     public float Radius1 { get; set; }
+
+    /// <summary>
+    /// The radius 2 of annulus.
+    /// </summary>
     public float Radius2 { get; set; }
+
+    /// <summary>
+    /// The arc start span.
+    /// </summary>
     public Vector2[] ArcStartSpan { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="center"></param>
+    /// <param name="radius1"></param>
+    /// <param name="radius2"></param>
+    /// <param name="color"></param>
+    /// <param name="thickness"></param>
+    /// <param name="arcStartSpan"></param>
     public Drawing3DAnnulus(Vector3 center, float radius1, float radius2, uint color,
         float thickness, params Vector2[] arcStartSpan)
         : base(null, color, thickness)
@@ -23,6 +48,10 @@ public class Drawing3DAnnulus : Drawing3DPolyline
         }
     }
 
+    /// <summary>
+    /// The things that can be done in the task.
+    /// </summary>
+    /// <param name="painter"></param>
     public override void UpdateOnFrame(XIVPainter painter)
     {
         base.UpdateOnFrame(painter);

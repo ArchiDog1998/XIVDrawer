@@ -1,12 +1,19 @@
 ﻿using Clipper2Lib;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
 namespace XIVPainter;
 
-public static class DrawingHelper
+/// <summary>
+/// A static class for drawing extension.
+/// </summary>
+public static class DrawingExtensions
 {
+    /// <summary>
+    /// Normalize the <seealso cref="Vector2"/> safely.
+    /// </summary>
+    /// <param name="vec">the vector to normalize</param>
+    /// <returns>is successfull.</returns>
     public static bool Normalize(ref this Vector2 vec)
     {
         var length = vec.Length();
@@ -15,6 +22,11 @@ public static class DrawingHelper
         return true;
     }
 
+    /// <summary>
+    /// Can the point be seen by the active camera.
+    /// </summary>
+    /// <param name="point">testing point in world.</param>
+    /// <returns>can be seen.</returns>
     public unsafe static bool CanSee(this Vector3 point)
     {
         var camera = (Vector3)CameraManager.Instance()->CurrentCamera->Object.Position;
@@ -30,6 +42,12 @@ public static class DrawingHelper
             ->RaycastEx(&hit, camera, vec, dis, 1, unknown);
     }
 
+    /// <summary>
+    /// Is the point inside the polygon
+    /// </summary>
+    /// <param name="pt">testing point</param>
+    /// <param name="pts">polygon</param>
+    /// <returns>is Inside</returns>
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
     {
         var count = 0;
@@ -47,6 +65,12 @@ public static class DrawingHelper
         return count % 2 == 1;
     }
 
+    /// <summary>
+    /// Get the closest point to the polygon.
+    /// </summary>
+    /// <param name="pt">testing point</param>
+    /// <param name="pts">polygon</param>
+    /// <returns>closest point</returns>
     public static Vector3 GetClosestPoint(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
     {
         float minDis = float.MaxValue;
@@ -94,9 +118,21 @@ public static class DrawingHelper
         return Vector3.Distance(p, cp);
     }
 
+    /// <summary>
+    /// Offset the polygon
+    /// </summary>
+    /// <param name="pts">polygon</param>
+    /// <param name="offset">distance to offset</param>
+    /// <returns>offseted polygon</returns>
     public static IEnumerable<Vector3[]> OffSetPolyline(IEnumerable<Vector3[]> pts, float offset)
         => pts?.SelectMany(p => OffSetPolyline(p, offset));
 
+    /// <summary>
+    /// Offset the polygon
+    /// </summary>
+    /// <param name="pts">polygon</param>
+    /// <param name="offset">distance to offset</param>
+    /// <returns>offseted polygon</returns>
     public static IEnumerable<Vector3[]> OffSetPolyline(Vector3[] pts, float offset)
     {
         if (pts.Length < 3) return new Vector3[][] { pts };
@@ -117,18 +153,18 @@ public static class DrawingHelper
         return result.Select(p => PathDToVec3(p, height));
     }
 
-    public static PathsD Vec3ToPathsD(IEnumerable<IEnumerable<Vector3>> pts)
+    internal static PathsD Vec3ToPathsD(IEnumerable<IEnumerable<Vector3>> pts)
         => new PathsD(pts.Select(Vec3ToPathD));
 
-    public static PathD Vec3ToPathD(IEnumerable<Vector3> pts)
+    internal static PathD Vec3ToPathD(IEnumerable<Vector3> pts)
     {
         if(pts == null) return null;
         return new PathD(pts.Select(p => new PointD(p.X, p.Z)));
     }
-    public static IEnumerable<Vector3[]> PathsDToVec3(PathsD path, float height)
+    internal static IEnumerable<Vector3[]> PathsDToVec3(PathsD path, float height)
     => path?.Select(p => PathDToVec3(p, height));
 
-    public static Vector3[] PathDToVec3(PathD path, float height)
+    internal static Vector3[] PathDToVec3(PathD path, float height)
     {
         var result = new Vector3[path.Count];
         for (int i = 0; i < path.Count; i++)
@@ -139,7 +175,7 @@ public static class DrawingHelper
         return result;
     }
 
-    public static void SegmentAction<T>(IEnumerable<T> pts, Action<T, T> pairAction, bool closed = true)
+    internal static void SegmentAction<T>(IEnumerable<T> pts, Action<T, T> pairAction, bool closed = true)
     {
         if (pairAction == null) return;
         if(pts == null || !pts.Any()) return;
@@ -161,6 +197,11 @@ public static class DrawingHelper
         if(closed) pairAction(prePt, pts.First());
     }
 
+    /// <summary>
+    /// ConvexDecomposition
+    /// </summary>
+    /// <param name="points">concave polygon</param>
+    /// <returns>convex polygons</returns>
     public static IEnumerable<Vector2[]> ConvexPoints(Vector2[] points)
     {
         if (points == null || points.Length < 3) 
@@ -188,7 +229,7 @@ public static class DrawingHelper
         return result;
     }
 
-    public static bool IsOrdered(Vector2[] points)
+    static bool IsOrdered(Vector2[] points)
     {
         int index = 0;
         float leftBottom = float.MaxValue;
@@ -222,6 +263,12 @@ public static class DrawingHelper
         return Vector3.Cross(new Vector3(vec1.X, vec1.Y, 0), new Vector3(vec2.X, vec2.Y, 0)).Z;
     }
 
+    /// <summary>
+    /// Get the ease function by <seealso cref="EaseFuncType"/>
+    /// </summary>
+    /// <param name="inType">input type</param>
+    /// <param name="outType">output type</param>
+    /// <returns>function</returns>
     public static Func<double, double> EaseFuncRemap(EaseFuncType inType, EaseFuncType outType)
     {
         if (inType == EaseFuncType.None)
@@ -289,8 +336,14 @@ public static class DrawingHelper
     };
 }
 
+/// <summary>
+/// Ease function type.
+/// </summary>
 public enum EaseFuncType
 {
+    /// <summary>
+    /// Line
+    /// </summary>
     None,
 
     /// <summary>

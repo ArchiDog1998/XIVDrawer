@@ -1,13 +1,39 @@
 ﻿namespace XIVPainter.Element3D;
 
+/// <summary>
+/// The element that can show the location that the player should go.
+/// </summary>
 public class Drawing3DHighlightLine: Drawing3DPoly
 {
+    /// <summary>
+    /// The position where it from
+    /// </summary>
     public Vector3 From { get; set; }
+
+    /// <summary>
+    /// The position where it to
+    /// </summary>
     public Vector3 To { get; set; }
+
+    /// <summary>
+    /// Highlight circle radius
+    /// </summary>
     public float Radius { get; set; }
+
+    /// <summary>
+    /// The thickness of curve.
+    /// </summary>
     public float Thickness { get; set; }
     Drawing3DCircularSector cir1, cir2;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
+    /// <param name="radius"></param>
+    /// <param name="color"></param>
+    /// <param name="thickness"></param>
     public Drawing3DHighlightLine(Vector3 from, Vector3 to, float radius, uint color, float thickness)
     {
         SubItems = new IDrawing3D[]
@@ -29,10 +55,14 @@ public class Drawing3DHighlightLine: Drawing3DPoly
         Color = color;
     }
 
+    /// <summary>
+    /// The things that can be done in the task.
+    /// </summary>
+    /// <param name="painter"></param>
     public override void UpdateOnFrame(XIVPainter painter)
     {
         var d = DateTime.Now.Millisecond / 1000f;
-        var ratio = (float)DrawingHelper.EaseFuncRemap(EaseFuncType.None, EaseFuncType.Cubic)(d);
+        var ratio = (float)DrawingExtensions.EaseFuncRemap(EaseFuncType.None, EaseFuncType.Cubic)(d);
         if(Radius == 0)
         {
             cir1.Radius = cir2.Radius = 0;

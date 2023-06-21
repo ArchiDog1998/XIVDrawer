@@ -1,9 +1,5 @@
 ﻿using Clipper2Lib;
-using Dalamud.Data;
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.Gui;
-using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
@@ -14,6 +10,9 @@ using XIVPainter.ElementSpecial;
 
 namespace XIVPainter;
 
+/// <summary>
+/// The painter for FFXIV in Dalamud.
+/// </summary>
 public class XIVPainter
 {
     readonly string _name;
@@ -24,20 +23,74 @@ public class XIVPainter
     readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
 
     #region Config
+
+    /// <summary>
+    /// Enable this <seealso cref="XIVPainter"/>
+    /// </summary>
     public bool Enable { get; set; } = true;
+
+    /// <summary>
+    /// if the points of the polyline is not on the ground, remove it.
+    /// </summary>
     public bool RemovePtsNotOnGround { get; set; } = false;
+
+    /// <summary>
+    /// The hight of drawing in the world for making the polyline on the ground.
+    /// </summary>
     public float DrawingHeight { get; set; } = 3;
+
+    /// <summary>
+    /// The length of sample, please don't set this too low!
+    /// </summary>
     public float SampleLength { get; set; } = 0.2f;
+
+    /// <summary>
+    /// How long should the animation of disappearing be in second.
+    /// </summary>
     public float TimeToDisappear { get; set; } = 1f;
+
+    /// <summary>
+    /// The ease function type of disappearing.
+    /// </summary>
     public EaseFuncType DisappearType { get; set; } = EaseFuncType.Back;
-    public byte DefaultWarningTime { get; set; } = 3;
+
+    /// <summary>
+    /// The time of warning.
+    /// </summary>
+    public byte WarningTime { get; set; } = 3;
+
+    /// <summary>
+    /// How much alpha value should be changed when warning.
+    /// </summary>
     public float WarningRatio { get; set; } = 0.8f;
+
+    /// <summary>
+    /// The ease function type for warning.
+    /// </summary>
     public EaseFuncType WarningType { get; set; } = EaseFuncType.Cubic;
+
+    /// <summary>
+    /// The color of moving suggestion.
+    /// </summary>
     public uint MovingSuggestionColor { get; set; } = ImGui.ColorConvertFloat4ToU32(new Vector4(0.3f, 0.8f, 0.2f, 1));
+
+    /// <summary>
+    /// Should it show the moving suggestions.
+    /// </summary>
     public bool MovingSuggestion { get; set; } = true;
-    public float MovingSuggestionRadius { get; set; } = 0.1f;
+
+    /// <summary>
+    /// The offset of the polygon that it should go.
+    /// </summary>
+    public float MovingSuggestionOffset { get; set; } = 0.1f;
     #endregion
 
+    /// <summary>
+    /// The way to create this.
+    /// </summary>
+    /// <param name="pluginInterface"></param>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public static XIVPainter Create(DalamudPluginInterface pluginInterface, string name)
     {
         pluginInterface.Create<Service>();
@@ -54,6 +107,9 @@ public class XIVPainter
         RaycastManager.Enable();
     }
 
+    /// <summary>
+    /// Don't forget to dispose this!
+    /// </summary>
     public void Dispose()
     {
         Service.PluginInterface.UiBuilder.Draw -= Draw;
@@ -211,35 +267,35 @@ public class XIVPainter
                     var inPts = GetUnion(inPoly);
 
 
-                    if ((outPts == null || !DrawingHelper.IsPointInside(start, outPts))
-                    && (inPts == null || DrawingHelper.IsPointInside(start, inPts))) continue;
+                    if ((outPts == null || !DrawingExtensions.IsPointInside(start, outPts))
+                    && (inPts == null || DrawingExtensions.IsPointInside(start, inPts))) continue;
 
-                    outPts = DrawingHelper.OffSetPolyline(outPts, -MovingSuggestionRadius);
-                    inPts = DrawingHelper.OffSetPolyline(inPts, MovingSuggestionRadius);
+                    outPts = DrawingExtensions.OffSetPolyline(outPts, -MovingSuggestionOffset);
+                    inPts = DrawingExtensions.OffSetPolyline(inPts, MovingSuggestionOffset);
 
                     Vector3 to = Vector3.Zero;
                     if(outPts != null && inPts != null)
                     {
-                        var o = DrawingHelper.Vec3ToPathsD(outPts);
-                        var i = DrawingHelper.Vec3ToPathsD(inPts);
+                        var o = DrawingExtensions.Vec3ToPathsD(outPts);
+                        var i = DrawingExtensions.Vec3ToPathsD(inPts);
                         var r = Clipper.Difference(i, o, FillRule.NonZero);
                         if(r != null)
                         {
                             var h1 = outPts.Sum(poly => poly.Sum(p => p.Y) / poly.Length) / outPts.Count();
                             var h2 = inPts.Sum(poly => poly.Sum(p => p.Y) / poly.Length) / inPts.Count();
 
-                            var pts = DrawingHelper.PathsDToVec3(r, (h1 + h2) /2);
+                            var pts = DrawingExtensions.PathsDToVec3(r, (h1 + h2) /2);
                             if(pts != null && pts.Any())
                             {
-                                to = DrawingHelper.GetClosestPoint(start, pts);
+                                to = DrawingExtensions.GetClosestPoint(start, pts);
                             }
                         }
                     }
 
                     if (to == Vector3.Zero)
                     {
-                        if (outPts != null) to = DrawingHelper.GetClosestPoint(start, outPts);
-                        else if (inPts != null) to = DrawingHelper.GetClosestPoint(start, inPts);
+                        if (outPts != null) to = DrawingExtensions.GetClosestPoint(start, outPts);
+                        else if (inPts != null) to = DrawingExtensions.GetClosestPoint(start, inPts);
                         else continue;
                     }
 
@@ -275,7 +331,7 @@ public class XIVPainter
         foreach (var p in polys)
         {
             height += p.BorderPoints.Sum(poly => poly.Sum(p => p.Y) / poly.Count()) / p.BorderPoints.Count();
-            var path = DrawingHelper.Vec3ToPathsD(p.BorderPoints);
+            var path = DrawingExtensions.Vec3ToPathsD(p.BorderPoints);
             if (path == null) continue;
 
             result = result == null ? Clipper.Union(path, FillRule.NonZero)
@@ -283,10 +339,14 @@ public class XIVPainter
         }
 
         height /= polys.Count();
-        return DrawingHelper.PathsDToVec3(result, height);
+        return DrawingExtensions.PathsDToVec3(result, height);
     }
 
     #region Add Remove
+    /// <summary>
+    /// Add the drawings to the list.
+    /// </summary>
+    /// <param name="drawings">drawings</param>
     public void AddDrawings(params IDrawing[] drawings)
     {
         foreach (var drawing in drawings)
@@ -297,16 +357,18 @@ public class XIVPainter
                 draw.TimeToDisappear = TimeToDisappear;
                 draw.WarningRatio = WarningRatio;
                 draw.WarningType = WarningType;
-                draw.WarningTime = DefaultWarningTime;
+                draw.WarningTime = WarningTime;
             }
         }
 
-        //lock (_drawing3DLock)
-        {
-            _drawingElements.AddRange(drawings);
-        }
+        _drawingElements.AddRange(drawings);
     }
 
+
+    /// <summary>
+    /// Remove the drawings from the list.
+    /// </summary>
+    /// <param name="drawings">drawings</param>
     public void RemoveDrawings(params IDrawing[] drawings)
     {
         foreach (var drawing in drawings)
@@ -327,7 +389,7 @@ public class XIVPainter
     #endregion
 
     #region Trasform
-    public unsafe Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed)
+    internal Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed)
     {
         var cameraPts = ProjectPtsOnGround(DivideCurve(pts, SampleLength, isClosed), DrawingHeight)
             .Select(WorldToCamera).ToArray();
@@ -342,7 +404,7 @@ public class XIVPainter
 
         IEnumerable<Vector3> pts = Array.Empty<Vector3>();
 
-        DrawingHelper.SegmentAction(worldPts, (a, b) =>
+        DrawingExtensions.SegmentAction(worldPts, (a, b) =>
         {
             pts = pts.Union(DashPoints(a, b, length));
         }, isClosed);
@@ -447,13 +509,13 @@ public class XIVPainter
     }
     #endregion
 
-    public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round)
+    internal Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round)
     {
         var circleSegment = (int)(MathF.Tau * radius / SampleLength);
         return SectorPlots(center, radius, rotation, round, circleSegment);
     }
 
-    public Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round, int circleSegment)
+    internal Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round, int circleSegment)
     {
         if (radius <= 0) return Array.Empty<Vector3>();
         circleSegment = Math.Max(circleSegment, 16);

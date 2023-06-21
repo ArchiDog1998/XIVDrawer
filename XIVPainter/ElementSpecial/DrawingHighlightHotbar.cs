@@ -1,5 +1,4 @@
-﻿using Dalamud.Utility;
-using FFXIVClientStructs.Attributes;
+﻿using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -11,6 +10,10 @@ using XIVPainter.Element2D;
 
 namespace XIVPainter.ElementSpecial;
 
+
+/// <summary>
+/// The hotbar highlight drawing.
+/// </summary>
 public class DrawingHighlightHotbar : IDrawing
 {
     static TexFile _tex = null;
@@ -19,9 +22,16 @@ public class DrawingHighlightHotbar : IDrawing
 
     TextureWrap _texture = null;
 
+    /// <summary>
+    /// The action ids that 
+    /// </summary>
     public HashSet<uint> ActionIds { get; } = new HashSet<uint>();
 
     Vector4 _color = new Vector4(0.8f, 0.5f, 0.3f, 1);
+
+    /// <summary>
+    /// The color of highlight.
+    /// </summary>
     public Vector4 Color 
     {
         get => _color;
@@ -32,6 +42,9 @@ public class DrawingHighlightHotbar : IDrawing
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public DrawingHighlightHotbar()
     {
         _tex ??= Service.Data.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
@@ -58,6 +71,11 @@ public class DrawingHighlightHotbar : IDrawing
         return array;
     }
 
+    /// <summary>
+    /// Convert this to the 2d elements.
+    /// </summary>
+    /// <param name="owner"></param>
+    /// <returns></returns>
     public unsafe IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
         if(_texture == null) return Array.Empty<IDrawing2D>();
@@ -125,6 +143,10 @@ public class DrawingHighlightHotbar : IDrawing
         return result;
     }
 
+    /// <summary>
+    /// The things that can be done in the task.
+    /// </summary>
+    /// <param name="painter"></param>
     public void UpdateOnFrame(XIVPainter painter)
     {
         return;
