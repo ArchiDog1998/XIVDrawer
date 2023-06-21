@@ -19,7 +19,7 @@ public class DrawingHighlightHotbar : IDrawing
 
     TextureWrap _texture = null;
 
-    public uint ActionId { get; set; } = 0;
+    public HashSet<uint> ActionIds { get; } = new HashSet<uint>();
 
     Vector4 _color = new Vector4(0.8f, 0.5f, 0.3f, 1);
     public Vector4 Color 
@@ -34,13 +34,13 @@ public class DrawingHighlightHotbar : IDrawing
 
     public DrawingHighlightHotbar()
     {
-        _tex ??= XIVPainter.Data.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
+        _tex ??= Service.Data.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
         SetTexture();
     }
 
     void SetTexture()
     {
-        _texture = XIVPainter._pluginInterface.UiBuilder.LoadImageRaw(GetImageData(_tex), _tex!.Header.Width, _tex!.Header.Height, 4);
+        _texture = Service.PluginInterface.UiBuilder.LoadImageRaw(GetImageData(_tex), _tex!.Header.Width, _tex!.Header.Height, 4);
     }
 
     byte[] GetImageData(TexFile texFile)
@@ -70,12 +70,12 @@ public class DrawingHighlightHotbar : IDrawing
             .Union(GetAddons<AddonActionCross>())
             .Union(GetAddons<AddonActionDoubleCrossBase>()))
         {
-            if (intPtr == IntPtr.Zero) continue;
             var actionBar = (AddonActionBarBase*)intPtr;
-            var s = actionBar->AtkUnitBase.Scale;
-            if (actionBar->AtkUnitBase.IsVisible)
+            if (actionBar != null && actionBar->AtkUnitBase.IsVisible)
             {
+                var s = actionBar->AtkUnitBase.Scale;
                 var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBar[hotBarIndex];
+
                 var slotIndex = 0;
                 foreach (var slot in actionBar->Slot)
                 {
@@ -118,6 +118,7 @@ public class DrawingHighlightHotbar : IDrawing
                     slotIndex++;
                 }
             }
+
             hotBarIndex++;
         }
 
@@ -134,7 +135,7 @@ public class DrawingHighlightHotbar : IDrawing
         if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return Array.Empty<nint>();
 
         return on.AddonIdentifiers
-            .Select(str => XIVPainter.GameGui.GetAddonByName(str, 1))
+            .Select(str => Service.GameGui.GetAddonByName(str, 1))
             .Where(ptr => ptr != IntPtr.Zero);
     }
 
@@ -146,6 +147,6 @@ public class DrawingHighlightHotbar : IDrawing
             if (hot->IconTypeB != HotbarSlotType.CraftAction && hot->IconTypeB != HotbarSlotType.Action) return false;
         }
 
-        return ActionId == ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId);
+        return ActionIds.Contains(ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId));
     }
 }

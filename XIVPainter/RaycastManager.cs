@@ -47,17 +47,17 @@ internal static class RaycastManager
 
     public static void Enable()
     {
-        if(XIVPainter._framework != null)
+        if(Service.Framework != null)
         {
-            XIVPainter._framework.Update += Update;
+            Service.Framework.Update += Update;
         }
     }
 
     public static void Dispose()
     {
 
-        if (XIVPainter._framework != null)
-            XIVPainter._framework.Update -= Update;
+        if (Service.Framework != null)
+            Service.Framework.Update -= Update;
     }
 
     static bool _isUpdateRun = false;
@@ -69,9 +69,9 @@ internal static class RaycastManager
         {
             _canAdd = !_calculatingPts.Any();
 
-            if (XIVPainter._clientState != null && XIVPainter._clientState.LocalPlayer != null)
+            if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
             {
-                var loc = XIVPainter._clientState.LocalPlayer.Position;
+                var loc = Service.ClientState.LocalPlayer.Position;
                 var pos = GetKey(loc);
                 while (_rayRelay.Count > compacity)
                 {

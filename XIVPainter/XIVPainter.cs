@@ -23,16 +23,6 @@ public class XIVPainter
 
     readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
 
-    [PluginService] internal static DataManager Data { get; private set; }
-
-    [PluginService] internal static DalamudPluginInterface _pluginInterface { get; private set; }
-
-    [PluginService] internal static Framework _framework { get; private set; }
-
-    [PluginService] internal static ClientState _clientState { get; private set; }
-
-    [PluginService] internal static GameGui GameGui { get; private set; }
-
     #region Config
     public bool Enable { get; set; } = true;
     public bool RemovePtsNotOnGround { get; set; } = false;
@@ -48,24 +38,26 @@ public class XIVPainter
     public float MovingSuggestionRadius { get; set; } = 0.1f;
     #endregion
 
-    /// <summary>
-    /// Do not use it! Please use DalamudPluginInterface.Create<XIVPainter>(string name) to create this.
-    /// </summary>
-    /// <param name="name"></param>
-    public XIVPainter(string name)
+    public static XIVPainter Create(DalamudPluginInterface pluginInterface, string name)
+    {
+        pluginInterface.Create<Service>();
+        return new XIVPainter(name);
+    }
+
+    private XIVPainter(string name)
     {
         _name = name;
 
-        _pluginInterface.UiBuilder.Draw += Draw;
-        _framework.Update += Update;
+        Service.PluginInterface.UiBuilder.Draw += Draw;
+        Service.Framework.Update += Update;
 
         RaycastManager.Enable();
     }
 
     public void Dispose()
     {
-        _pluginInterface.UiBuilder.Draw -= Draw;
-        _framework.Update -= Update;
+        Service.PluginInterface.UiBuilder.Draw -= Draw;
+        Service.Framework.Update -= Update;
 
         RaycastManager.Dispose();
     }
@@ -198,7 +190,9 @@ public class XIVPainter
             {
                 _outLineGo.Clear();
 
-                Vector3 start = _clientState.LocalPlayer.Position;
+                if (Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
+
+                Vector3 start = Service.ClientState.LocalPlayer.Position;
                 var color = ImGui.ColorConvertU32ToFloat4(MovingSuggestionColor);
 
                 foreach (var pair in movingPoly.GroupBy(poly => poly.DeadTime).OrderBy(p => p.Key))

@@ -91,10 +91,10 @@ public class Drawing3DPolyline : Drawing3D
         base.UpdateOnFrame(painter);
 
         if (DeadTime != DateTime.MinValue && DateTime.Now > DeadTime) return;
-        var inside = XIVPainter._clientState.LocalPlayer != null && DrawingHelper.IsPointInside(XIVPainter._clientState.LocalPlayer.Position, BorderPoints);
+        var inside = Service.ClientState.LocalPlayer != null && DrawingHelper.IsPointInside(Service.ClientState.LocalPlayer.Position, BorderPoints);
 
         showColor = Color;
-        if (XIVPainter._clientState?.LocalPlayer != null)
+        if (Service.ClientState?.LocalPlayer != null)
         {
             if (Color != InsideColor)
             {

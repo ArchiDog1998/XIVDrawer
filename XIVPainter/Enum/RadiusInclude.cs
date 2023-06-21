@@ -18,7 +18,7 @@ public static class RadiusIncludeExtension
         if(target == null) return 0;
         if (include.HasFlag(RadiusInclude.IncludePlayer))
         {
-            radius += XIVPainter._clientState?.LocalPlayer?.HitboxRadius ?? 0;
+            radius += Service.ClientState?.LocalPlayer?.HitboxRadius ?? 0;
         }
         if (include.HasFlag(RadiusInclude.IncludeTarget))
         {
