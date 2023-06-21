@@ -73,8 +73,7 @@ public class DrawingHighlightHotbar : IDrawing
             var actionBar = (AddonActionBarBase*)intPtr;
             var s = actionBar->AtkUnitBase.Scale;
 
-            var hotbarUnitBase = (AtkUnitBase*)intPtr;
-            var visibilityFlag = hotbarUnitBase->VisibilityFlags;
+            var visibilityFlag = actionBar->AtkUnitBase.VisibilityFlags;
 
             if (visibilityFlag != 1 && actionBar->AtkUnitBase.IsVisible)
             {
