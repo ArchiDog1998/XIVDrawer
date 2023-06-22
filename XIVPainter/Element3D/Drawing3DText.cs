@@ -38,7 +38,6 @@ public class Drawing3DText : Drawing3D
     /// </summary>
     /// <param name="owner"></param>
     /// <returns></returns>
-
     public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
         if(HideIfInvisible && !Position.CanSee() || string.IsNullOrEmpty(Text)) return Array.Empty<IDrawing2D>();

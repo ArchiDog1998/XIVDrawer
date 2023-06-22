@@ -32,7 +32,6 @@ public abstract class Drawing3D : IDrawing3D
     /// </summary>
     protected float AnimationRatio { get; set; } = 0;
 
-
     /// <summary>
     /// Convert this to the 2d elements.
     /// </summary>

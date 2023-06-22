@@ -213,6 +213,6 @@ internal static class RaycastManager
         RaycastHit hit = default;
 
         return FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule
-            ->RaycastEx(&hit, point + Vector3.UnitY * 6, -Vector3.UnitY, 100, 1, unknown) ? hit.Point.Y : float.NaN;
+            ->RaycastEx(&hit, point + Vector3.UnitY * 5, -Vector3.UnitY, 100, 1, unknown) ? hit.Point.Y : float.NaN;
     }
 }

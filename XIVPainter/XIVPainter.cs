@@ -118,7 +118,7 @@ public class XIVPainter
 
     private void Draw()
     {
-        if(!Enable) return;
+        if (!Enable || Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
         try
         {
             ImGuiHelpers.ForceNextWindowMainViewport();
@@ -182,7 +182,7 @@ public class XIVPainter
 
     private void Update(Framework framework)
     {
-        if (!Enable) return;
+        if (!Enable || Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
         Task.Run(UpdateData);
     }
 
