@@ -74,6 +74,7 @@ public class DrawingHighlightHotbar : IDrawing
     static unsafe bool IsVisible(AtkUnitBase unit)
     {
         if (!unit.IsVisible) return false;
+        if (unit.VisibilityFlags == 1) return false;
 
         return IsVisible(unit.RootNode);
     }
@@ -103,7 +104,8 @@ public class DrawingHighlightHotbar : IDrawing
         var hotBarIndex = 0;
         foreach (var intPtr in GetAddons<AddonActionBar>()
             .Union(GetAddons<AddonActionBarX>())
-            .Union(GetAddons<AddonActionCross>()))
+            .Union(GetAddons<AddonActionCross>())
+            .Union(GetAddons<AddonActionDoubleCrossBase>()))
         {
             var actionBar = (AddonActionBarBase*)intPtr;
             if (actionBar != null && IsVisible(actionBar->AtkUnitBase))
