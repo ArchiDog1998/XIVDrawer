@@ -14,18 +14,12 @@ public interface IDrawing3D : IDrawing
     uint Color { get; set; }
 
     /// <summary>
-    /// What should it do everyframe.
+    /// What should it do every frame.
     /// </summary>
     Action UpdateEveryFrame { get; set; }
-    internal byte WarningTime { get; set; }
-    internal float AlphaRatio { get; set; }
 
     /// <summary>
-    /// The time that it will disapear.
+    /// The time that it will disappear.
     /// </summary>
     public DateTime DeadTime { get; set; }
-    internal EaseFuncType DisappearType { get; set; }
-    internal float TimeToDisappear { get; set; }
-    internal float WarningRatio { get; set; }
-    internal EaseFuncType WarningType { get; set; }
 }

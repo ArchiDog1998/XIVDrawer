@@ -17,9 +17,7 @@ public class XIVPainter
 {
     readonly string _name;
 
-    //readonly object _drawing3DLock = new object();
     List<IDrawing> _drawingElements = new List<IDrawing>();
-
     readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
 
     #region Config
@@ -35,7 +33,7 @@ public class XIVPainter
     public bool RemovePtsNotOnGround { get; set; } = false;
 
     /// <summary>
-    /// The hight of drawing in the world for making the polyline on the ground.
+    /// The height of drawing in the world for making the polyline on the ground.
     /// </summary>
     public float DrawingHeight { get; set; } = 3;
 
@@ -349,18 +347,6 @@ public class XIVPainter
     /// <param name="drawings">drawings</param>
     public void AddDrawings(params IDrawing[] drawings)
     {
-        foreach (var drawing in drawings)
-        {
-            if(drawing is IDrawing3D draw)
-            {
-                draw.DisappearType = DisappearType;
-                draw.TimeToDisappear = TimeToDisappear;
-                draw.WarningRatio = WarningRatio;
-                draw.WarningType = WarningType;
-                draw.WarningTime = WarningTime;
-            }
-        }
-
         _drawingElements.AddRange(drawings);
     }
 

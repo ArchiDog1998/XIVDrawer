@@ -31,12 +31,7 @@ public class Drawing3DPoly : Drawing3D
         base.UpdateOnFrame(painter);
         foreach (var item in SubItems)
         {
-            item.WarningRatio = WarningRatio;
-            item.WarningTime = WarningTime;
-            item.WarningType = WarningType;
             item.DeadTime = DeadTime;
-            item.TimeToDisappear = TimeToDisappear;
-            item.DisappearType = DisappearType;
             item.UpdateOnFrame(painter);
         }
     }
