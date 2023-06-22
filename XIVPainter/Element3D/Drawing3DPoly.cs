@@ -19,7 +19,7 @@ public class Drawing3DPoly : Drawing3D
     /// <returns></returns>
     public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
-        return SubItems.SelectMany(i => i.To2D(owner));
+        return SubItems?.SelectMany(i => i.To2D(owner)) ?? Array.Empty<IDrawing2D>();
     }
 
     /// <summary>

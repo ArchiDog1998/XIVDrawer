@@ -71,6 +71,24 @@ public class DrawingHighlightHotbar : IDrawing
         return array;
     }
 
+    static unsafe bool IsVisible(AtkUnitBase unit)
+    {
+        if (!unit.IsVisible) return false;
+
+        return IsVisible(unit.RootNode);
+    }
+
+    static unsafe bool IsVisible(AtkResNode* node)
+    {
+        while (node != null)
+        {
+            if (!node->IsVisible) return false;
+            node = node->ParentNode;
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Convert this to the 2d elements.
     /// </summary>
@@ -85,11 +103,10 @@ public class DrawingHighlightHotbar : IDrawing
         var hotBarIndex = 0;
         foreach (var intPtr in GetAddons<AddonActionBar>()
             .Union(GetAddons<AddonActionBarX>())
-            .Union(GetAddons<AddonActionCross>())
-            .Union(GetAddons<AddonActionDoubleCrossBase>()))
+            .Union(GetAddons<AddonActionCross>()))
         {
             var actionBar = (AddonActionBarBase*)intPtr;
-            if (actionBar != null && actionBar->AtkUnitBase.IsVisible)
+            if (actionBar != null && IsVisible(actionBar->AtkUnitBase))
             {
                 var s = actionBar->AtkUnitBase.Scale;
                 var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBar[hotBarIndex];
@@ -98,22 +115,19 @@ public class DrawingHighlightHotbar : IDrawing
                 foreach (var slot in actionBar->Slot)
                 {
                     var iconAddon = slot.Icon;
-                    if ((IntPtr)iconAddon != IntPtr.Zero && iconAddon->AtkResNode.IsVisible)
+                    if ((IntPtr)iconAddon != IntPtr.Zero && IsVisible(&iconAddon->AtkResNode))
                     {
                         AtkResNode node = default;
                         HotBarSlot* bar;
 
                         if (hotBarIndex > 9)
                         {
-                            if (slot.Icon->AtkResNode.ParentNode->ParentNode->IsVisible)
-                            {
-                                var manager = slot.Icon->AtkResNode.ParentNode->GetAsAtkComponentNode()->Component->UldManager.NodeList[2]->GetAsAtkComponentNode()->Component->UldManager;
+                            var manager = slot.Icon->AtkResNode.ParentNode->GetAsAtkComponentNode()->Component->UldManager.NodeList[2]->GetAsAtkComponentNode()->Component->UldManager;
 
-                                for (var i = 0; i < manager.NodeListCount; i++)
-                                {
-                                    node = *manager.NodeList[i];
-                                    if (node.Width == 72) break;
-                                }
+                            for (var i = 0; i < manager.NodeListCount; i++)
+                            {
+                                node = *manager.NodeList[i];
+                                if (node.Width == 72) break;
                             }
 
                             bar = null;
