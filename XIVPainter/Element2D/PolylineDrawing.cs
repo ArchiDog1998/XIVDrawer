@@ -1,11 +1,20 @@
 ﻿namespace XIVPainter.Element2D;
 
-internal class PolylineDrawing : IDrawing2D
+/// <summary>
+/// Polyline drawing.
+/// </summary>
+public class PolylineDrawing : IDrawing2D
 {
     Vector2[] _pts;
     uint _color;
     internal float _thickness;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="pts"></param>
+    /// <param name="color"></param>
+    /// <param name="thickness"></param>
     public PolylineDrawing(Vector2[] pts, uint color, float thickness)
     {
         _pts = pts;
@@ -13,6 +22,9 @@ internal class PolylineDrawing : IDrawing2D
         _thickness = thickness;
     }
 
+    /// <summary>
+    /// Draw on the <seealso cref="ImGui"/>
+    /// </summary>
     public void Draw()
     {
         if (_pts == null || _pts.Length < 2) return;
