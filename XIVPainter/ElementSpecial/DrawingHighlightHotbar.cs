@@ -45,6 +45,18 @@ public class DrawingHighlightHotbar : IDrawing
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="color">Color</param>
+    /// <param name="ids">action ids</param>
+    public DrawingHighlightHotbar(Vector4 color, params uint[] ids)
+        : this()
+    {
+        Color = color;
+        ActionIds = new HashSet<uint>(ids);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public DrawingHighlightHotbar()
     {
         _tex ??= Service.Data.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
