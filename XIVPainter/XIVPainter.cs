@@ -183,15 +183,16 @@ public class XIVPainter
     private void Update(Framework framework)
     {
         if (!Enable || Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
+
+        if (_started) return;
+        _started = true;
+
         Task.Run(UpdateData);
     }
 
     bool _started = false;
     private async void UpdateData()
     {
-        if (_started) return;
-        _started = true;
-
         try
         {
             IDrawing2D[] elements = Array.Empty<IDrawing2D>();
