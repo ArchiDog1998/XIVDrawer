@@ -93,24 +93,4 @@ public class Drawing3DAnnulus : Drawing3DPolyline
         BorderPoints = boarder;
         FillPoints = fill;
     }
-
-    //SLOW!
-    private static IEnumerable<IEnumerable<Vector3>> GetAnnulusFill(Vector3[] ptsA, Vector3[] ptsB)
-    {
-        if (ptsA.Length != ptsB.Length) return Array.Empty<Vector3[]>();
-        var length = ptsA.Length;
-
-        var result = new Vector3[ptsA.Length][];
-
-        for (int i = 0; i < length; i++)
-        {
-            var p1 = ptsA[i];
-            var p2 = ptsB[i];
-            var p3 = ptsB[(i + 1) % length];
-            var p4 = ptsA[(i + 1) % length];
-
-            result[i] = new Vector3[] { p1, p2, p3, p4 };
-        }
-        return result;
-    }
 }
