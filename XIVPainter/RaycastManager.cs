@@ -1,7 +1,5 @@
 ﻿using Dalamud.Game;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using System.Drawing;
 
 namespace XIVPainter;
 
@@ -39,11 +37,14 @@ internal static class RaycastManager
 
     static readonly Vector2Comparer _comparer = new Vector2Comparer();
 
-    readonly static SortedList<Vector2, float> _rayRelay = new (compacity + 2000, _comparer);
+    readonly static SortedList<Vector2, (DateTime addTime, float value)> _rayRelay = new (compacity + 2000, _comparer);
 
-    static readonly object _calculatingPtsLock = new object();
     static readonly Queue<Vector3> _calculatingPts = new ();
     static bool _canAdd = false;
+
+    static readonly object _addingPtsLock = new object();
+    static readonly Queue<Vector3> _addingPts = new Queue<Vector3>();
+
 
     public static void Enable()
     {
@@ -63,12 +64,20 @@ internal static class RaycastManager
     static bool _isUpdateRun = false;
     private static void Update(Framework framework)
     {
+        _canAdd = !_addingPts.Any();
+
         if (_isUpdateRun) return;
         _isUpdateRun = true;
+
         Task.Run(() =>
         {
-            _canAdd = !_calculatingPts.Any();
+            //Add
+            while(TryGetCalPt(out var pt))
+            {
+                AddCalculatingPts(pt, 5, 1);
+            }
 
+            //Remove
             if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
             {
                 var loc = Service.ClientState.LocalPlayer.Position;
@@ -80,23 +89,39 @@ internal static class RaycastManager
                 }
             }
 
+            //Calculation
+            while (_calculatingPts.TryDequeue(out var vector))
+            {
+                var key = GetKey(vector);
+                var value = Raycast(vector);
+
+                _rayRelay[key] = (DateTime.Now, value);
+            }
+
             _isUpdateRun = false;
         });
     }
 
+    static bool TryGetCalPt(out Vector3 pt)
+    {
+        lock (_addingPtsLock)
+        {
+            return _addingPts.TryDequeue(out pt);
+        }
+    }
+
+    static readonly TimeSpan reCalTime = TimeSpan.FromSeconds(10);
+    static readonly TimeSpan reCalTimePt = TimeSpan.FromSeconds(1);
     private static void AddCalculatingPts(Vector3 loc, float distance, int maxCount)
     {
         var pt = default(Vector2);
 
         int count = 0;
 
-        if (!_rayRelay.ContainsKey(pt + GetKey(loc)))
+        if (!_rayRelay.TryGetValue(pt + GetKey(loc), out var pair) || DateTime.Now - pair.addTime > reCalTimePt)
         {
             count++;
-            lock (_calculatingPtsLock)
-            {
-                _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
-            }
+            _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
         }
         while (count < maxCount && Vector2.Distance(pt, default) < distance)
         {
@@ -108,24 +133,16 @@ internal static class RaycastManager
             else if (xAy <= 0 && xSy < 0) pt += new Vector2(0, -0.1f);
             else pt += new Vector2(0.1f, 0);
 
-            if (!_rayRelay.ContainsKey(pt + GetKey(loc)))
+            if (!_rayRelay.TryGetValue(pt + GetKey(loc), out pair) || DateTime.Now -  pair.addTime > reCalTime)
             {
                 count++;
-                lock (_calculatingPtsLock)
-                {
-                    _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
-                }
+                _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
             }
         }
         if (count == 0)
         {
-            lock (_calculatingPtsLock)
-            {
-                _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
-            }
+            _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
         }
-
-        RunRaycast();
     }
 
     public static bool Raycast(Vector3 point, float height, out Vector3 territoryPt)
@@ -136,10 +153,10 @@ internal static class RaycastManager
         //Start RayCasting!
         if (_canAdd)
         {
-            Task.Run(() =>
+            lock (_addingPtsLock)
             {
-                AddCalculatingPts(point, 5, 1);
-            });
+                _addingPts.Enqueue(point);
+            }
         }
 
         if (!GetHeight(xy, out var vector)) vector = territoryPt.Y;
@@ -170,7 +187,7 @@ internal static class RaycastManager
             index %= _rayRelay.Count;
 
             if (Vector2.Distance(keys[index], xy) > 3) return false;
-            height = _rayRelay.Values[index];
+            height = _rayRelay.Values[index].value;
             return true;
         }
         return false;
@@ -178,33 +195,6 @@ internal static class RaycastManager
 
     private static Vector2 GetKey(Vector3 point) 
         => new Vector2(float.Round(point.X, 1), float.Round(point.Z, 1));
-
-    static bool _isRaycastRun = false;
-    static void RunRaycast()
-    {
-        if(_isRaycastRun) return;
-        _isRaycastRun = true;
-
-        Task.Run(() =>
-        {
-            while (TryGetCalPt(out var vector))
-            {
-                var key = GetKey(vector);
-                var value = Raycast(vector);
-
-                _rayRelay[key] = value;
-            }
-            _isRaycastRun = false;
-        });
-    }
-
-    static bool TryGetCalPt(out Vector3 pt)
-    {
-        lock (_calculatingPtsLock)
-        {
-            return _calculatingPts.TryDequeue(out pt);
-        }
-    }
 
     static unsafe float Raycast(Vector3 point)
     {
