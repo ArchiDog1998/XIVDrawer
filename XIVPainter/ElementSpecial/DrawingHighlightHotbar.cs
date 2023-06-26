@@ -59,7 +59,7 @@ public class DrawingHighlightHotbar : IDrawing
     /// </summary>
     public DrawingHighlightHotbar()
     {
-        _tex ??= Service.Data.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
+        _tex ??= Service.Data?.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
         SetTexture();
     }
 
