@@ -65,6 +65,7 @@ public class DrawingHighlightHotbar : IDrawing
 
     void SetTexture()
     {
+        if (_tex == null) return;
         _texture = Service.PluginInterface.UiBuilder.LoadImageRaw(GetImageData(_tex), _tex!.Header.Width, _tex!.Header.Height, 4);
     }
 
