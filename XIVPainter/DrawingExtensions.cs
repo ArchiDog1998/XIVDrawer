@@ -49,15 +49,24 @@ public static class DrawingExtensions
     /// <param name="pts">polygon</param>
     /// <returns>is Inside</returns>
     public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
+        => IsPointInside(new Vector2(pt.X, pt.Z), pts.Select(lt => lt.Select(p => new Vector2(p.X, p.Z))));
+
+    /// <summary>
+    /// Is the point inside the polygon
+    /// </summary>
+    /// <param name="pt">testing point</param>
+    /// <param name="pts">polygon</param>
+    /// <returns>is Inside</returns>
+    public static bool IsPointInside(Vector2 pt, IEnumerable<IEnumerable<Vector2>> pts)
     {
         var count = 0;
 
-        foreach (var partPts in pts) 
+        foreach (var partPts in pts)
         {
             SegmentAction(partPts, (a, b) =>
             {
-                if ((pt.Z < a.Z) != (pt.Z < b.Z) &&
-                    pt.X < a.X + (pt.Z - a.Z) / (b.Z - a.Z) * (b.X - a.X))
+                if ((pt.Y < a.Y) != (pt.Y < b.Y) &&
+                    pt.X < a.X + (pt.Y - a.Y) / (b.Y - a.Y) * (b.X - a.X))
                     count++;
             });
         }

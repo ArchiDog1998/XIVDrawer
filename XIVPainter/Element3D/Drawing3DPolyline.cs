@@ -26,6 +26,11 @@ public class Drawing3DPolyline : Drawing3D
     public bool IsFill { get; set; } = true;
 
     /// <summary>
+    /// Whether the mouse is within the drawing range.
+    /// </summary>
+    public bool IsMouseInside { get; private set; } = false;
+
+    /// <summary>
     /// The type of it, you can set it for moving suggestion.
     /// </summary>
     public PolylineType PolylineType { get; set; } = PolylineType.None;
@@ -86,11 +91,14 @@ public class Drawing3DPolyline : Drawing3D
         IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
         var hasFill = FillPoints != null && FillPoints.Any();
         var hasBorder = Thickness != 0;
+
+        var screenPts = new List<Vector2[]>(BorderPoints.Count());
         foreach (var points in BorderPoints)
         {
             var pts = owner.GetPtsOnScreen(points, Thickness > 0);
+            screenPts.Add(pts);
 
-            if(hasBorder)
+            if (hasBorder)
             {
                 if (IsFill)
                 {
@@ -116,6 +124,8 @@ public class Drawing3DPolyline : Drawing3D
 
             if(!hasFill && IsFill) result = result.Union(DrawingExtensions.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
         }
+
+        IsMouseInside = DrawingExtensions.IsPointInside(ImGui.GetMousePos(), screenPts);
 
         if (hasFill && IsFill)
         {
