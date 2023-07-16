@@ -16,31 +16,20 @@ namespace XIVPainter.ElementSpecial;
 /// </summary>
 public class DrawingHighlightHotbar : IDrawing
 {
-    static TexFile _tex = null;
     static readonly Vector2 _uv1 = new Vector2(96 * 5 / 852f, 0), 
         _uv2 = new Vector2((96 * 5 + 144) / 852f, 0.5f);
 
-    TextureWrap _texture = null;
+    static TextureWrap _texture = null;
 
     /// <summary>
     /// The action ids that 
     /// </summary>
     public HashSet<uint> ActionIds { get; } = new HashSet<uint>();
 
-    Vector4 _color = new Vector4(0.8f, 0.5f, 0.3f, 1);
-
     /// <summary>
     /// The color of highlight.
     /// </summary>
-    public Vector4 Color 
-    {
-        get => _color;
-        set
-        {
-            _color = value;
-            SetTexture();
-        }
-    }
+    public Vector4 Color { get; set; } = new Vector4(0.8f, 0.5f, 0.3f, 1);
 
     /// <summary>
     /// 
@@ -59,29 +48,19 @@ public class DrawingHighlightHotbar : IDrawing
     /// </summary>
     public DrawingHighlightHotbar()
     {
-        _tex ??= Service.Data?.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
-        SetTexture();
-    }
-
-    void SetTexture()
-    {
-        if (_tex == null) return;
-        _texture = Service.PluginInterface.UiBuilder.LoadImageRaw(GetImageData(_tex), _tex!.Header.Width, _tex!.Header.Height, 4);
-    }
-
-    byte[] GetImageData(TexFile texFile)
-    {
-        byte[] imageData = texFile.ImageData;
+        if (_texture != null) return;
+        var tex = Service.Data?.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
+        if (tex == null) return;
+        byte[] imageData = tex.ImageData;
         byte[] array = new byte[imageData.Length];
-        for (int i = 0; i < array.Length; i += 4)
+
+        for (int i = 0; i < imageData.Length; i += 4)
         {
-            array[i] = (byte)(byte.MaxValue * Color.X);
-            array[i + 1] = (byte)(byte.MaxValue * Color.Y);
-            array[i + 2] = (byte)(byte.MaxValue * Color.Z);
-            array[i + 3] = (byte) (imageData[i + 3] * Color.W);
+            array[i] = array[i + 1] = array[i + 2] = byte.MaxValue;
+            array[i + 3] = imageData[i + 3];
         }
 
-        return array;
+        _texture = Service.PluginInterface.UiBuilder.LoadImageRaw(array, tex!.Header.Width, tex!.Header.Height, 4);
     }
 
     static unsafe bool IsVisible(AtkUnitBase unit)
@@ -158,7 +137,7 @@ public class DrawingHighlightHotbar : IDrawing
                             var pt1 = new Vector2(node.ScreenX, node.ScreenY);
                             var pt2 = pt1 + new Vector2(node.Width * s, node.Height * s);
 
-                            result.Add(new ImageDrawing(_texture.ImGuiHandle, pt1, pt2, _uv1, _uv2));
+                            result.Add(new ImageDrawing(_texture.ImGuiHandle, pt1, pt2, _uv1, _uv2, ImGui.ColorConvertFloat4ToU32(Color)));
                         }
                     }
 
