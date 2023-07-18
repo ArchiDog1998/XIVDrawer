@@ -1,4 +1,5 @@
-﻿using ImGuiScene;
+﻿using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
+using ImGuiScene;
 using XIVPainter.Element2D;
 
 namespace XIVPainter.Element3D;
@@ -27,6 +28,11 @@ public class Drawing3DImage : Drawing3D
     /// Drawing Height
     /// </summary>
     public float Height { get; set; }
+
+    /// <summary>
+    /// The Image must be in range.
+    /// </summary>
+    public bool MustInViewRange { get; set; }
 
     /// <summary>
     /// If the <see cref="Position"/> can't be seen, it'll not be shown.
@@ -87,6 +93,41 @@ public class Drawing3DImage : Drawing3D
         var pt = pts[0];
 
         var half = new Vector2(Width / 2, Height / 2);
+
+        if (MustInViewRange) unsafe
+        {
+            var windowPos = ImGuiHelpers.MainViewport.Pos;
+
+            var device = Device.Instance();
+            float width = device->Width;
+            float height = device->Height;
+
+            pt = GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
+        }
+
         return new IDrawing2D[] { new ImageDrawing(ImageID, pt - half, pt + half) };
+    }
+    
+    private static Vector2 GetPtInRect(Vector2 pos, Vector2 size, Vector2 pt)
+    {
+        var rec = size / 2;
+        var center = pos + rec;
+        return GetPtInRect(rec, pt - center) + center;
+    }
+
+    private static Vector2 GetPtInRect(Vector2 rec, Vector2 pt) 
+    {
+        if (rec.X <= 0 || rec.Y <= 0) return pt;
+        return GetPtIn1Rect(pt / rec) * rec;
+    }
+
+    private static Vector2 GetPtIn1Rect(Vector2 pt)
+    {
+        if(pt.X is  >= -1 and <= 1 && pt.Y is >= -1 and <= 1) return pt;
+
+        var rate = Math.Max(Math.Abs(pt.X), Math.Abs(pt.Y));
+        if (rate == 0) return pt;
+
+        return new Vector2(pt.X / rate, pt.Y / rate);
     }
 }
