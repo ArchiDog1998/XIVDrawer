@@ -102,32 +102,9 @@ public class Drawing3DImage : Drawing3D
             float width = device->Width;
             float height = device->Height;
 
-            pt = GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
+            pt = XIVPainter.GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
         }
 
         return new IDrawing2D[] { new ImageDrawing(ImageID, pt - half, pt + half) };
-    }
-    
-    private static Vector2 GetPtInRect(Vector2 pos, Vector2 size, Vector2 pt)
-    {
-        var rec = size / 2;
-        var center = pos + rec;
-        return GetPtInRect(rec, pt - center) + center;
-    }
-
-    private static Vector2 GetPtInRect(Vector2 rec, Vector2 pt) 
-    {
-        if (rec.X <= 0 || rec.Y <= 0) return pt;
-        return GetPtIn1Rect(pt / rec) * rec;
-    }
-
-    private static Vector2 GetPtIn1Rect(Vector2 pt)
-    {
-        if(pt.X is  >= -1 and <= 1 && pt.Y is >= -1 and <= 1) return pt;
-
-        var rate = Math.Max(Math.Abs(pt.X), Math.Abs(pt.Y));
-        if (rate == 0) return pt;
-
-        return new Vector2(pt.X / rate, pt.Y / rate);
     }
 }

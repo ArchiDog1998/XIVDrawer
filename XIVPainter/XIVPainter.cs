@@ -4,6 +4,7 @@ using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using System;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
 using XIVPainter.ElementSpecial;
@@ -376,13 +377,20 @@ public class XIVPainter
     #endregion
 
     #region Trasform
-    internal Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed)
+    /// <summary>
+    /// Make the world point project into the screen.
+    /// </summary>
+    /// <param name="pts"></param>
+    /// <param name="isClosed"></param>
+    /// <param name="inScreen"></param>
+    /// <returns></returns>
+    public Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed, bool inScreen = false)
     {
         var cameraPts = ProjectPtsOnGround(DivideCurve(pts, SampleLength, isClosed), DrawingHeight)
             .Select(WorldToCamera).ToArray();
         var changedPts = ChangePtsBehindCamera(cameraPts);
 
-        return changedPts.Select(CameraToScreen).ToArray();
+        return changedPts.Select(p => CameraToScreen(p, inScreen)).ToArray();
     }
 
     IEnumerable<Vector3> DivideCurve(IEnumerable<Vector3> worldPts, float length, bool isClosed)
@@ -480,7 +488,7 @@ public class XIVPainter
         return Vector3.Transform(worldPos, camera->ViewMatrix * camera->RenderCamera->ProjectionMatrix);
     }
 
-    unsafe Vector2 CameraToScreen(Vector3 cameraPos)
+    unsafe Vector2 CameraToScreen(Vector3 cameraPos, bool inScreen)
     {
         var screenPos = new Vector2(cameraPos.X / MathF.Abs(cameraPos.Z), cameraPos.Y / MathF.Abs(cameraPos.Z));
         var windowPos = ImGuiHelpers.MainViewport.Pos;
@@ -492,7 +500,41 @@ public class XIVPainter
         screenPos.X = (0.5f * width * (screenPos.X + 1f)) + windowPos.X;
         screenPos.Y = (0.5f * height * (1f - screenPos.Y)) + windowPos.Y;
 
+        if (inScreen)
+        {
+            screenPos = GetPtInRect(windowPos, new Vector2(width, height), screenPos);
+        }
         return screenPos;
+    }
+
+    /// <summary>
+    /// Make the <paramref name="pt"/> into the Rectange.
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="size"></param>
+    /// <param name="pt"></param>
+    /// <returns></returns>
+    public static Vector2 GetPtInRect(Vector2 pos, Vector2 size, Vector2 pt)
+    {
+        var rec = size / 2;
+        var center = pos + rec;
+        return GetPtInRect(rec, pt - center) + center;
+    }
+
+    private static Vector2 GetPtInRect(Vector2 rec, Vector2 pt)
+    {
+        if (rec.X <= 0 || rec.Y <= 0) return pt;
+        return GetPtIn1Rect(pt / rec) * rec;
+    }
+
+    private static Vector2 GetPtIn1Rect(Vector2 pt)
+    {
+        if (pt.X is >= -1 and <= 1 && pt.Y is >= -1 and <= 1) return pt;
+
+        var rate = Math.Max(Math.Abs(pt.X), Math.Abs(pt.Y));
+        if (rate == 0) return pt;
+
+        return new Vector2(pt.X / rate, pt.Y / rate);
     }
     #endregion
 
