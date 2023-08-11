@@ -1,6 +1,7 @@
 ﻿using Dalamud.Data;
 using Dalamud.Game;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -10,6 +11,8 @@ namespace XIVPainter;
 internal class Service 
 {
     [PluginService] internal static DataManager Data { get; private set; }
+
+    [PluginService] internal static Condition Condition { get; private set; }
 
     [PluginService] internal static DalamudPluginInterface PluginInterface { get; private set; }
 

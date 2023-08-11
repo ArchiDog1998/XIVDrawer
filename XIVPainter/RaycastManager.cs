@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game;
+using Dalamud.Game.ClientState.Conditions;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
 namespace XIVPainter;
@@ -90,7 +91,9 @@ internal static class RaycastManager
             }
 
             //Calculation
-            while (_calculatingPts.TryDequeue(out var vector))
+            while (!Service.Condition[ConditionFlag.BetweenAreas] 
+                && !Service.Condition[ConditionFlag.BetweenAreas51]
+                && _calculatingPts.TryDequeue(out var vector))
             {
                 var key = GetKey(vector);
                 var value = Raycast(vector);
