@@ -198,7 +198,7 @@ internal static class RaycastManager
 
     static unsafe float Raycast(Vector3 point)
     {
-        int* unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
+        int* unknown = stackalloc int[] { 0x4000, 0x4000 };
 
         RaycastHit hit = default;
 
