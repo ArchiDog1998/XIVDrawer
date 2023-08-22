@@ -42,7 +42,7 @@ public class Drawing3DText : Drawing3D
     {
         if(HideIfInvisible && !Position.CanSee() || string.IsNullOrEmpty(Text)) return Array.Empty<IDrawing2D>();
 
-        var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false);
+        var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false, DrawWithHeight);
         if(pts.Length == 0) return Array.Empty<IDrawing2D>();
         var pt = pts[0];
 

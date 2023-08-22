@@ -33,6 +33,11 @@ public abstract class Drawing3D : IDrawing3D
     protected float AnimationRatio { get; set; } = 0;
 
     /// <summary>
+    /// Draw this element with height.
+    /// </summary>
+    public bool DrawWithHeight { get; set; } = true;
+
+    /// <summary>
     /// Convert this to the 2d elements.
     /// </summary>
     /// <param name="owner"></param>

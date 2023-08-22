@@ -383,10 +383,11 @@ public class XIVPainter
     /// <param name="pts"></param>
     /// <param name="isClosed"></param>
     /// <param name="inScreen"></param>
+    /// <param name="withHeight">With draw height.</param>
     /// <returns></returns>
-    public Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed, bool inScreen = false)
+    public Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed, bool inScreen = false, bool withHeight = true)
     {
-        var cameraPts = ProjectPtsOnGround(DivideCurve(pts, SampleLength, isClosed), DrawingHeight)
+        var cameraPts = ProjectPtsOnGround(DivideCurve(pts, SampleLength, isClosed), withHeight ? DrawingHeight : 0)
             .Select(WorldToCamera).ToArray();
         var changedPts = ChangePtsBehindCamera(cameraPts);
 

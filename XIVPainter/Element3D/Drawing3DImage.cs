@@ -88,7 +88,7 @@ public class Drawing3DImage : Drawing3D
     {
         if (HideIfInvisiable && !Position.CanSee() || ImageID == 0 || Height == 0 || Width == 0) return Array.Empty<IDrawing2D>();
 
-        var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false);
+        var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false, DrawWithHeight);
         if (pts.Length == 0) return Array.Empty<IDrawing2D>();
         var pt = pts[0];
 
