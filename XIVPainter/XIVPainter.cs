@@ -381,11 +381,11 @@ public class XIVPainter
     /// Make the world point project into the screen.
     /// </summary>
     /// <param name="pts"></param>
-    /// <param name="isClosed"></param>
-    /// <param name="inScreen"></param>
+    /// <param name="isClosed">Is pts closed</param>
+    /// <param name="inScreen">Must be draw in the screen.</param>
     /// <param name="withHeight">With draw height.</param>
     /// <returns></returns>
-    public Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed, bool inScreen = false, bool withHeight = true)
+    public Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed, bool inScreen, bool withHeight)
     {
         var cameraPts = ProjectPtsOnGround(DivideCurve(pts, SampleLength, isClosed), withHeight ? DrawingHeight : 0)
             .Select(WorldToCamera).ToArray();

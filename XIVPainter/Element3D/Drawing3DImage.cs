@@ -37,13 +37,13 @@ public class Drawing3DImage : Drawing3D
     /// <summary>
     /// If the <see cref="Position"/> can't be seen, it'll not be shown.
     /// </summary>
-    public bool HideIfInvisiable { get; set; }
+    public bool HideIfInvisible { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="wrap">texture</param>
-    /// <param name="position">potsition</param>
+    /// <param name="position">position</param>
     /// <param name="size">size ratio</param>
     public Drawing3DImage(TextureWrap wrap, Vector3 position, float size = 1)
        : this(wrap?.ImGuiHandle ?? IntPtr.Zero, position,
@@ -86,9 +86,9 @@ public class Drawing3DImage : Drawing3D
     /// <returns></returns>
     public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
-        if (HideIfInvisiable && !Position.CanSee() || ImageID == 0 || Height == 0 || Width == 0) return Array.Empty<IDrawing2D>();
+        if (HideIfInvisible && !Position.CanSee() || ImageID == 0 || Height == 0 || Width == 0) return Array.Empty<IDrawing2D>();
 
-        var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false, DrawWithHeight);
+        var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false, false, DrawWithHeight);
         if (pts.Length == 0) return Array.Empty<IDrawing2D>();
         var pt = pts[0];
 
