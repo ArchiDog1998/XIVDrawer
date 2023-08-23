@@ -51,15 +51,17 @@ internal static class RaycastManager
     {
         if(Service.Framework != null)
         {
+            Service.Framework.Update -= Update;
             Service.Framework.Update += Update;
         }
     }
 
     public static void Dispose()
     {
-
         if (Service.Framework != null)
+        {
             Service.Framework.Update -= Update;
+        }
     }
 
     static bool _isUpdateRun = false;

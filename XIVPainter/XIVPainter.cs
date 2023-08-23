@@ -14,7 +14,7 @@ namespace XIVPainter;
 /// <summary>
 /// The painter for FFXIV in Dalamud.
 /// </summary>
-public class XIVPainter
+public class XIVPainter : IDisposable
 {
     readonly string _name;
 
