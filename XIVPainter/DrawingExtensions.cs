@@ -27,7 +27,7 @@ public static class DrawingExtensions
     /// </summary>
     /// <param name="point">testing point in world.</param>
     /// <returns>can be seen.</returns>
-    public unsafe static bool CanSee(this Vector3 point)
+    public unsafe static bool CanSee(in this Vector3 point)
     {
         var camera = (Vector3)CameraManager.Instance()->CurrentCamera->Object.Position;
 
@@ -48,7 +48,7 @@ public static class DrawingExtensions
     /// <param name="pt">testing point</param>
     /// <param name="pts">polygon</param>
     /// <returns>is Inside</returns>
-    public static bool IsPointInside(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
+    public static bool IsPointInside(in Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
         => IsPointInside(new Vector2(pt.X, pt.Z), pts.Select(lt => lt.Select(p => new Vector2(p.X, p.Z))));
 
     /// <summary>
@@ -101,7 +101,7 @@ public static class DrawingExtensions
         return result;
     }
 
-    static float PointSegment(Vector3 p, Vector3 a, Vector3 b, out Vector3 cp)
+    static float PointSegment(in Vector3 p, in Vector3 a, in Vector3 b, out Vector3 cp)
     {
         Vector3 ab = b - a;
         Vector3 ap = p - a;
@@ -110,20 +110,12 @@ public static class DrawingExtensions
         float abLenSq = ab.LengthSquared();
         float d = proj / abLenSq;
 
-        switch(d)
+        cp = d switch
         {
-            case <= 0:
-                cp = a;
-                break;
-
-            case >= 1:
-                cp = b;
-                break;
-
-            default:
-                cp = a + ab * d;
-                break;
-        }
+            <= 0 => a,
+            >= 1 => b,
+            _ => a + ab * d,
+        };
         return Vector3.Distance(p, cp);
     }
 
@@ -133,7 +125,7 @@ public static class DrawingExtensions
     /// <param name="pts">polygon</param>
     /// <param name="offset">distance to offset</param>
     /// <returns>offseted polygon</returns>
-    public static IEnumerable<Vector3[]> OffSetPolyline(IEnumerable<Vector3[]> pts, float offset)
+    public static IEnumerable<Vector3[]> OffSetPolyline(in IEnumerable<Vector3[]> pts, float offset)
         => pts?.SelectMany(p => OffSetPolyline(p, offset));
 
     /// <summary>
@@ -142,7 +134,7 @@ public static class DrawingExtensions
     /// <param name="pts">polygon</param>
     /// <param name="offset">distance to offset</param>
     /// <returns>offseted polygon</returns>
-    public static IEnumerable<Vector3[]> OffSetPolyline(Vector3[] pts, float offset)
+    public static IEnumerable<Vector3[]> OffSetPolyline(in Vector3[] pts, float offset)
     {
         if (pts.Length < 3) return new Vector3[][] { pts };
 
@@ -173,7 +165,7 @@ public static class DrawingExtensions
     internal static IEnumerable<Vector3[]> PathsDToVec3(PathsD path, float height)
     => path?.Select(p => PathDToVec3(p, height));
 
-    internal static Vector3[] PathDToVec3(PathD path, float height)
+    internal static Vector3[] PathDToVec3(PathD path, in float height)
     {
         var result = new Vector3[path.Count];
         for (int i = 0; i < path.Count; i++)
@@ -184,7 +176,7 @@ public static class DrawingExtensions
         return result;
     }
 
-    internal static void SegmentAction<T>(IEnumerable<T> pts, Action<T, T> pairAction, bool closed = true)
+    internal static void SegmentAction<T>(IEnumerable<T> pts, Action<T, T> pairAction, in bool closed = true)
     {
         if (pairAction == null) return;
         if(pts == null || !pts.Any()) return;
@@ -211,7 +203,7 @@ public static class DrawingExtensions
     /// </summary>
     /// <param name="points">concave polygon</param>
     /// <returns>convex polygons</returns>
-    public static IEnumerable<Vector2[]> ConvexPoints(Vector2[] points)
+    public static IEnumerable<Vector2[]> ConvexPoints(in Vector2[] points)
     {
         if (points == null || points.Length < 3) 
             return new Vector2[][] { points };
@@ -238,7 +230,7 @@ public static class DrawingExtensions
         return result;
     }
 
-    static bool IsOrdered(Vector2[] points)
+    static bool IsOrdered(in Vector2[] points)
     {
         int index = 0;
         float leftBottom = float.MaxValue;
@@ -256,7 +248,7 @@ public static class DrawingExtensions
         return PointCross(points, index, out _, out _) <= 0.01f;
     }
 
-    private static float PointCross(Vector2[] pts, int index, out Vector2 vec1, out Vector2 vec2)
+    private static float PointCross(in Vector2[] pts, in int index, out Vector2 vec1, out Vector2 vec2)
     {
         var length = pts.Length;
         var prePt = pts[(index - 1 + length) % length];
@@ -311,7 +303,7 @@ public static class DrawingExtensions
     const double n1 = 7.5625;
     const double d1 = 2.75;
 
-    static Func<double, double> FindOutFuction(EaseFuncType outType) => outType switch 
+    static Func<double, double> FindOutFuction(in EaseFuncType outType) => outType switch 
     {
         EaseFuncType.Sine => x => Math.Sin(x * Math.PI / 2),
         EaseFuncType.Quad => x => 1 - ((1 - x) * (1 - x)),

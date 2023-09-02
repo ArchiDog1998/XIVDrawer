@@ -6,8 +6,8 @@ namespace XIVPainter;
 
 internal static class RaycastManager
 {
-    const int MaxDistance = 80;
-    const int compacity = MaxDistance * MaxDistance * 400;
+    const int MaxDistance = 80,
+              Compacity = MaxDistance * MaxDistance * 400;
     class Vector2Comparer : IComparer<Vector2>
     {
         public int Compare(Vector2 x, Vector2 y)
@@ -38,7 +38,7 @@ internal static class RaycastManager
 
     static readonly Vector2Comparer _comparer = new Vector2Comparer();
 
-    readonly static SortedList<Vector2, (DateTime addTime, float value)> _rayRelay = new (compacity + 2000, _comparer);
+    readonly static SortedList<Vector2, (DateTime addTime, float value)> _rayRelay = new (Compacity + 2000, _comparer);
 
     static readonly Queue<Vector3> _calculatingPts = new ();
     static bool _canAdd = false;
@@ -77,15 +77,15 @@ internal static class RaycastManager
             //Add
             while(TryGetCalPt(out var pt))
             {
-                AddCalculatingPts(pt, 5, 1);
+                AddCalculatingPts(in pt, 5, 1);
             }
 
             //Remove
             if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
             {
                 var loc = Service.ClientState.LocalPlayer.Position;
-                var pos = GetKey(loc);
-                while (_rayRelay.Count > compacity)
+                var pos = GetKey(in loc);
+                while (_rayRelay.Count > Compacity)
                 {
                     var removed = _rayRelay.MaxBy(p => Vector2.Distance(p.Key, pos));
                     _rayRelay.Remove(removed.Key);
@@ -97,8 +97,8 @@ internal static class RaycastManager
                 && !Service.Condition[ConditionFlag.BetweenAreas51]
                 && _calculatingPts.TryDequeue(out var vector))
             {
-                var key = GetKey(vector);
-                var value = Raycast(vector);
+                var key = GetKey(in vector);
+                var value = Raycast(in vector);
 
                 _rayRelay[key] = (DateTime.Now, value);
             }
@@ -115,9 +115,10 @@ internal static class RaycastManager
         }
     }
 
-    static readonly TimeSpan reCalTime = TimeSpan.FromSeconds(10);
-    static readonly TimeSpan reCalTimePt = TimeSpan.FromSeconds(1);
-    private static void AddCalculatingPts(Vector3 loc, float distance, int maxCount)
+    static readonly TimeSpan reCalTime = TimeSpan.FromSeconds(10),
+                             reCalTimePt = TimeSpan.FromSeconds(1);
+
+    private static void AddCalculatingPts(in Vector3 loc, in float distance, in int maxCount)
     {
         var pt = default(Vector2);
 
@@ -138,7 +139,7 @@ internal static class RaycastManager
             else if (xAy <= 0 && xSy < 0) pt += new Vector2(0, -0.1f);
             else pt += new Vector2(0.1f, 0);
 
-            if (!_rayRelay.TryGetValue(pt + GetKey(loc), out pair) || DateTime.Now -  pair.addTime > reCalTime)
+            if (!_rayRelay.TryGetValue(pt + GetKey(in loc), out pair) || DateTime.Now -  pair.addTime > reCalTime)
             {
                 count++;
                 _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
@@ -150,9 +151,9 @@ internal static class RaycastManager
         }
     }
 
-    public static bool Raycast(Vector3 point, float height, out Vector3 territoryPt)
+    public static bool Raycast(in Vector3 point, in float height, out Vector3 territoryPt)
     {
-        var xy = GetKey(point);
+        var xy = GetKey(in point);
         territoryPt = point;
 
         //Start RayCasting!
@@ -164,7 +165,7 @@ internal static class RaycastManager
             }
         }
 
-        if (!GetHeight(xy, out var vector)) vector = territoryPt.Y;
+        if (!GetHeight(in xy, out var vector)) vector = territoryPt.Y;
         if (float.IsNaN(vector))
         {
             return false;
@@ -179,7 +180,7 @@ internal static class RaycastManager
     }
 
     static FieldInfo _keyInfo;
-    private static bool GetHeight(Vector2 xy, out float height)
+    private static bool GetHeight(in Vector2 xy, out float height)
     {
         height = 0;
 
@@ -198,10 +199,10 @@ internal static class RaycastManager
         return false;
     }
 
-    private static Vector2 GetKey(Vector3 point) 
+    private static Vector2 GetKey(in Vector3 point) 
         => new Vector2(float.Round(point.X, 1), float.Round(point.Z, 1));
 
-    static unsafe float Raycast(Vector3 point)
+    static unsafe float Raycast(in Vector3 point)
     {
         int* unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
 

@@ -459,7 +459,7 @@ public class XIVPainter : IDisposable
         var result = new List<Vector3>(pts.Count());
         foreach (var pt in pts)
         {
-            if (RaycastManager.Raycast(pt, height, out var territoryPt))
+            if (RaycastManager.Raycast(in pt, in height, out var territoryPt))
             {
                 result.Add(territoryPt);
             }
