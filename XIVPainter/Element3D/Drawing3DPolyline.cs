@@ -122,7 +122,8 @@ public class Drawing3DPolyline : Drawing3D
                 }
             }
 
-            if(!hasFill && IsFill) result = result.Union(DrawingExtensions.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
+            if(!hasFill && IsFill) result = result.Concat(DrawingExtensions.ConvexPoints(pts)
+                .Select(p => new PolylineDrawing(p, fillColor, 0) as IDrawing2D));
         }
 
         IsMouseInside = DrawingExtensions.IsPointInside(ImGui.GetMousePos(), screenPts);
@@ -133,7 +134,8 @@ public class Drawing3DPolyline : Drawing3D
             {
                 var pts = owner.GetPtsOnScreen(points, true, false, DrawWithHeight);
 
-                result = result.Union(DrawingExtensions.ConvexPoints(pts).Select(p => new PolylineDrawing(p, fillColor, 0)));
+                result = result.Concat(DrawingExtensions.ConvexPoints(pts)
+                    .Select(p => new PolylineDrawing(p, fillColor, 0) as IDrawing2D));
             }
         }
 

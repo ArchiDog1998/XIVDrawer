@@ -1,24 +1,22 @@
-﻿using Dalamud.Data;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Gui;
-using Dalamud.IoC;
+﻿using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 namespace XIVPainter;
 
 internal class Service 
 {
-    [PluginService] internal static DataManager Data { get; private set; }
-
-    [PluginService] internal static Condition Condition { get; private set; }
-
     [PluginService] internal static DalamudPluginInterface PluginInterface { get; private set; }
 
-    [PluginService] internal static Framework Framework { get; private set; }
+    [PluginService] internal static IDataManager Data { get; private set; }
 
-    [PluginService] internal static ClientState ClientState { get; private set; }
+    [PluginService] internal static ICondition Condition { get; private set; }
 
-    [PluginService] internal static GameGui GameGui { get; private set; }
+    [PluginService] internal static IFramework Framework { get; private set; }
+
+    [PluginService] internal static IClientState ClientState { get; private set; }
+
+    [PluginService] internal static IGameGui GameGui { get; private set; }
+
+    [PluginService] internal static IPluginLog Log { get; private set; }
 }

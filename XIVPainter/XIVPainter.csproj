@@ -45,7 +45,6 @@
 
 		<Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
 		<Using Include="Dalamud.Interface" />
-		<Using Include="ImGuiNET" />
 		<Using Include="Newtonsoft.Json" />
 		<Using Include="System.Numerics" />
 		<Using Include="System.Reflection" />

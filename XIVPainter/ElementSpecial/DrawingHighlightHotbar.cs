@@ -1,10 +1,10 @@
-﻿using FFXIVClientStructs.Attributes;
+﻿using Dalamud.Interface.Internal;
+using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ImGuiScene;
 using Lumina.Data.Files;
 using XIVPainter.Element2D;
 
@@ -19,7 +19,7 @@ public class DrawingHighlightHotbar : IDrawing
     static readonly Vector2 _uv1 = new Vector2(96 * 5 / 852f, 0), 
         _uv2 = new Vector2((96 * 5 + 144) / 852f, 0.5f);
 
-    static TextureWrap _texture = null;
+    static IDalamudTextureWrap _texture = null;
 
     /// <summary>
     /// The action ids that 

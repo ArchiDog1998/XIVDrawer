@@ -3,11 +3,11 @@
 /// <summary>
 /// Text drawing.
 /// </summary>
-public class TextDrawing : IDrawing2D
+public readonly struct TextDrawing : IDrawing2D
 {
-    Vector2 _pt;
-    uint _color;
-    string _text;
+    readonly Vector2 _pt;
+    readonly uint _color;
+    readonly string _text;
 
     /// <summary>
     /// 

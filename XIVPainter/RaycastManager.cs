@@ -1,5 +1,5 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.Conditions;
+﻿using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
 namespace XIVPainter;
@@ -65,7 +65,7 @@ internal static class RaycastManager
     }
 
     static bool _isUpdateRun = false;
-    private static void Update(Framework framework)
+    private static void Update(IFramework framework)
     {
         _canAdd = !_addingPts.Any();
 

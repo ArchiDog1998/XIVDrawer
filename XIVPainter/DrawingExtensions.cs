@@ -13,7 +13,7 @@ public static class DrawingExtensions
     /// Normalize the <seealso cref="Vector2"/> safely.
     /// </summary>
     /// <param name="vec">the vector to normalize</param>
-    /// <returns>is successfull.</returns>
+    /// <returns>Is succeed.</returns>
     public static bool Normalize(ref this Vector2 vec)
     {
         var length = vec.Length();

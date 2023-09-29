@@ -1,4 +1,6 @@
-﻿namespace XIVPainter.Element3D;
+﻿using Dalamud.Interface.Internal;
+
+namespace XIVPainter.Element3D;
 
 /// <summary>
 /// The element that can show the location that the player should go.
@@ -47,7 +49,6 @@ public class Drawing3DHighlightLine: Drawing3DPoly
                 IsFill = false,
             },
         };
-
         From = from;
         To = to;
         Radius = radius;

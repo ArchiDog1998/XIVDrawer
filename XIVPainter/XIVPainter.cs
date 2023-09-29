@@ -1,10 +1,10 @@
 ﻿using Clipper2Lib;
-using Dalamud.Game;
-using Dalamud.Logging;
+using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using System;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
 using XIVPainter.ElementSpecial;
@@ -126,7 +126,7 @@ public class XIVPainter : IDisposable
             ImGuiHelpers.SetNextWindowPosRelativeMainViewport(Vector2.Zero);
             ImGui.SetNextWindowSize(ImGuiHelpers.MainViewport.Size);
 
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+            using var windowStyle = ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, Vector2.Zero);
             if (ImGui.Begin(_name, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus
             | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoDocking
             | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav
@@ -142,13 +142,13 @@ public class XIVPainter : IDisposable
                     {
                         foreach (var item in _drawingElements)
                         {
-                            result = result.Union(item.To2D(this));
+                            result = result.Concat(item.To2D(this));
                         }
                     }
 
                     foreach (var item in _outLineGo)
                     {
-                        result = result.Union(item.To2D(this));
+                        result = result.Concat(item.To2D(this));
                     }
 
                     foreach (var item in result.OrderBy(drawing =>
@@ -168,20 +168,18 @@ public class XIVPainter : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.Warning(ex, $"{_name} failed to draw on Screen.");
+                    Service.Log.Warning(ex, $"{_name} failed to draw on Screen.");
                 }
                 ImGui.End();
             }
-
-            ImGui.PopStyleVar();
         }
         catch (Exception ex)
         {
-            PluginLog.Warning(ex, $"{_name} failed to draw.");
+            Service.Log.Warning(ex, $"{_name} failed to draw.");
         }
     }
 
-    private void Update(Framework framework)
+    private void Update(IFramework framework)
     {
         if (!Enable || Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
 
@@ -312,7 +310,7 @@ public class XIVPainter : IDisposable
         }
         catch (Exception ex)
         {
-            PluginLog.Warning(ex, "Something wrong with drawing");
+            Service.Log.Warning(ex, "Something wrong with drawing");
         }
 
         _started = false;

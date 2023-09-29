@@ -3,11 +3,11 @@
 /// <summary>
 /// Drawing the image.
 /// </summary>
-public class ImageDrawing : IDrawing2D
+public readonly struct ImageDrawing : IDrawing2D
 {
-    nint _textureId;
-    Vector2 _pt1, _pt2, _uv1 = default, _uv2 = Vector2.One;
-    uint _col;
+    readonly nint _textureId;
+    readonly Vector2 _pt1, _pt2, _uv1 = default, _uv2 = Vector2.One;
+    readonly uint _col;
 
     /// <summary>
     /// 

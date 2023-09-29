@@ -1,4 +1,6 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
+﻿using Dalamud.Interface.Internal;
+using Dalamud.Interface.Utility;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using ImGuiScene;
 using XIVPainter.Element2D;
 
@@ -71,7 +73,7 @@ public class Drawing3DImage : Drawing3D
     /// </summary>
     /// <param name="wrap">texture</param>
     /// <param name="size">size ratio</param>
-    public void SetTexture(TextureWrap wrap, float size = 1)
+    public void SetTexture(IDalamudTextureWrap wrap, float size = 1)
     {
         ImageID = wrap?.ImGuiHandle ?? IntPtr.Zero;
         Width = wrap?.Width * size ?? 0;

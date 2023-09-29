@@ -3,13 +3,13 @@
 /// <summary>
 /// Text drawing with font.
 /// </summary>
-public class TextDrawingFont : IDrawing2D
+public readonly struct TextDrawingFont : IDrawing2D
 {
-    Vector2 _pt;
-    uint _color;
-    string _text;
-    ImFontPtr _font;
-    float _fontSize;
+    readonly Vector2 _pt;
+    readonly uint _color;
+    readonly string _text;
+    readonly ImFontPtr _font;
+    readonly float _fontSize;
 
     /// <summary>
     /// 

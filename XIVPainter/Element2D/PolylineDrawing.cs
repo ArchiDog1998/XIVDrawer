@@ -3,11 +3,11 @@
 /// <summary>
 /// Polyline drawing.
 /// </summary>
-public class PolylineDrawing : IDrawing2D
+public readonly struct PolylineDrawing : IDrawing2D
 {
-    Vector2[] _pts;
-    uint _color;
-    internal float _thickness;
+    readonly Vector2[] _pts;
+    readonly uint _color;
+    readonly internal float _thickness;
 
     /// <summary>
     /// 

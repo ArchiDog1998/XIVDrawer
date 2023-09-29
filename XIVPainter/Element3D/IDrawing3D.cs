@@ -1,5 +1,4 @@
-﻿using XIVPainter.Element2D;
-using XIVPainter.ElementSpecial;
+﻿using XIVPainter.ElementSpecial;
 
 namespace XIVPainter.Element3D;
 
