@@ -103,7 +103,7 @@ public class DrawingHighlightHotbar : IDrawing
             if (actionBar != null && IsVisible(actionBar->AtkUnitBase))
             {
                 var s = actionBar->AtkUnitBase.Scale;
-                var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBar[hotBarIndex];
+                var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBarsSpan[hotBarIndex];
 
                 var slotIndex = 0;
                 foreach (var slot in actionBar->Slot)
@@ -112,7 +112,7 @@ public class DrawingHighlightHotbar : IDrawing
                     if ((IntPtr)iconAddon != IntPtr.Zero && IsVisible(&iconAddon->AtkResNode))
                     {
                         AtkResNode node = default;
-                        HotBarSlot* bar;
+                        HotBarSlot? bar;
 
                         if (hotBarIndex > 9)
                         {
@@ -129,7 +129,7 @@ public class DrawingHighlightHotbar : IDrawing
                         else
                         {
                             node = *slot.Icon->AtkResNode.ParentNode->ParentNode;
-                            bar = hotBar->Slot[slotIndex];
+                            bar = hotBar.SlotsSpan[slotIndex];
                         }
 
                         if (IsActionSlotRight(slot, bar))
@@ -169,12 +169,12 @@ public class DrawingHighlightHotbar : IDrawing
             .Where(ptr => ptr != IntPtr.Zero);
     }
 
-    unsafe bool IsActionSlotRight(ActionBarSlot slot, HotBarSlot* hot)
+    unsafe bool IsActionSlotRight(ActionBarSlot slot, HotBarSlot? hot)
     {
-        if ((IntPtr)hot != IntPtr.Zero)
+        if (hot.HasValue)
         {
-            if (hot->IconTypeA != HotbarSlotType.CraftAction && hot->IconTypeA != HotbarSlotType.Action) return false;
-            if (hot->IconTypeB != HotbarSlotType.CraftAction && hot->IconTypeB != HotbarSlotType.Action) return false;
+            if (hot.Value.IconTypeA != HotbarSlotType.CraftAction && hot.Value.IconTypeA != HotbarSlotType.Action) return false;
+            if (hot.Value.IconTypeB != HotbarSlotType.CraftAction && hot.Value.IconTypeB != HotbarSlotType.Action) return false;
         }
 
         return ActionIds.Contains(ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId));
