@@ -1,6 +1,7 @@
 ﻿using Clipper2Lib;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
@@ -16,10 +17,12 @@ namespace XIVPainter;
 /// </summary>
 public class XIVPainter : IDisposable
 {
-    readonly string _name;
+    internal readonly string _name;
 
-    List<IDrawing> _drawingElements = new List<IDrawing>();
-    readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
+    internal readonly List<IDrawing> _drawingElements = new List<IDrawing>();
+    internal readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
+
+    private readonly WindowSystem windowSystem;
 
     #region Config
 
@@ -99,8 +102,10 @@ public class XIVPainter : IDisposable
     private XIVPainter(string name)
     {
         _name = name;
+        windowSystem = new WindowSystem(name);
+        windowSystem.AddWindow(new OverlayWindow(this));
 
-        Service.PluginInterface.UiBuilder.Draw += Draw;
+        Service.PluginInterface.UiBuilder.Draw += windowSystem.Draw;
         Service.Framework.Update += Update;
 
         RaycastManager.Enable();
@@ -111,7 +116,7 @@ public class XIVPainter : IDisposable
     /// </summary>
     public void Dispose()
     {
-        Service.PluginInterface.UiBuilder.Draw -= Draw;
+        Service.PluginInterface.UiBuilder.Draw -= windowSystem.Draw;
         Service.Framework.Update -= Update;
 
         RaycastManager.Dispose();
