@@ -19,8 +19,8 @@ public class XIVPainter : IDisposable
 {
     internal readonly string _name;
 
-    internal readonly List<IDrawing> _drawingElements = new List<IDrawing>();
-    internal readonly List<Drawing3DHighlightLine> _outLineGo =new List<Drawing3DHighlightLine>();
+    internal readonly List<IDrawing> _drawingElements = new ();
+    internal readonly List<Drawing3DHighlightLine> _outLineGo =new ();
 
     private readonly WindowSystem windowSystem;
 
@@ -107,7 +107,6 @@ public class XIVPainter : IDisposable
 
         Service.PluginInterface.UiBuilder.Draw += windowSystem.Draw;
         Service.Framework.Update += Update;
-
         RaycastManager.Enable();
     }
 
@@ -120,6 +119,7 @@ public class XIVPainter : IDisposable
         Service.Framework.Update -= Update;
 
         RaycastManager.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private void Draw()
@@ -257,8 +257,8 @@ public class XIVPainter : IDisposable
                 foreach (var pair in movingPoly.GroupBy(poly => poly.DeadTime).OrderBy(p => p.Key))
                 {
                     var c = pair.Count();
-                    List<Drawing3DPolyline> outPoly = new List<Drawing3DPolyline>(c),
-                                            inPoly = new List<Drawing3DPolyline>(c);
+                    List<Drawing3DPolyline> outPoly = new (c),
+                                            inPoly = new (c);
 
                     foreach (var p in pair)
                     {
@@ -397,7 +397,7 @@ public class XIVPainter : IDisposable
         return changedPts.Select(p => CameraToScreen(p, inScreen)).ToArray();
     }
 
-    IEnumerable<Vector3> DivideCurve(IEnumerable<Vector3> worldPts, float length, bool isClosed)
+    static IEnumerable<Vector3> DivideCurve(IEnumerable<Vector3> worldPts, float length, bool isClosed)
     {
         if(worldPts == null || worldPts.Count() < 2 || length <= 0.01f) return worldPts;
 
@@ -413,7 +413,7 @@ public class XIVPainter : IDisposable
         return pts;
     }
 
-    Vector3[] DashPoints(Vector3 previous, Vector3 next, float length)
+    static Vector3[] DashPoints(Vector3 previous, Vector3 next, float length)
     {
         var dir = next - previous;
         var count = Math.Max(1, (int)(dir.Length() / length));
@@ -425,7 +425,7 @@ public class XIVPainter : IDisposable
         return points;
     }
 
-    IEnumerable<Vector3> ChangePtsBehindCamera(Vector3[] cameraPts)
+    static IEnumerable<Vector3> ChangePtsBehindCamera(Vector3[] cameraPts)
     {
         var changedPts = new List<Vector3>(cameraPts.Length * 2);
 
@@ -443,7 +443,7 @@ public class XIVPainter : IDisposable
                 GetPointOnPlane(pt2, ref pt1);
             }
 
-            if (changedPts.Count > 0 && Vector3.Distance(pt1, changedPts[changedPts.Count - 1]) > 0.001f)
+            if (changedPts.Count > 0 && Vector3.Distance(pt1, changedPts[^1]) > 0.001f)
             {
                 changedPts.Add(pt1);
             }
@@ -475,7 +475,7 @@ public class XIVPainter : IDisposable
     }
 
     const float PLANE_Z = 0.001f;
-    void GetPointOnPlane(Vector3 front, ref Vector3 back)
+    static void GetPointOnPlane(Vector3 front, ref Vector3 back)
     {
         if (front.Z <= 0) return;
         if (back.Z > 0) return;
@@ -548,7 +548,7 @@ public class XIVPainter : IDisposable
         return SectorPlots(center, radius, rotation, round, circleSegment);
     }
 
-    internal Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round, int circleSegment)
+    internal static Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round, int circleSegment)
     {
         if (radius <= 0) return Array.Empty<Vector3>();
         circleSegment = Math.Max(circleSegment, 16);

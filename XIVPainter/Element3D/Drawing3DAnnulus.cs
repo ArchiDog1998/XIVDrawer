@@ -69,8 +69,8 @@ public class Drawing3DAnnulus : Drawing3DPolyline
             var circleSegment = (int)(MathF.Tau * MathF.Max(Radius1, Radius2) / painter.SampleLength);
             circleSegment = Math.Min(circleSegment, 72);
 
-            var sect1 = painter.SectorPlots(Center, Radius1, pair.X, pair.Y, circleSegment).Reverse().ToArray();
-            var sect2 = painter.SectorPlots(Center, Radius2, pair.X, pair.Y, circleSegment);
+            var sect1 = XIVPainter.SectorPlots(Center, Radius1, pair.X, pair.Y, circleSegment).Reverse().ToArray();
+            var sect2 = XIVPainter.SectorPlots(Center, Radius2, pair.X, pair.Y, circleSegment);
             boarder = boarder.Append(sect1);
             boarder = boarder.Append(sect2);
 

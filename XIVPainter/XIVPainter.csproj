@@ -11,7 +11,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Clipper2" Version="1.2.2" />
+		<PackageReference Include="Clipper2" Version="1.2.3" />
 		<PackageReference Include="LibTessDotNet" Version="1.1.15" />
 		
 		<Reference Include="Dalamud">

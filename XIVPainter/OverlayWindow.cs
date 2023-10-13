@@ -6,7 +6,7 @@ namespace XIVPainter;
 
 internal class OverlayWindow : Window
 {
-    XIVPainter _owner;
+    readonly XIVPainter _owner;
     public OverlayWindow(XIVPainter owner) : base(owner._name, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus
             | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoDocking
             | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav, true)

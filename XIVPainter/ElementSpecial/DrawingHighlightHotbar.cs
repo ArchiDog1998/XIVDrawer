@@ -16,8 +16,8 @@ namespace XIVPainter.ElementSpecial;
 /// </summary>
 public class DrawingHighlightHotbar : IDrawing
 {
-    static readonly Vector2 _uv1 = new Vector2(96 * 5 / 852f, 0), 
-        _uv2 = new Vector2((96 * 5 + 144) / 852f, 0.5f);
+    static readonly Vector2 _uv1 = new (96 * 5 / 852f, 0), 
+        _uv2 = new ((96 * 5 + 144) / 852f, 0.5f);
 
     static IDalamudTextureWrap _texture = null;
 
@@ -91,7 +91,7 @@ public class DrawingHighlightHotbar : IDrawing
     {
         if(_texture == null) return Array.Empty<IDrawing2D>();
 
-        List<IDrawing2D> result = new List<IDrawing2D>();
+        List<IDrawing2D> result = new ();
 
         var hotBarIndex = 0;
         foreach (var intPtr in GetAddons<AddonActionBar>()

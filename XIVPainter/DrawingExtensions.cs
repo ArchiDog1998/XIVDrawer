@@ -1,6 +1,7 @@
 ﻿using Clipper2Lib;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using g4;
 
 namespace XIVPainter;
 
@@ -155,7 +156,7 @@ public static class DrawingExtensions
     }
 
     internal static PathsD Vec3ToPathsD(IEnumerable<IEnumerable<Vector3>> pts)
-        => new PathsD(pts.Select(Vec3ToPathD));
+        => new (pts.Select(Vec3ToPathD));
 
     internal static PathD Vec3ToPathD(IEnumerable<Vector3> pts)
     {

@@ -36,15 +36,15 @@ internal static class RaycastManager
         }
     }
 
-    static readonly Vector2Comparer _comparer = new Vector2Comparer();
+    static readonly Vector2Comparer _comparer = new ();
 
     readonly static SortedList<Vector2, (DateTime addTime, float value)> _rayRelay = new (Compacity + 2000, _comparer);
 
     static readonly Queue<Vector3> _calculatingPts = new ();
     static bool _canAdd = false;
 
-    static readonly object _addingPtsLock = new object();
-    static readonly Queue<Vector3> _addingPts = new Queue<Vector3>();
+    static readonly object _addingPtsLock = new ();
+    static readonly Queue<Vector3> _addingPts = new ();
 
 
     public static void Enable()
@@ -200,7 +200,7 @@ internal static class RaycastManager
     }
 
     private static Vector2 GetKey(in Vector3 point) 
-        => new Vector2(float.Round(point.X, 1), float.Round(point.Z, 1));
+        => new (float.Round(point.X, 1), float.Round(point.Z, 1));
 
     static unsafe float Raycast(in Vector3 point)
     {

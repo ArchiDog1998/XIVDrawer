@@ -1,6 +1,4 @@
-﻿using Dalamud.Interface.Internal;
-
-namespace XIVPainter.Element3D;
+﻿namespace XIVPainter.Element3D;
 
 /// <summary>
 /// The element that can show the location that the player should go.
@@ -26,7 +24,7 @@ public class Drawing3DHighlightLine: Drawing3DPoly
     /// The thickness of curve.
     /// </summary>
     public float Thickness { get; set; }
-    Drawing3DCircularSector cir1, cir2;
+    readonly Drawing3DCircularSector cir1, cir2;
 
     /// <summary>
     /// 

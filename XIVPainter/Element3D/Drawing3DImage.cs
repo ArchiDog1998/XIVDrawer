@@ -1,7 +1,6 @@
 ﻿using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
-using ImGuiScene;
 using XIVPainter.Element2D;
 
 namespace XIVPainter.Element3D;
