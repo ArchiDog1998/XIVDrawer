@@ -48,5 +48,6 @@
 		<Using Include="Newtonsoft.Json" />
 		<Using Include="System.Numerics" />
 		<Using Include="System.Reflection" />
+		<Using Include="ImGuiNET" />
 	</ItemGroup>
 </Project>
