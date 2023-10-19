@@ -1,7 +1,6 @@
 ﻿using Clipper2Lib;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using g4;
 
 namespace XIVPainter;
 
