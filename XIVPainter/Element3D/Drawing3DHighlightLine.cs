@@ -77,6 +77,8 @@ public class Drawing3DHighlightLine: Drawing3DPoly
         cir1.Center = From + (To -  From) * ratio;
         cir2.Center = To;
 
+        cir1.DrawWithHeight = cir2.DrawWithHeight = DrawWithHeight;
+
         base.UpdateOnFrame(painter);
     }
 }
