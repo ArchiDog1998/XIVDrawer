@@ -1,44 +1,17 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using KdTree;
+using KdTree.Math;
 
 namespace XIVPainter;
 
 internal static class RaycastManager
 {
-    const int MaxDistance = 80,
-              Compacity = MaxDistance * MaxDistance * 400;
-    class Vector2Comparer : IComparer<Vector2>
-    {
-        public int Compare(Vector2 x, Vector2 y)
-        {
-            var xX = (int)x.X;
-            var xY = (int)x.Y;
+    //const int MaxDistance = 80,
+    //          Compacity = MaxDistance * MaxDistance * 400;
 
-            var yX = (int)y.X;
-            var yY = (int)y.Y;
-
-            int com;
-
-            //com = (xX / 10).CompareTo(yX / 10);
-            //if (com != 0) return com;
-            //com = (xY / 10).CompareTo(yY / 10);
-            //if (com != 0) return com;
-
-            com = xX.CompareTo(yX);
-            if (com != 0) return com;
-            com = xY.CompareTo(yY);
-            if (com != 0) return com;
-
-            com = x.X.CompareTo(y.X);
-            if(com != 0) return com;
-            return x.Y.CompareTo(y.Y);
-        }
-    }
-
-    static readonly Vector2Comparer _comparer = new ();
-
-    readonly static SortedList<Vector2, (DateTime addTime, float value)> _rayRelay = new (Compacity + 2000, _comparer);
+    readonly static KdTree<float, (DateTime addTime, float value)> _rayRelay = new (2, new FloatMath(), AddDuplicateBehavior.Update);
 
     static readonly Queue<Vector3> _calculatingPts = new ();
     static bool _canAdd = false;
@@ -80,17 +53,17 @@ internal static class RaycastManager
                 AddCalculatingPts(in pt, 5, 1);
             }
 
-            //Remove
-            if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
-            {
-                var loc = Service.ClientState.LocalPlayer.Position;
-                var pos = GetKey(in loc);
-                while (_rayRelay.Count > Compacity)
-                {
-                    var removed = _rayRelay.MaxBy(p => Vector2.Distance(p.Key, pos));
-                    _rayRelay.Remove(removed.Key);
-                }
-            }
+            ////Remove
+            //if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
+            //{
+            //    var loc = Service.ClientState.LocalPlayer.Position;
+            //    var pos = GetKey(in loc);
+            //    while (_rayRelay.Count > Compacity)
+            //    {
+            //        var removed = _rayRelay.MaxBy(p => Vector2.Distance(p.Key, pos));
+            //        _rayRelay.Remove(removed.Key);
+            //    }
+            //}
 
             //Calculation
             while (!Service.Condition[ConditionFlag.BetweenAreas] 
@@ -100,7 +73,7 @@ internal static class RaycastManager
                 var key = GetKey(in vector);
                 var value = Raycast(in vector);
 
-                _rayRelay[key] = (DateTime.Now, value);
+                _rayRelay.Add(new float[] { key.X, key.Y }, (DateTime.Now, value));
             }
 
             _isUpdateRun = false;
@@ -124,7 +97,8 @@ internal static class RaycastManager
 
         int count = 0;
 
-        if (!_rayRelay.TryGetValue(pt + GetKey(loc), out var pair) || DateTime.Now - pair.addTime > reCalTimePt)
+        var p = pt + GetKey(loc);
+        if (!_rayRelay.TryFindValueAt(new float[] {p.X, p.Y}, out var pair) || DateTime.Now - pair.addTime > reCalTimePt)
         {
             count++;
             _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
@@ -139,7 +113,8 @@ internal static class RaycastManager
             else if (xAy <= 0 && xSy < 0) pt += new Vector2(0, -0.1f);
             else pt += new Vector2(0.1f, 0);
 
-            if (!_rayRelay.TryGetValue(pt + GetKey(in loc), out pair) || DateTime.Now -  pair.addTime > reCalTime)
+            p = pt + GetKey(loc);
+            if (!_rayRelay.TryFindValueAt(new float[] { p.X, p.Y }, out pair) || DateTime.Now -  pair.addTime > reCalTime)
             {
                 count++;
                 _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
@@ -179,22 +154,21 @@ internal static class RaycastManager
         }
     }
 
-    static FieldInfo _keyInfo;
     private static bool GetHeight(in Vector2 xy, out float height)
     {
         height = 0;
 
-        if (_rayRelay.Count > 0)
-        {
-            _keyInfo ??= _rayRelay.GetType().GetRuntimeFields().First(f => f.Name == "keys");
-            var keys = (Vector2[])_keyInfo.GetValue(_rayRelay);
-            var index = Array.BinarySearch(keys, 0, _rayRelay.Count, xy, _comparer);
-            if (index < 0) index = -1 - index;
-            index %= _rayRelay.Count;
+        var result = _rayRelay.GetNearestNeighbours(new float[] { xy.X, xy.Y }, 1);
 
-            if (Vector2.Distance(keys[index], xy) > 3) return false;
-            height = _rayRelay.Values[index].value;
-            return true;
+        if(result != null && result.Length >= 0)
+        {
+            var p = result[0].Point;
+
+            if((new Vector2(p[0], p[1]) - xy).LengthSquared() <= 1)
+            {
+                height = result[0].Value.value;
+                return true;
+            }
         }
         return false;
     }
