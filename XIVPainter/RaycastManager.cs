@@ -8,8 +8,7 @@ namespace XIVPainter;
 
 internal static class RaycastManager
 {
-    //const int MaxDistance = 80,
-    //          Compacity = MaxDistance * MaxDistance * 400;
+    //const int Compacity = 80 * 80 * 400;
 
     readonly static KdTree<float, (DateTime addTime, float value)> _rayRelay = new (2, new FloatMath(), AddDuplicateBehavior.Update);
 
@@ -47,36 +46,49 @@ internal static class RaycastManager
 
         Task.Run(() =>
         {
-            //Add
-            while(TryGetCalPt(out var pt))
+            try
             {
-                AddCalculatingPts(in pt, 5, 1);
+                //Add
+                while (TryGetCalPt(out var pt))
+                {
+                    var p = GetKey(pt);
+                    if (!_rayRelay.TryFindValueAt(new float[] { p.X, p.Y }, out var pair) || DateTime.Now - pair.addTime > reCalTimePt)
+                    {
+                        _calculatingPts.Enqueue(pt);
+                    }
+                }
+
+                ////Remove
+                //if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
+                //{
+                //    var loc = Service.ClientState.LocalPlayer.Position;
+                //    var pos = GetKey(in loc);
+                //    while (_rayRelay.Count > Compacity)
+                //    {
+                //        var removed = _rayRelay.MaxBy(p => Vector2.Distance(new Vector2(p.Point[0], p.Point[1]), pos));
+                //        _rayRelay.RemoveAt(removed.Point);
+                //    }
+                //}
+
+                //Calculation
+                while (!Service.Condition[ConditionFlag.BetweenAreas]
+                    && !Service.Condition[ConditionFlag.BetweenAreas51]
+                    && _calculatingPts.TryDequeue(out var vector))
+                {
+                    var key = GetKey(in vector);
+                    var value = Raycast(in vector);
+
+                    _rayRelay.Add(new float[] { key.X, key.Y }, (DateTime.Now, value));
+                }
             }
-
-            ////Remove
-            //if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
-            //{
-            //    var loc = Service.ClientState.LocalPlayer.Position;
-            //    var pos = GetKey(in loc);
-            //    while (_rayRelay.Count > Compacity)
-            //    {
-            //        var removed = _rayRelay.MaxBy(p => Vector2.Distance(p.Key, pos));
-            //        _rayRelay.Remove(removed.Key);
-            //    }
-            //}
-
-            //Calculation
-            while (!Service.Condition[ConditionFlag.BetweenAreas] 
-                && !Service.Condition[ConditionFlag.BetweenAreas51]
-                && _calculatingPts.TryDequeue(out var vector))
+            catch (Exception ex)
             {
-                var key = GetKey(in vector);
-                var value = Raycast(in vector);
-
-                _rayRelay.Add(new float[] { key.X, key.Y }, (DateTime.Now, value));
+                Service.Log.Warning(ex, "Failed to calculating the raycast");
             }
-
-            _isUpdateRun = false;
+            finally
+            {
+                _isUpdateRun = false;
+            }
         });
     }
 
@@ -88,43 +100,7 @@ internal static class RaycastManager
         }
     }
 
-    static readonly TimeSpan reCalTime = TimeSpan.FromSeconds(10),
-                             reCalTimePt = TimeSpan.FromSeconds(1);
-
-    private static void AddCalculatingPts(in Vector3 loc, in float distance, in int maxCount)
-    {
-        var pt = default(Vector2);
-
-        int count = 0;
-
-        var p = pt + GetKey(loc);
-        if (!_rayRelay.TryFindValueAt(new float[] {p.X, p.Y}, out var pair) || DateTime.Now - pair.addTime > reCalTimePt)
-        {
-            count++;
-            _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
-        }
-        while (count < maxCount && Vector2.Distance(pt, default) < distance)
-        {
-            var xAy = pt.X + pt.Y;
-            var xSy = pt.X - pt.Y;
-
-            if (xAy >= 0 && xSy >= 0) pt += new Vector2(0, 0.1f);
-            else if (xAy > 0 && xSy < 0) pt += new Vector2(-0.1f, 0);
-            else if (xAy <= 0 && xSy < 0) pt += new Vector2(0, -0.1f);
-            else pt += new Vector2(0.1f, 0);
-
-            p = pt + GetKey(loc);
-            if (!_rayRelay.TryFindValueAt(new float[] { p.X, p.Y }, out pair) || DateTime.Now -  pair.addTime > reCalTime)
-            {
-                count++;
-                _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
-            }
-        }
-        if (count == 0)
-        {
-            _calculatingPts.Enqueue(loc + new Vector3(pt.X, 0, pt.Y));
-        }
-    }
+    static readonly TimeSpan reCalTimePt = TimeSpan.FromSeconds(1);
 
     public static bool Raycast(in Vector3 point, in float height, out Vector3 territoryPt)
     {
