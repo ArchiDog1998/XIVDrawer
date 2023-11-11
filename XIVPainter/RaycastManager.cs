@@ -160,7 +160,7 @@ internal static class RaycastManager
 
         var result = _rayRelay.GetNearestNeighbours(new float[] { xy.X, xy.Y }, 1);
 
-        if(result != null && result.Length >= 0)
+        if (result != null && result.Length > 0)
         {
             var p = result[0].Point;
 
