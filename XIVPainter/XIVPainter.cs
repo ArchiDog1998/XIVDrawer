@@ -527,8 +527,25 @@ public class XIVPainter : IDisposable
 
     private static Vector2 GetPtInRect(Vector2 rec, Vector2 pt)
     {
-        if (rec.X <= 0 || rec.Y <= 0) return pt;
-        return GetPtIn1Rect(pt / rec) * rec;
+        if (rec.X > 0)
+        {
+            pt.X /= rec.X;
+        }
+        else
+        {
+            pt.X = 0;
+        }
+
+        if (rec.Y > 0)
+        {
+            pt.Y /= rec.Y;
+        }
+        else 
+        {
+            pt.Y = 0; 
+        }
+
+        return GetPtIn1Rect(pt) * rec;
     }
 
     private static Vector2 GetPtIn1Rect(Vector2 pt)
