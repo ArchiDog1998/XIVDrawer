@@ -10,7 +10,7 @@ public class Drawing3DPoly : Drawing3D
     /// <summary>
     /// The sub items.
     /// </summary>
-    public IDrawing3D[] SubItems { get; set; }
+    public IDrawing3D[] SubItems { get; set; } = [];
 
     /// <summary>
     /// Convert this to the 2d elements.
@@ -19,7 +19,7 @@ public class Drawing3DPoly : Drawing3D
     /// <returns></returns>
     public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
-        return SubItems?.SelectMany(i => i.To2D(owner)) ?? Array.Empty<IDrawing2D>();
+        return SubItems.SelectMany(i => i.To2D(owner)) ?? Array.Empty<IDrawing2D>();
     }
 
     /// <summary>

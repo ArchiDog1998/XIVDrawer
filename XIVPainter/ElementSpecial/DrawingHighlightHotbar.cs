@@ -19,12 +19,12 @@ public class DrawingHighlightHotbar : IDrawing
     static readonly Vector2 _uv1 = new (96 * 5 / 852f, 0), 
         _uv2 = new ((96 * 5 + 144) / 852f, 0.5f);
 
-    static IDalamudTextureWrap _texture = null;
+    static IDalamudTextureWrap? _texture = null;
 
     /// <summary>
     /// The action ids that 
     /// </summary>
-    public HashSet<uint> ActionIds { get; } = new HashSet<uint>();
+    public HashSet<uint> ActionIds { get; } = [];
 
     /// <summary>
     /// The color of highlight.
@@ -106,7 +106,7 @@ public class DrawingHighlightHotbar : IDrawing
                 var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBarsSpan[hotBarIndex];
 
                 var slotIndex = 0;
-                foreach (var slot in actionBar->Slot)
+                foreach (var slot in actionBar->ActionBarSlotVector.Span)
                 {
                     var iconAddon = slot.Icon;
                     if ((IntPtr)iconAddon != IntPtr.Zero && IsVisible(&iconAddon->AtkResNode))

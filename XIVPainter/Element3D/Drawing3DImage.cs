@@ -46,7 +46,7 @@ public class Drawing3DImage : Drawing3D
     /// <param name="wrap">texture</param>
     /// <param name="position">position</param>
     /// <param name="size">size ratio</param>
-    public Drawing3DImage(IDalamudTextureWrap wrap, Vector3 position, float size = 1)
+    public Drawing3DImage(IDalamudTextureWrap? wrap, Vector3 position, float size = 1)
        : this(wrap?.ImGuiHandle ?? IntPtr.Zero, position,
              wrap?.Width * size ?? 0, wrap?.Height * size ?? 0)
     {
@@ -72,7 +72,7 @@ public class Drawing3DImage : Drawing3D
     /// </summary>
     /// <param name="wrap">texture</param>
     /// <param name="size">size ratio</param>
-    public void SetTexture(IDalamudTextureWrap wrap, float size = 1)
+    public void SetTexture(IDalamudTextureWrap? wrap, float size = 1)
     {
         ImageID = wrap?.ImGuiHandle ?? IntPtr.Zero;
         Width = wrap?.Width * size ?? 0;

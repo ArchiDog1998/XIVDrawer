@@ -36,7 +36,7 @@ public class Drawing3DCircularSector : Drawing3DPolyline
         ArcStartSpan = arcStartSpan;
         if(arcStartSpan == null || arcStartSpan.Length == 0)
         {
-            ArcStartSpan = new Vector2[] { new Vector2(0, MathF.Tau)};
+            ArcStartSpan = [new Vector2(0, MathF.Tau)];
         }
     }
 

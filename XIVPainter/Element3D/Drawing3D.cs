@@ -25,7 +25,7 @@ public abstract class Drawing3D : IDrawing3D
     /// <summary>
     /// What should it do every frame.
     /// </summary>
-    public Action UpdateEveryFrame { get; set; }
+    public Action? UpdateEveryFrame { get; set; }
 
     /// <summary>
     /// 

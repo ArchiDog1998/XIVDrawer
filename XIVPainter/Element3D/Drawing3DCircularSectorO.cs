@@ -21,7 +21,7 @@ public class Drawing3DCircularSectorO : Drawing3DCircularSector
     /// <summary>
     /// The binding target
     /// </summary>
-    public GameObject Target { get; set; }
+    public GameObject? Target { get; set; }
 
     /// <summary>
     /// Arc start, span.
@@ -37,7 +37,7 @@ public class Drawing3DCircularSectorO : Drawing3DCircularSector
     /// <param name="thickness"></param>
     /// <param name="include"></param>
     /// <param name="arcStartSpan"></param>
-    public Drawing3DCircularSectorO(GameObject target, float radius, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan) 
+    public Drawing3DCircularSectorO(GameObject? target, float radius, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan) 
         : base(target?.Position ?? default, include.GetRadius(target, radius), color, thickness)
     {
         RadiusTarget = radius;
@@ -46,7 +46,7 @@ public class Drawing3DCircularSectorO : Drawing3DCircularSector
         ArcStartSpanTarget = arcStartSpan;
         if (arcStartSpan == null || arcStartSpan.Length == 0)
         {
-            ArcStartSpanTarget = new Vector2[] { new Vector2(0, MathF.Tau) };
+            ArcStartSpanTarget = [new Vector2(0, MathF.Tau)];
         }
     }
 

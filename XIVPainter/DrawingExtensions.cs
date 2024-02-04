@@ -125,7 +125,7 @@ public static class DrawingExtensions
     /// <param name="pts">polygon</param>
     /// <param name="offset">distance to offset</param>
     /// <returns>offseted polygon</returns>
-    public static IEnumerable<Vector3[]> OffSetPolyline(in IEnumerable<Vector3[]> pts, float offset)
+    public static IEnumerable<Vector3[]>? OffSetPolyline(in IEnumerable<Vector3[]>? pts, float offset)
         => pts?.SelectMany(p => OffSetPolyline(p, offset));
 
     /// <summary>
@@ -155,14 +155,13 @@ public static class DrawingExtensions
     }
 
     internal static PathsD Vec3ToPathsD(IEnumerable<IEnumerable<Vector3>> pts)
-        => new (pts.Select(Vec3ToPathD));
+        => new(pts.Select(Vec3ToPathD));
 
     internal static PathD Vec3ToPathD(IEnumerable<Vector3> pts)
     {
-        if(pts == null) return null;
         return new PathD(pts.Select(p => new PointD(p.X, p.Z)));
     }
-    internal static IEnumerable<Vector3[]> PathsDToVec3(PathsD path, float height)
+    internal static IEnumerable<Vector3[]>? PathsDToVec3(PathsD? path, float height)
     => path?.Select(p => PathDToVec3(p, height));
 
     internal static Vector3[] PathDToVec3(PathD path, in float height)
@@ -176,12 +175,12 @@ public static class DrawingExtensions
         return result;
     }
 
-    internal static void SegmentAction<T>(IEnumerable<T> pts, Action<T, T> pairAction, in bool closed = true)
+    internal static void SegmentAction<T>(IEnumerable<T> pts, Action<T?, T> pairAction, in bool closed = true)
     {
         if (pairAction == null) return;
         if(pts == null || !pts.Any()) return;
 
-        T prePt = default;
+        T? prePt = default;
         bool isFirst = true;
         foreach (var pt in pts)
         {
@@ -205,8 +204,8 @@ public static class DrawingExtensions
     /// <returns>convex polygons</returns>
     public static IEnumerable<Vector2[]> ConvexPoints(in Vector2[] points)
     {
-        if (points == null || points.Length < 3) 
-            return new Vector2[][] { points };
+        if (points.Length < 3)
+            return [points];
 
         var tess = new LibTessDotNet.Tess();
         tess.AddContour(points.Select(p => new LibTessDotNet.ContourVertex(new LibTessDotNet.Vec3(p.X, p.Y, 0))).ToArray(), LibTessDotNet.ContourOrientation.CounterClockwise);
@@ -220,12 +219,12 @@ public static class DrawingExtensions
             var v0 = tess.Vertices[tess.Elements[i * 3]].Position;
             var v1 = tess.Vertices[tess.Elements[i * 3 + 1]].Position;
             var v2 = tess.Vertices[tess.Elements[i * 3 + 2]].Position;
-            result[i] = new Vector2[]
-            {
+            result[i] =
+            [
                 new Vector2(v0.X, v0.Y),
                 new Vector2(v1.X, v1.Y),
                 new Vector2(v2.X, v2.Y),
-            };
+            ];
         }
         return result;
     }

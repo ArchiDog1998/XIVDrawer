@@ -43,7 +43,7 @@ public class Drawing3DPolyline : Drawing3D
     /// <summary>
     /// The fill of polygon.
     /// </summary>
-    public IEnumerable<IEnumerable<Vector3>> FillPoints { get; protected set; }
+    public IEnumerable<IEnumerable<Vector3>>? FillPoints { get; protected set; }
 
     /// <summary>
     /// 
@@ -51,8 +51,8 @@ public class Drawing3DPolyline : Drawing3D
     /// <param name="pts"></param>
     /// <param name="color"></param>
     /// <param name="thickness"></param>
-    public Drawing3DPolyline(IEnumerable<Vector3> pts, uint color, float thickness)
-        : this(new IEnumerable<Vector3>[] { pts ?? Array.Empty<Vector3>() }, color, thickness)
+    public Drawing3DPolyline(IEnumerable<Vector3>? pts, uint color, float thickness)
+        : this([pts ?? []], color, thickness)
     {
     }
 
@@ -63,7 +63,7 @@ public class Drawing3DPolyline : Drawing3D
     /// <param name="color"></param>
     /// <param name="thickness"></param>
     /// <param name="fillPoints"></param>
-    public Drawing3DPolyline(IEnumerable<IEnumerable<Vector3>> borderPts, uint color, float thickness, IEnumerable<IEnumerable<Vector3>> fillPoints = null)
+    public Drawing3DPolyline(IEnumerable<IEnumerable<Vector3>> borderPts, uint color, float thickness, IEnumerable<IEnumerable<Vector3>>? fillPoints = null)
     {
         BorderPoints = borderPts ?? Array.Empty<Vector3[]>();
         FillPoints = fillPoints;
@@ -128,7 +128,7 @@ public class Drawing3DPolyline : Drawing3D
 
         IsMouseInside = DrawingExtensions.IsPointInside(ImGui.GetMousePos(), screenPts);
 
-        if (hasFill && IsFill)
+        if (hasFill && IsFill && FillPoints != null)
         {
             foreach (var points in FillPoints)
             {

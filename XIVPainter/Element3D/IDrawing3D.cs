@@ -15,7 +15,7 @@ public interface IDrawing3D : IDrawing
     /// <summary>
     /// What should it do every frame.
     /// </summary>
-    Action UpdateEveryFrame { get; set; }
+    Action? UpdateEveryFrame { get; set; }
 
     /// <summary>
     /// The time that it will disappear.

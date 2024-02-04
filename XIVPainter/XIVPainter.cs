@@ -19,8 +19,8 @@ public class XIVPainter : IDisposable
 {
     internal readonly string _name;
 
-    internal readonly List<IDrawing> _drawingElements = new ();
-    internal readonly List<Drawing3DHighlightLine> _outLineGo =new ();
+    internal readonly List<IDrawing> _drawingElements = [];
+    internal readonly List<Drawing3DHighlightLine> _outLineGo = [];
 
     private readonly WindowSystem windowSystem;
 
@@ -199,7 +199,7 @@ public class XIVPainter : IDisposable
     {
         try
         {
-            IDrawing2D[] elements = Array.Empty<IDrawing2D>();
+            IDrawing2D[] elements = [];
             IEnumerable<IDrawing2D> relay = elements;
             List<Task> tasks;
             List<Drawing3DPolyline> movingPoly;
@@ -311,7 +311,7 @@ public class XIVPainter : IDisposable
                 }
             }));
 
-            await Task.WhenAll(tasks.ToArray());
+            await Task.WhenAll([.. tasks]);
         }
         catch (Exception ex)
         {
@@ -321,14 +321,14 @@ public class XIVPainter : IDisposable
         _started = false;
     }
 
-    private static IEnumerable<Vector3[]> GetUnion(IEnumerable<Drawing3DPolyline> polys)
+    private static IEnumerable<Vector3[]>? GetUnion(IEnumerable<Drawing3DPolyline> polys)
     {
-        if (polys == null || !polys.Any())
+        if (!polys.Any())
         {
             return null;
         }
 
-        PathsD result = null;
+        PathsD? result = null;
         float height = 0;
 
         foreach (var p in polys)
@@ -399,7 +399,7 @@ public class XIVPainter : IDisposable
 
     static IEnumerable<Vector3> DivideCurve(IEnumerable<Vector3> worldPts, float length, bool isClosed)
     {
-        if(worldPts == null || worldPts.Count() < 2 || length <= 0.01f) return worldPts;
+        if (worldPts.Count() < 2 || length <= 0.01f) return worldPts;
 
         IEnumerable<Vector3> pts = Array.Empty<Vector3>();
 
@@ -567,7 +567,7 @@ public class XIVPainter : IDisposable
 
     internal static Vector3[] SectorPlots(Vector3 center, float radius, float rotation, float round, int circleSegment)
     {
-        if (radius <= 0) return Array.Empty<Vector3>();
+        if (radius <= 0) return [];
         circleSegment = Math.Max(circleSegment, 16);
 
         var seg = (int)(circleSegment * round / MathF.Tau);

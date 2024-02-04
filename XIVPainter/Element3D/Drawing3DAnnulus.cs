@@ -44,7 +44,7 @@ public class Drawing3DAnnulus : Drawing3DPolyline
         ArcStartSpan = arcStartSpan;
         if (arcStartSpan == null || arcStartSpan.Length == 0)
         {
-            ArcStartSpan = new Vector2[] { new Vector2(0, MathF.Tau) };
+            ArcStartSpan = [new Vector2(0, MathF.Tau)];
         }
     }
 
@@ -58,7 +58,7 @@ public class Drawing3DAnnulus : Drawing3DPolyline
 
         if (Radius1 == 0 || Radius2 == 0)
         {
-            BorderPoints = FillPoints = Array.Empty<Vector3[]>();
+            BorderPoints = FillPoints = [];
             return;
         }
 

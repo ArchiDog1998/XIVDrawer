@@ -26,7 +26,7 @@ public class Drawing3DAnnulusO : Drawing3DAnnulus
     /// <summary>
     /// The binding target
     /// </summary>
-    public GameObject Target { get; set; }
+    public GameObject? Target { get; set; }
 
     /// <summary>
     /// Arc start, span.
@@ -43,7 +43,7 @@ public class Drawing3DAnnulusO : Drawing3DAnnulus
     /// <param name="thickness"></param>
     /// <param name="include"></param>
     /// <param name="arcStartSpan"></param>
-    public Drawing3DAnnulusO(GameObject target, float radius1, float radius2, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan) 
+    public Drawing3DAnnulusO(GameObject? target, float radius1, float radius2, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan) 
         : base(target?.Position ?? default, include.GetRadius(target, radius1), include.GetRadius(target, radius2), color, thickness)
     {
         RadiusTarget1 = radius1;
@@ -53,7 +53,7 @@ public class Drawing3DAnnulusO : Drawing3DAnnulus
         ArcStartSpanTarget = arcStartSpan;
         if (arcStartSpan == null || arcStartSpan.Length == 0)
         {
-            ArcStartSpanTarget = new Vector2[] { new Vector2(0, MathF.Tau) };
+            ArcStartSpanTarget = [new Vector2(0, MathF.Tau)];
         }
     }
 
