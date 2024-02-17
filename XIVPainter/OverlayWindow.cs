@@ -31,12 +31,12 @@ internal class OverlayWindow : Window
         ImGui.GetStyle().AntiAliasedFill = false;
 
 #if DEBUG
-        if (RaycastManager.PointCount > RaycastManager.Compacity)
-        {
-            Service.Log.Error($"{RaycastManager.PointCount} / {RaycastManager.Compacity}");
-        }
-        ImGui.TextColored(Dalamud.Interface.Colors.ImGuiColors.DalamudRed, 
-            $"{RaycastManager.PointCount} / {RaycastManager.Compacity}");
+        //if (RaycastManager.PointCount > RaycastManager.Compacity)
+        //{
+        //    Service.Log.Error($"{RaycastManager.PointCount} / {RaycastManager.Compacity}");
+        //}
+        //ImGui.TextColored(Dalamud.Interface.Colors.ImGuiColors.DalamudRed, 
+        //    $"{RaycastManager.PointCount} / {RaycastManager.Compacity}");
 #endif
         try
         {
