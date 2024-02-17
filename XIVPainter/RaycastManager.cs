@@ -13,7 +13,7 @@ internal static class RaycastManager
 
     public
 #endif
-    const int Compacity = 80 * 80 * 400;
+    const int Compacity = 60 * 60 * 100;
 
     readonly static KdTree<float, (DateTime addTime, float value)> _rayRelay = new (2, new FloatMath(), AddDuplicateBehavior.Update);
 
@@ -22,7 +22,6 @@ internal static class RaycastManager
 
     static readonly object _addingPtsLock = new ();
     static readonly Queue<Vector3> _addingPts = new ();
-
 
     public static void Enable()
     {
