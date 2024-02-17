@@ -122,68 +122,6 @@ public class XIVPainter : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private void Draw()
-    {
-        if (!Enable || Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
-        try
-        {
-            ImGuiHelpers.ForceNextWindowMainViewport();
-            ImGuiHelpers.SetNextWindowPosRelativeMainViewport(Vector2.Zero);
-            ImGui.SetNextWindowSize(ImGuiHelpers.MainViewport.Size);
-
-            using var windowStyle = ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-            if (ImGui.Begin(_name, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus
-            | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoDocking
-            | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav
-            ))
-            {
-                ImGui.GetStyle().AntiAliasedFill = false;
-
-                try
-                {
-                    IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
-
-                    if (_drawingElements != null)
-                    {
-                        foreach (var item in _drawingElements)
-                        {
-                            result = result.Concat(item.To2D(this));
-                        }
-                    }
-
-                    foreach (var item in _outLineGo)
-                    {
-                        result = result.Concat(item.To2D(this));
-                    }
-
-                    foreach (var item in result.OrderBy(drawing =>
-                    {
-                        if (drawing is PolylineDrawing poly)
-                        {
-                            return poly._thickness == 0 ? 0 : 1;
-                        }
-                        else
-                        {
-                            return 2;
-                        }
-                    }))
-                    {
-                        item.Draw();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Service.Log.Warning(ex, $"{_name} failed to draw on Screen.");
-                }
-                ImGui.End();
-            }
-        }
-        catch (Exception ex)
-        {
-            Service.Log.Warning(ex, $"{_name} failed to draw.");
-        }
-    }
-
     private void Update(IFramework framework)
     {
         if (!Enable || Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
@@ -236,7 +174,14 @@ public class XIVPainter : IDisposable
 
                     tasks.Add(Task.Run(() =>
                     {
-                        ele.UpdateOnFrame(this);
+                        try
+                        {
+                            ele.UpdateOnFrame(this);
+                        }
+                        catch (Exception ex)
+                        {
+                            Service.Log.Warning(ex, "Something wrong with " + nameof(IDrawing.UpdateOnFrame));
+                        }
                     }));
                 }
                 foreach (var r in remove)

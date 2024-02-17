@@ -8,7 +8,12 @@ namespace XIVPainter;
 
 internal static class RaycastManager
 {
-    //const int Compacity = 80 * 80 * 400;
+#if DEBUG
+    public static int PointCount => _rayRelay.Count;
+
+    public
+#endif
+    const int Compacity = 80 * 80 * 400;
 
     readonly static KdTree<float, (DateTime addTime, float value)> _rayRelay = new (2, new FloatMath(), AddDuplicateBehavior.Update);
 
@@ -52,23 +57,25 @@ internal static class RaycastManager
                 while (TryGetCalPt(out var pt))
                 {
                     var p = GetKey(pt);
-                    if (!_rayRelay.TryFindValueAt(new float[] { p.X, p.Y }, out var pair) || DateTime.Now - pair.addTime > reCalTimePt)
+
+                    if (!_rayRelay.TryFindValueAt([p.X, p.Y], out var pair) || DateTime.Now - pair.addTime > reCalTimePt)
                     {
                         _calculatingPts.Enqueue(pt);
                     }
                 }
 
-                ////Remove
-                //if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
-                //{
-                //    var loc = Service.ClientState.LocalPlayer.Position;
-                //    var pos = GetKey(in loc);
-                //    while (_rayRelay.Count > Compacity)
-                //    {
-                //        var removed = _rayRelay.MaxBy(p => Vector2.Distance(new Vector2(p.Point[0], p.Point[1]), pos));
-                //        _rayRelay.RemoveAt(removed.Point);
-                //    }
-                //}
+                //Remove
+                if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
+                {
+                    var loc = Service.ClientState.LocalPlayer.Position;
+                    var pos = GetKey(in loc);
+                    while (_rayRelay.Count > Compacity)
+                    {
+                        var removed = _rayRelay.MaxBy(p => Vector2.Distance(new Vector2(p.Point[0], p.Point[1]), pos));
+                        if (removed == null) continue;
+                        _rayRelay.RemoveAt(removed.Point);
+                    }
+                }
 
                 //Calculation
                 while (!Service.Condition[ConditionFlag.BetweenAreas]
@@ -78,7 +85,8 @@ internal static class RaycastManager
                     var key = GetKey(in vector);
                     var value = Raycast(in vector);
 
-                    _rayRelay.Add(new float[] { key.X, key.Y }, (DateTime.Now, value));
+                    _rayRelay.RemoveAt([key.X, key.Y]);
+                    _rayRelay.Add([key.X, key.Y], (DateTime.Now, value));
                 }
             }
             catch (Exception ex)
@@ -134,7 +142,7 @@ internal static class RaycastManager
     {
         height = 0;
 
-        var result = _rayRelay.GetNearestNeighbours(new float[] { xy.X, xy.Y }, 1);
+        var result = _rayRelay.GetNearestNeighbours([xy.X, xy.Y], 1);
 
         if (result != null && result.Length > 0)
         {
