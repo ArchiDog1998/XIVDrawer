@@ -8,27 +8,34 @@ namespace XIVPainter.Element3D;
 /// <summary>
 /// The 3d drawing element for image.
 /// </summary>
-public class Drawing3DImage : Drawing3D
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="imageId">Imgui handle</param>
+/// <param name="position">position</param>
+/// <param name="width">drawing width</param>
+/// <param name="height">drawing height</param>
+public class Drawing3DImage(nint imageId, Vector3 position, float width, float height) : Drawing3D
 {
     /// <summary>
     /// The position to draw.
     /// </summary>
-    public Vector3 Position { get; set; }
+    public Vector3 Position { get; set; } = position;
 
     /// <summary>
     /// <seealso cref="ImGui"/> handle for texture.
     /// </summary>
-    public nint ImageID { get; set; }
+    public nint ImageID { get; set; } = imageId;
 
     /// <summary>
     /// Drawing width
     /// </summary>
-    public float Width { get; set; }
+    public float Width { get; set; } = width;
 
     /// <summary>
     /// Drawing Height
     /// </summary>
-    public float Height { get; set; }
+    public float Height { get; set; } = height;
 
     /// <summary>
     /// The Image must be in range.
@@ -53,21 +60,6 @@ public class Drawing3DImage : Drawing3D
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="imageId">Imgui handle</param>
-    /// <param name="position">position</param>
-    /// <param name="width">drawing width</param>
-    /// <param name="height">drawing height</param>
-    public Drawing3DImage(nint imageId, Vector3 position, float width, float height)
-    {
-        ImageID = imageId;
-        Position = position;
-        Width = width;
-        Height = height;
-    }
-
-    /// <summary>
     /// Set the new texture.
     /// </summary>
     /// <param name="wrap">texture</param>
@@ -87,7 +79,8 @@ public class Drawing3DImage : Drawing3D
     /// <returns></returns>
     public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
-        if (HideIfInvisible && !Position.CanSee() || ImageID == 0 || Height == 0 || Width == 0) return Array.Empty<IDrawing2D>();
+        if (HideIfInvisible && !Position.CanSee() || ImageID == 0 || Height == 0 || Width == 0) 
+            return Array.Empty<IDrawing2D>();
 
         var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false, false, DrawWithHeight);
         if (pts.Length == 0) return Array.Empty<IDrawing2D>();
@@ -96,15 +89,15 @@ public class Drawing3DImage : Drawing3D
         var half = new Vector2(Width / 2, Height / 2);
 
         if (MustInViewRange) unsafe
-        {
-            var windowPos = ImGuiHelpers.MainViewport.Pos;
+            {
+                var windowPos = ImGuiHelpers.MainViewport.Pos;
 
-            var device = Device.Instance();
-            float width = device->Width;
-            float height = device->Height;
+                var device = Device.Instance();
+                float width = device->Width;
+                float height = device->Height;
 
-            pt = XIVPainter.GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
-        }
+                pt = XIVPainter.GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
+            }
 
         return new IDrawing2D[] { new ImageDrawing(ImageID, pt - half, pt + half) };
     }
