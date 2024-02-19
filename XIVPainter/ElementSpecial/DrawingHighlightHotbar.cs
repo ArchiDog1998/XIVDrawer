@@ -137,7 +137,7 @@ public class DrawingHighlightHotbar : IDrawing
                             var pt1 = new Vector2(node.ScreenX, node.ScreenY);
                             var pt2 = pt1 + new Vector2(node.Width * s, node.Height * s);
 
-                            result.Add(new ImageDrawing(_texture.ImGuiHandle, pt1, pt2, _uv1, _uv2, ImGui.ColorConvertFloat4ToU32(Color)));
+                            result.Add(new ImageDrawing(_texture, pt1, pt2, _uv1, _uv2, ImGui.ColorConvertFloat4ToU32(Color)));
                         }
                     }
 

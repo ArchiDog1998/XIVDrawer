@@ -11,11 +11,10 @@ namespace XIVPainter.Element3D;
 /// <remarks>
 /// 
 /// </remarks>
-/// <param name="imageId">Imgui handle</param>
+/// <param name="texture"></param>
 /// <param name="position">position</param>
-/// <param name="width">drawing width</param>
-/// <param name="height">drawing height</param>
-public class Drawing3DImage(nint imageId, Vector3 position, float width, float height) : Drawing3D
+/// <param name="size"></param>
+public class Drawing3DImage(IDalamudTextureWrap? texture, Vector3 position, float size = 1) : Drawing3D
 {
     /// <summary>
     /// The position to draw.
@@ -23,19 +22,14 @@ public class Drawing3DImage(nint imageId, Vector3 position, float width, float h
     public Vector3 Position { get; set; } = position;
 
     /// <summary>
-    /// <seealso cref="ImGui"/> handle for texture.
+    /// <seealso cref="ImGui"/> for texture.
     /// </summary>
-    public nint ImageID { get; set; } = imageId;
-
-    /// <summary>
-    /// Drawing width
-    /// </summary>
-    public float Width { get; set; } = width;
+    public IDalamudTextureWrap? Image { get; set; } = texture;
 
     /// <summary>
     /// Drawing Height
     /// </summary>
-    public float Height { get; set; } = height;
+    public float Size { get; set; } = size;
 
     /// <summary>
     /// The Image must be in range.
@@ -47,30 +41,6 @@ public class Drawing3DImage(nint imageId, Vector3 position, float width, float h
     /// </summary>
     public bool HideIfInvisible { get; set; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="wrap">texture</param>
-    /// <param name="position">position</param>
-    /// <param name="size">size ratio</param>
-    public Drawing3DImage(IDalamudTextureWrap? wrap, Vector3 position, float size = 1)
-       : this(wrap?.ImGuiHandle ?? IntPtr.Zero, position,
-             wrap?.Width * size ?? 0, wrap?.Height * size ?? 0)
-    {
-    }
-
-    /// <summary>
-    /// Set the new texture.
-    /// </summary>
-    /// <param name="wrap">texture</param>
-    /// <param name="size">size ratio</param>
-    public void SetTexture(IDalamudTextureWrap? wrap, float size = 1)
-    {
-        ImageID = wrap?.ImGuiHandle ?? IntPtr.Zero;
-        Width = wrap?.Width * size ?? 0;
-        Height = wrap?.Height * size ?? 0;
-    }
-
 
     /// <summary>
     /// Convert this to the 2d elements.
@@ -79,14 +49,14 @@ public class Drawing3DImage(nint imageId, Vector3 position, float width, float h
     /// <returns></returns>
     public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
-        if (HideIfInvisible && !Position.CanSee() || ImageID == 0 || Height == 0 || Width == 0) 
+        if (HideIfInvisible && !Position.CanSee() || Image == null || Size == 0) 
             return Array.Empty<IDrawing2D>();
 
         var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false, false, DrawWithHeight);
         if (pts.Length == 0) return Array.Empty<IDrawing2D>();
         var pt = pts[0];
 
-        var half = new Vector2(Width / 2, Height / 2);
+        var half = new Vector2(Image.Width * Size / 2, Image.Height * Size / 2);
 
         if (MustInViewRange) unsafe
             {
@@ -99,6 +69,6 @@ public class Drawing3DImage(nint imageId, Vector3 position, float width, float h
                 pt = XIVPainter.GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
             }
 
-        return new IDrawing2D[] { new ImageDrawing(ImageID, pt - half, pt + half) };
+        return new IDrawing2D[] { new ImageDrawing(Image, pt - half, pt + half) };
     }
 }

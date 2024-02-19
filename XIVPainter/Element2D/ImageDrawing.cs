@@ -1,4 +1,6 @@
-﻿namespace XIVPainter.Element2D;
+﻿using Dalamud.Interface.Internal;
+
+namespace XIVPainter.Element2D;
 
 /// <summary>
 /// Drawing the image.
@@ -6,28 +8,28 @@
 /// <remarks>
 /// 
 /// </remarks>
-/// <param name="textureId"></param>
+/// <param name="texture"></param>
 /// <param name="pt1"></param>
 /// <param name="pt2"></param>
 /// <param name="col"></param>
-public readonly struct ImageDrawing(nint textureId, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
+public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
 {
-    readonly nint _textureId = textureId;
+    readonly IDalamudTextureWrap _texture = texture;
     readonly Vector2 _pt1 = pt1, _pt2 = pt2, _uv1 = default, _uv2 = Vector2.One;
     readonly uint _col = col;
 
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="textureId"></param>
+    /// <param name="texture"></param>
     /// <param name="pt1"></param>
     /// <param name="pt2"></param>
     /// <param name="uv1"></param>
     /// <param name="uv2"></param>
     /// <param name="col"></param>
-    public ImageDrawing(nint textureId, Vector2 pt1, Vector2 pt2, 
+    public ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, 
         Vector2 uv1, Vector2 uv2, uint col = uint.MaxValue)
-        :this(textureId, pt1, pt2, col)
+        :this(texture, pt1, pt2, col)
     {
         _uv1 = uv1;
         _uv2 = uv2;
@@ -38,6 +40,6 @@ public readonly struct ImageDrawing(nint textureId, Vector2 pt1, Vector2 pt2, ui
     /// </summary>
     public void Draw()
     {
-        ImGui.GetWindowDrawList().AddImage(_textureId, _pt1, _pt2, _uv1, _uv2, _col);
+        ImGui.GetWindowDrawList().AddImage(_texture.ImGuiHandle, _pt1, _pt2, _uv1, _uv2, _col);
     }
 }
