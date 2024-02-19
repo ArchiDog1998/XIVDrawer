@@ -5,33 +5,24 @@ namespace XIVPainter.Element3D;
 /// <summary>
 /// The text drawing.
 /// </summary>
-public class Drawing3DText : Drawing3D
+/// <param name="text"></param>
+/// <param name="position"></param>
+public class Drawing3DText(string text, Vector3 position) : Drawing3D
 {
     /// <summary>
     /// The text it should show.
     /// </summary>
-    public string Text { get; set; }
+    public string Text { get; set; } = text;
 
     /// <summary>
     /// The location of showing.
     /// </summary>
-    public Vector3 Position { get; set; }
+    public Vector3 Position { get; set; } = position;
 
     /// <summary>
     /// Should it hides if the <seealso cref="Position"/> can't be seen by the active camera.
     /// </summary>
     public bool HideIfInvisible { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="text"></param>
-    /// <param name="position"></param>
-    public Drawing3DText(string text, Vector3 position)
-    {
-        Text = text;
-        Position = position;
-    }
 
     /// <summary>
     /// Convert this to the 2d elements.

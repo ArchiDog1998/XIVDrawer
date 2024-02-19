@@ -36,8 +36,8 @@ public class Drawing3DHighlightLine: Drawing3DPoly
     /// <param name="thickness"></param>
     public Drawing3DHighlightLine(Vector3 from, Vector3 to, float radius, uint color, float thickness)
     {
-        SubItems = new IDrawing3D[]
-        {
+        SubItems =
+        [
             cir1 = new Drawing3DCircularSector(from, 0, color, thickness)
             {
                 IsFill = false,
@@ -46,7 +46,7 @@ public class Drawing3DHighlightLine: Drawing3DPoly
             {
                 IsFill = false,
             },
-        };
+        ];
         From = from;
         To = to;
         Radius = radius;

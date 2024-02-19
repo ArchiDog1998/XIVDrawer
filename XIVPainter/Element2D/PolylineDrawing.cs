@@ -3,24 +3,17 @@
 /// <summary>
 /// Polyline drawing.
 /// </summary>
-public readonly struct PolylineDrawing : IDrawing2D
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="pts"></param>
+/// <param name="color"></param>
+/// <param name="thickness"></param>
+public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thickness) : IDrawing2D
 {
-    readonly Vector2[] _pts;
-    readonly uint _color;
-    readonly internal float _thickness;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="pts"></param>
-    /// <param name="color"></param>
-    /// <param name="thickness"></param>
-    public PolylineDrawing(Vector2[] pts, uint color, float thickness)
-    {
-        _pts = pts;
-        _color = color;
-        _thickness = thickness;
-    }
+    readonly Vector2[] _pts = pts;
+    readonly uint _color = color;
+    readonly internal float _thickness = thickness;
 
     /// <summary>
     /// Draw on the <seealso cref="ImGui"/>

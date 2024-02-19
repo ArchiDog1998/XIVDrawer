@@ -91,7 +91,7 @@ public class DrawingHighlightHotbar : IDrawing
     {
         if(_texture == null) return Array.Empty<IDrawing2D>();
 
-        List<IDrawing2D> result = new ();
+        List<IDrawing2D> result = new();
 
         var hotBarIndex = 0;
         foreach (var intPtr in GetAddons<AddonActionBar>()

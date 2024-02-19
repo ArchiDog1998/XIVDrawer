@@ -1,6 +1,4 @@
-﻿using Dalamud.Game.ClientState.Conditions;
-
-namespace XIVPainter.Element2D;
+﻿namespace XIVPainter.Element2D;
 
 /// <summary>
 /// Drawing the image.
@@ -35,28 +33,11 @@ public readonly struct ImageDrawing(nint textureId, Vector2 pt1, Vector2 pt2, ui
         _uv2 = uv2;
     }
 
-    private static DateTime _time = DateTime.Now;
-
     /// <summary>
     /// Draw on the <seealso cref="ImGui"/>
     /// </summary>
     public void Draw()
     {
-        var canDraw = !Service.Condition[ConditionFlag.BetweenAreas]
-        && !Service.Condition[ConditionFlag.BetweenAreas51]
-        && !Service.Condition[ConditionFlag.OccupiedInCutSceneEvent];
-
-        if (!canDraw)
-        {
-            _time = DateTime.Now;
-            return;
-        }
-
-        if (DateTime.Now - _time < TimeSpan.FromSeconds(5))
-        {
-            return;
-        }
-
         ImGui.GetWindowDrawList().AddImage(_textureId, _pt1, _pt2, _uv1, _uv2, _col);
     }
 }
