@@ -61,8 +61,13 @@ internal static class RaycastManager
                     }
                 }
 
+                if (Service.Condition[ConditionFlag.BetweenAreas]
+                    || Service.Condition[ConditionFlag.BetweenAreas51])
+                {
+                    _rayRelay.Clear();
+                }
                 //Remove
-                if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
+                else if (Service.ClientState != null && Service.ClientState.LocalPlayer != null)
                 {
                     var loc = Service.ClientState.LocalPlayer.Position;
                     var pos = GetKey(in loc);
