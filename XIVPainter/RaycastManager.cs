@@ -10,11 +10,9 @@ internal static class RaycastManager
 {
 #if DEBUG
     public static int PointCount => _rayRelay.Count;
-
-    public
 #endif
-    const int Compacity = 60 * 60 * 100;
 
+    const float PtsRange = 60;
     readonly static KdTree<float, (DateTime addTime, float value)> _rayRelay = new (2, new FloatMath(), AddDuplicateBehavior.Update);
 
     static readonly Queue<Vector3> _calculatingPts = new ();
@@ -68,11 +66,11 @@ internal static class RaycastManager
                 {
                     var loc = Service.ClientState.LocalPlayer.Position;
                     var pos = GetKey(in loc);
-                    while (_rayRelay.Count > Compacity)
+
+                    foreach (var p in _rayRelay)
                     {
-                        var removed = _rayRelay.MaxBy(p => Vector2.Distance(new Vector2(p.Point[0], p.Point[1]), pos));
-                        if (removed == null) continue;
-                        _rayRelay.RemoveAt(removed.Point);
+                        if (Vector2.Distance(new Vector2(p.Point[0], p.Point[1]), pos) < PtsRange) continue;
+                        _rayRelay.RemoveAt(p.Point);
                     }
                 }
 
@@ -84,7 +82,6 @@ internal static class RaycastManager
                     var key = GetKey(in vector);
                     var value = Raycast(in vector);
 
-                    _rayRelay.RemoveAt([key.X, key.Y]);
                     _rayRelay.Add([key.X, key.Y], (DateTime.Now, value));
                 }
             }
