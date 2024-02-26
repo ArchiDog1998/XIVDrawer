@@ -19,6 +19,7 @@ public class XIVPainter : IDisposable
     internal readonly string _name;
 
     internal readonly List<IDrawing> _drawingElements = [];
+    internal IDrawing2D[] _drawingElements2D = [];
     internal readonly List<Drawing3DHighlightLine> _outLineGo = [];
 
     private readonly WindowSystem windowSystem;
@@ -43,7 +44,7 @@ public class XIVPainter : IDisposable
     /// <summary>
     /// The length of sample, please don't set this too low!
     /// </summary>
-    public float SampleLength { get; set; } = 0.2f;
+    public float SampleLength { get; set; } = 1;
 
     /// <summary>
     /// How long should the animation of disappearing be in second.
@@ -84,6 +85,11 @@ public class XIVPainter : IDisposable
     /// The offset of the polygon that it should go.
     /// </summary>
     public float MovingSuggestionOffset { get; set; } = 0.1f;
+
+    /// <summary>
+    /// To make it faster
+    /// </summary>
+    public bool UseTaskToAccelerate { get; set; } = false;
     #endregion
 
     /// <summary>
@@ -189,73 +195,14 @@ public class XIVPainter : IDisposable
                 }
             }
 
-            if (MovingSuggestion) tasks.Add(Task.Run(() =>
-            {
-                _outLineGo.Clear();
-
-                if (Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
-
-                Vector3 start = Service.ClientState.LocalPlayer.Position;
-                var color = ImGui.ColorConvertU32ToFloat4(MovingSuggestionColor);
-
-                foreach (var pair in movingPoly.GroupBy(poly => poly.DeadTime).OrderBy(p => p.Key))
-                {
-                    var c = pair.Count();
-                    List<Drawing3DPolyline> outPoly = new (c),
-                                            inPoly = new (c);
-
-                    foreach (var p in pair)
-                    {
-                        if(p.PolylineType == Enum.PolylineType.ShouldGoIn) inPoly.Add(p);
-                        else if (p.PolylineType == Enum.PolylineType.ShouldGoOut) outPoly.Add(p);
-                    }
-
-                    var outPts = GetUnion(outPoly);
-                    var inPts = GetUnion(inPoly);
-
-
-                    if ((outPts == null || !DrawingExtensions.IsPointInside(start, outPts))
-                    && (inPts == null || DrawingExtensions.IsPointInside(start, inPts))) continue;
-
-                    outPts = DrawingExtensions.OffSetPolyline(outPts, -MovingSuggestionOffset);
-                    inPts = DrawingExtensions.OffSetPolyline(inPts, MovingSuggestionOffset);
-
-                    Vector3 to = Vector3.Zero;
-                    if(outPts != null && inPts != null)
-                    {
-                        var o = DrawingExtensions.Vec3ToPathsD(outPts);
-                        var i = DrawingExtensions.Vec3ToPathsD(inPts);
-                        var r = Clipper.Difference(i, o, FillRule.NonZero);
-                        if(r != null)
-                        {
-                            var h1 = outPts.Sum(poly => poly.Sum(p => p.Y) / poly.Length) / outPts.Count();
-                            var h2 = inPts.Sum(poly => poly.Sum(p => p.Y) / poly.Length) / inPts.Count();
-
-                            var pts = DrawingExtensions.PathsDToVec3(r, (h1 + h2) /2);
-                            if(pts != null && pts.Any())
-                            {
-                                to = DrawingExtensions.GetClosestPoint(start, pts);
-                            }
-                        }
-                    }
-
-                    if (to == Vector3.Zero)
-                    {
-                        if (outPts != null) to = DrawingExtensions.GetClosestPoint(start, outPts);
-                        else if (inPts != null) to = DrawingExtensions.GetClosestPoint(start, inPts);
-                        else continue;
-                    }
-
-                    var go = new Drawing3DHighlightLine(start, to, 0.5f, ImGui.ColorConvertFloat4ToU32(color), 4);
-                    start = to;
-                    color.W *= 0.8f;
-
-                    go.UpdateOnFrame(this);
-                    _outLineGo.Add(go);
-                }
-            }));
+            if (MovingSuggestion) tasks.Add(Task.Run(() => DrawMovingSuggestion(movingPoly)));
 
             await Task.WhenAll([.. tasks]);
+
+            if (UseTaskToAccelerate)
+            {
+                _drawingElements2D = await To2DAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -263,6 +210,93 @@ public class XIVPainter : IDisposable
         }
 
         _started = false;
+    }
+
+    internal async Task<IDrawing2D[]> To2DAsync()
+    {
+        List<Task<IEnumerable<IDrawing2D>>> drawing2Ds = [];
+
+        if (_drawingElements != null)
+        {
+            drawing2Ds.AddRange(_drawingElements.Select(item => Task.Run(() =>
+            {
+                return item.To2D(this);
+            })));
+        }
+
+        drawing2Ds.AddRange(_outLineGo.Select(item => Task.Run(() =>
+        {
+            return item.To2D(this);
+        })));
+        await Task.WhenAll([.. drawing2Ds]);
+        return drawing2Ds.SelectMany(i => i.Result).ToArray();
+    }
+
+    private void DrawMovingSuggestion(List<Drawing3DPolyline> movingPoly)
+    {
+        _outLineGo.Clear();
+
+        if (Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
+
+        Vector3 start = Service.ClientState.LocalPlayer.Position;
+        var color = ImGui.ColorConvertU32ToFloat4(MovingSuggestionColor);
+
+        foreach (var pair in movingPoly.GroupBy(poly => poly.DeadTime).OrderBy(p => p.Key))
+        {
+            var c = pair.Count();
+            List<Drawing3DPolyline> outPoly = new(c),
+                                    inPoly = new(c);
+
+            foreach (var p in pair)
+            {
+                if (p.PolylineType == Enum.PolylineType.ShouldGoIn) inPoly.Add(p);
+                else if (p.PolylineType == Enum.PolylineType.ShouldGoOut) outPoly.Add(p);
+            }
+
+            var outPts = GetUnion(outPoly);
+            var inPts = GetUnion(inPoly);
+
+
+            if ((outPts == null || !DrawingExtensions.IsPointInside(start, outPts))
+            && (inPts == null || DrawingExtensions.IsPointInside(start, inPts))) continue;
+
+            outPts = DrawingExtensions.OffSetPolyline(outPts, -MovingSuggestionOffset);
+            inPts = DrawingExtensions.OffSetPolyline(inPts, MovingSuggestionOffset);
+
+            Vector3 to = Vector3.Zero;
+            if (outPts != null && inPts != null)
+            {
+                var o = DrawingExtensions.Vec3ToPathsD(outPts);
+                var i = DrawingExtensions.Vec3ToPathsD(inPts);
+                var r = Clipper.Difference(i, o, FillRule.NonZero);
+                if (r != null)
+                {
+                    var h1 = outPts.Sum(poly => poly.Sum(p => p.Y) / poly.Length) / outPts.Count();
+                    var h2 = inPts.Sum(poly => poly.Sum(p => p.Y) / poly.Length) / inPts.Count();
+
+                    var pts = DrawingExtensions.PathsDToVec3(r, (h1 + h2) / 2);
+                    if (pts != null && pts.Any())
+                    {
+                        to = DrawingExtensions.GetClosestPoint(start, pts);
+                    }
+                }
+            }
+
+            if (to == Vector3.Zero)
+            {
+                if (outPts != null) to = DrawingExtensions.GetClosestPoint(start, outPts);
+                else if (inPts != null) to = DrawingExtensions.GetClosestPoint(start, inPts);
+                else continue;
+            }
+
+            var go = new Drawing3DHighlightLine(start, to, 0.5f, ImGui.ColorConvertFloat4ToU32(color), 4);
+            start = to;
+            color.W *= 0.8f;
+
+            go.UpdateOnFrame(this);
+            _outLineGo.Add(go);
+        }
+
     }
 
     private static IEnumerable<Vector3[]>? GetUnion(IEnumerable<Drawing3DPolyline> polys)

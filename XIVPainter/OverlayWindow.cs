@@ -36,22 +36,12 @@ internal class OverlayWindow : Window
 #endif
         try
         {
-            IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
-
-            if (_owner._drawingElements != null)
+            if (!_owner.UseTaskToAccelerate)
             {
-                foreach (var item in _owner._drawingElements)
-                {
-                    result = result.Concat(item.To2D(_owner));
-                }
+                _owner._drawingElements2D = _owner.To2DAsync().Result;
             }
 
-            foreach (var item in _owner._outLineGo)
-            {
-                result = result.Concat(item.To2D(_owner));
-            }
-
-            foreach (var item in result.OrderBy(drawing =>
+            foreach (var item in _owner._drawingElements2D.OrderBy(drawing =>
             {
                 if (drawing is PolylineDrawing poly)
                 {
