@@ -44,7 +44,10 @@
 			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-
+		<Reference Include="SharpDX.Mathematics">
+			<HintPath>$(DalamudLibPath)SharpDX.Mathematics.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
 		<Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
 		<Using Include="Dalamud.Interface" />
 		<Using Include="Newtonsoft.Json" />

@@ -31,7 +31,6 @@ internal static class VfxManager
     public static StaticVfxRemoveDelegate? StaticVfxRemove;
 
     // ======= STATIC HOOKS ========
-
     public static Hook<StaticVfxRemoveDelegate>? StaticVfxRemoveHook { get; private set; }
 
     // ======== ACTOR =============
@@ -78,6 +77,7 @@ internal static class VfxManager
         StaticVfxRemoveHook.Enable();
         ActorVfxRemoveHook.Enable();
 
+        Service.ClientState.Logout += ClearAllVfx;
 #if DEBUG
         unsafe
         {
@@ -90,8 +90,20 @@ internal static class VfxManager
 #endif
     }
 
+    public static void ClearAllVfx()
+    {
+        foreach (var item in AddedVfxStructs)
+        {
+            item.Dispose();
+        }
+    }
+
     public static void Dispose()
     {
+        ClearAllVfx();
+
+        Service.ClientState.Logout -= ClearAllVfx;
+
         StaticVfxRemoveHook?.Dispose();
         ActorVfxRemoveHook?.Dispose();
 #if DEBUG
@@ -127,7 +139,7 @@ internal static class VfxManager
     {
         DrawDebug(pPath);
         return _getResourceSyncHook!.Original(pFileManager, pCategoryId, pResourceType, pResourceHash, pPath, pUnknown);
-    }
+        }
 
     private unsafe static void* GetResourceAsyncDetour(IntPtr pFileManager, uint* pCategoryId, char* pResourceType, uint* pResourceHash, char* pPath, void* pUnknown, bool isUnknown)
     {

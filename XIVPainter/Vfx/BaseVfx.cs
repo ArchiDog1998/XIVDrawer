@@ -10,7 +10,7 @@ internal unsafe struct VfxStruct
 {
     [FieldOffset(0x38)] public byte Flags;
     [FieldOffset(0x50)] public Vector3 Position;
-    [FieldOffset(0x60)] public Vector4 Rotation;
+    [FieldOffset(0x60)] public Quat Rotation;
     [FieldOffset(0x70)] public Vector3 Scale;
 
     [FieldOffset(0x128)] public int ActorCaster;
@@ -20,13 +20,52 @@ internal unsafe struct VfxStruct
     [FieldOffset(0x1C0)] public int StaticTarget;
 }
 
+[StructLayout(LayoutKind.Sequential)]
+internal struct Quat
+{
+    public float X;
+    public float Z;
+    public float Y;
+    public float W;
+
+    public static implicit operator System.Numerics.Vector4(Quat pos) => new(pos.X, pos.Y, pos.Z, pos.W);
+
+    public static implicit operator SharpDX.Vector4(Quat pos) => new(pos.X, pos.Z, pos.Y, pos.W);
+}
+
 /// <summary>
 /// The basic vfx
 /// </summary>
 public abstract unsafe class BaseVfx : IDisposable
 {
-    private VfxStruct* Vfx;
+    private protected VfxStruct* Vfx;
 
+    private float _height;
+    private bool _enable = true;
+    public bool Enable 
+    {
+        get => _enable;
+        set
+        {
+            if (_enable == value) return;
+            _enable = value;
+
+            unsafe
+            {
+                if (_enable)
+                {
+                    Vfx->Scale.Y = _height;
+                }
+                else
+                {
+                    _height = Vfx->Scale.Y;
+                    Vfx->Scale.Y = 0;
+                }
+            }
+
+            Update();
+        }
+    }
     internal IntPtr Handle 
     { 
         get =>(IntPtr)Vfx;
@@ -38,10 +77,31 @@ public abstract unsafe class BaseVfx : IDisposable
         }
     }
 
+    private protected BaseVfx()
+    {
+        Service.Framework.Update += Framework_Update;
+    }
+
+    private void Framework_Update(Dalamud.Plugin.Services.IFramework framework)
+    {
+        CustomUpdate();
+        if (!Enable)
+        {
+            Vfx->Scale.Y = 0;
+        }
+        Update();
+    }
+
+    private protected virtual void CustomUpdate()
+    {
+
+    }
+
     /// <inheritdoc/>>
     public void Dispose()
     {
         GC.SuppressFinalize(this);
+        Service.Framework.Update -= Framework_Update;
 
         if (!VfxManager.AddedVfxStructs.Remove(this)) return;
         if (Handle == IntPtr.Zero) return;
@@ -58,7 +118,6 @@ public abstract unsafe class BaseVfx : IDisposable
     public void Update()
     {
         if (Vfx == null) return;
-
         Vfx->Flags |= 0x2;
     }
 
@@ -97,12 +156,19 @@ public abstract unsafe class BaseVfx : IDisposable
     /// 
     /// </summary>
     /// <param name="rotation"></param>
+    public void UpdateRotation(float rotation) 
+        => UpdateRotation(new Vector3(0, 0, rotation));
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="rotation"></param>
     public void UpdateRotation(Vector3 rotation)
     {
         if (Vfx == null) return;
 
         var q = Quaternion.CreateFromYawPitchRoll(rotation.X, rotation.Y, rotation.Z);
-        Vfx->Rotation = new Vector4
+        Vfx->Rotation = new Quat
         {
             X = q.X,
             Y = q.Y,

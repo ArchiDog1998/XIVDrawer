@@ -3,7 +3,7 @@
 namespace XIVPainter.Enum;
 
 /// <summary>
-/// The type of the Omen.
+/// 
 /// </summary>
 public enum GroundOmenType
 {
