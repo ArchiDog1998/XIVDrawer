@@ -95,7 +95,7 @@ public class Drawing3DPolyline : Drawing3D
         var screenPts = new List<Vector2[]>(BorderPoints.Count());
         foreach (var points in BorderPoints)
         {
-            var pts = owner.GetPtsOnScreen(points, Thickness > 0, false, DrawWithHeight);
+            var pts = owner.GetPtsOnScreen(points, Thickness > 0, false);
             screenPts.Add(pts);
 
             if (hasBorder)
@@ -108,7 +108,7 @@ public class Drawing3DPolyline : Drawing3D
                     {
                         foreach (var item in DrawingExtensions.OffSetPolyline(points.ToArray(), -AnimationRatio))
                         {
-                            var offset = owner.GetPtsOnScreen(item, true, false, DrawWithHeight);
+                            var offset = owner.GetPtsOnScreen(item, true, false);
 
                             baseColor.W *= 1 - AnimationRatio;
 
@@ -132,7 +132,7 @@ public class Drawing3DPolyline : Drawing3D
         {
             foreach (var points in FillPoints)
             {
-                var pts = owner.GetPtsOnScreen(points, true, false, DrawWithHeight);
+                var pts = owner.GetPtsOnScreen(points, true, false);
 
                 result = result.Concat(DrawingExtensions.ConvexPoints(pts)
                     .Select(p => new PolylineDrawing(p, fillColor, 0) as IDrawing2D));

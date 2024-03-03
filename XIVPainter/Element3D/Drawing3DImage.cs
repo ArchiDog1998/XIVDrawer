@@ -50,10 +50,10 @@ public class Drawing3DImage(IDalamudTextureWrap? texture, Vector3 position, floa
     public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
     {
         if (HideIfInvisible && !Position.CanSee() || Image == null || Size == 0) 
-            return Array.Empty<IDrawing2D>();
+            return [];
 
-        var pts = owner.GetPtsOnScreen(new Vector3[] { Position }, false, false, DrawWithHeight);
-        if (pts.Length == 0) return Array.Empty<IDrawing2D>();
+        var pts = owner.GetPtsOnScreen([Position], false, false);
+        if (pts.Length == 0) return [];
         var pt = pts[0];
 
         var half = new Vector2(Image.Width * Size / 2, Image.Height * Size / 2);

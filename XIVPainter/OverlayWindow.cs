@@ -30,10 +30,6 @@ internal class OverlayWindow : Window
 
         ImGui.GetStyle().AntiAliasedFill = false;
 
-#if DEBUG
-        ImGui.TextColored(Dalamud.Interface.Colors.ImGuiColors.DalamudRed,
-            $"{RaycastManager.PointCount}");
-#endif
         try
         {
             if (!_owner.UseTaskToAccelerate)

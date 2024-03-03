@@ -28,9 +28,6 @@
 			<HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-		<Reference Include="KdTreeLib">
-		  <HintPath>..\Dependencies\KdTreeLib.dll</HintPath>
-		</Reference>
 		<Reference Include="Lumina">
 			<HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
 			<Private>False</Private>

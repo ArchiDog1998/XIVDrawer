@@ -8,6 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using XIVPainter.Element2D;
 using XIVPainter.Element3D;
 using XIVPainter.ElementSpecial;
+using XIVPainter.Vfx;
 
 namespace XIVPainter;
 
@@ -35,11 +36,6 @@ public class XIVPainter : IDisposable
     /// if the points of the polyline is not on the ground, remove it.
     /// </summary>
     public bool RemovePtsNotOnGround { get; set; } = false;
-
-    /// <summary>
-    /// The height of drawing in the world for making the polyline on the ground.
-    /// </summary>
-    public float DrawingHeight { get; set; } = 3;
 
     /// <summary>
     /// The length of sample, please don't set this too low!
@@ -104,6 +100,8 @@ public class XIVPainter : IDisposable
         return new XIVPainter(name);
     }
 
+    private bool _isDisposed = false;
+    private static byte _count = 0;
     private XIVPainter(string name)
     {
         _name = name;
@@ -112,7 +110,12 @@ public class XIVPainter : IDisposable
 
         Service.PluginInterface.UiBuilder.Draw += windowSystem.Draw;
         Service.Framework.Update += Update;
-        RaycastManager.Enable();
+
+        if (_count == 0)
+        {
+            VfxManager.Init();
+        }
+        _count ++;
     }
 
     /// <summary>
@@ -120,10 +123,19 @@ public class XIVPainter : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
         Service.PluginInterface.UiBuilder.Draw -= windowSystem.Draw;
         Service.Framework.Update -= Update;
 
-        RaycastManager.Dispose();
+        _count--;
+
+        if (_count == 0)
+        {
+            VfxManager.Dispose();
+        }
+
         GC.SuppressFinalize(this);
     }
 
@@ -364,11 +376,10 @@ public class XIVPainter : IDisposable
     /// <param name="pts"></param>
     /// <param name="isClosed">Is pts closed</param>
     /// <param name="inScreen">Must be draw in the screen.</param>
-    /// <param name="withHeight">With draw height.</param>
     /// <returns></returns>
-    public Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed, bool inScreen, bool withHeight)
+    public Vector2[] GetPtsOnScreen(IEnumerable<Vector3> pts, bool isClosed, bool inScreen)
     {
-        var cameraPts = ProjectPtsOnGround(DivideCurve(pts, SampleLength, isClosed), withHeight ? DrawingHeight : 0)
+        var cameraPts = DivideCurve(pts, SampleLength, isClosed)
             .Select(WorldToCamera).ToArray();
         var changedPts = ChangePtsBehindCamera(cameraPts);
 
@@ -430,26 +441,6 @@ public class XIVPainter : IDisposable
         }
 
         return changedPts.Where(p => p.Z > 0);
-    }
-
-    unsafe IEnumerable<Vector3> ProjectPtsOnGround(IEnumerable<Vector3> pts, float height)
-    {
-        if (!RemovePtsNotOnGround && height <= 0) 
-            return pts;
-
-        var result = new List<Vector3>(pts.Count());
-        foreach (var pt in pts)
-        {
-            if (RaycastManager.Raycast(in pt, in height, out var territoryPt))
-            {
-                result.Add(territoryPt);
-            }
-            else if (!RemovePtsNotOnGround)
-            {
-                result.Add(pt - Vector3.UnitY * height);
-            }
-        }
-        return result;
     }
 
     const float PLANE_Z = 0.001f;
