@@ -100,7 +100,6 @@ public enum GroundOmenType
     CircularSector180_Er,
     #endregion
 
-
     /// <summary>
     /// Angle 180, Scale 26 Outer 26, Inner 20.
     /// </summary>

@@ -20,7 +20,19 @@ public enum ObjectOmenType
     TankShare03_05,
 
     /// <summary>
-    /// Radius 7, 5 Seconds.
+    /// New one IDK.
+    /// </summary>
+    [VfxPath("vfx/lockon/eff/com_share1f.avfx")]
+    ShareSmall,
+
+    /// <summary>
+    /// Radius 6, 5 Seconds.
+    /// </summary>
+    [VfxPath("vfx/lockon/eff/com_share0c.avfx")]
+    Share06,
+
+    /// <summary>
+    /// Radius 6, 5 Seconds.
     /// </summary>
     [VfxPath("vfx/lockon/eff/com_share3t.avfx")]
     Share07,

@@ -77,6 +77,7 @@ public abstract unsafe class BaseVfx : IDisposable
         }
     }
 
+    public DateTime DeadTime { get; set; } = DateTime.MinValue;
     private protected BaseVfx()
     {
         Service.Framework.Update += Framework_Update;
@@ -84,6 +85,12 @@ public abstract unsafe class BaseVfx : IDisposable
 
     private void Framework_Update(Dalamud.Plugin.Services.IFramework framework)
     {
+        if (DeadTime != DateTime.MinValue && DeadTime < DateTime.Now)
+        {
+            Dispose();
+            return;
+        }
+
         CustomUpdate();
         if (!Enable)
         {

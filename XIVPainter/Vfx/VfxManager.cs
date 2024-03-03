@@ -160,13 +160,13 @@ internal static class VfxManager
                 Service.Log.Debug("Omen: " + path);
             }
         }
-        //else if (!path.StartsWith("vfx/common/eff/"))
-        //{
-        //    if (!System.Enum.GetValues<ObjectOmenType>().Any(i => i.GetAttribute<VfxPathAttribute>()?.Path == path))
-        //    {
-        //        Service.Log.Debug("Object: " + path);
-        //    }
-        //}
+        else if (!path.StartsWith("vfx/common/eff/"))
+        {
+            if (!System.Enum.GetValues<ObjectOmenType>().Any(i => i.GetAttribute<VfxPathAttribute>()?.Path == path))
+            {
+                Service.Log.Verbose("Object Unknown: " + path);
+            }
+        }
         static unsafe string ReadTerminatedString(byte* ptr)
         {
             if (ptr == null)

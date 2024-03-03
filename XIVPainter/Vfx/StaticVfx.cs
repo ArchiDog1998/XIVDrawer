@@ -11,6 +11,8 @@ public class StaticVfx : BaseVfx
 
     public GameObject? Target { get; set; }
 
+    public float RotateAddition { get; init; }
+
     /// <summary>
     /// 
     /// </summary>
@@ -66,7 +68,7 @@ public class StaticVfx : BaseVfx
         else
         {
             var dir = Target.Position - Owner.Position;
-            UpdateRotation(MathF.Atan2(dir.X , dir.Z));
+            UpdateRotation(MathF.Atan2(dir.X , dir.Z) + RotateAddition);
         }
     }
 
