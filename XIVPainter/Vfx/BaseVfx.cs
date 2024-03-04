@@ -36,13 +36,15 @@ internal struct Quat
 /// <summary>
 /// The basic vfx
 /// </summary>
-public abstract unsafe class BaseVfx : IDisposable
+public abstract unsafe class BaseVfx() : BasicDrawing()
 {
     private protected VfxStruct* Vfx;
 
     private float _height;
     private bool _enable = true;
-    public bool Enable 
+
+    /// <inheritdoc/>
+    public override bool Enable 
     {
         get => _enable;
         set
@@ -77,20 +79,8 @@ public abstract unsafe class BaseVfx : IDisposable
         }
     }
 
-    public DateTime DeadTime { get; set; } = DateTime.MinValue;
-    private protected BaseVfx()
+    private protected sealed override void AdditionalUpdate()
     {
-        Service.Framework.Update += Framework_Update;
-    }
-
-    private void Framework_Update(Dalamud.Plugin.Services.IFramework framework)
-    {
-        if (DeadTime != DateTime.MinValue && DeadTime < DateTime.Now)
-        {
-            Dispose();
-            return;
-        }
-
         CustomUpdate();
         if (!Enable)
         {
@@ -105,18 +95,14 @@ public abstract unsafe class BaseVfx : IDisposable
     }
 
     /// <inheritdoc/>>
-    public void Dispose()
+    private protected sealed override void AdditionalDispose()
     {
-        GC.SuppressFinalize(this);
-        Service.Framework.Update -= Framework_Update;
-
         if (!VfxManager.AddedVfxStructs.Remove(this)) return;
         if (Handle == IntPtr.Zero) return;
         Remove();
 
         Vfx = null;
     }
-
     private protected abstract void Remove();
 
     /// <summary>

@@ -75,27 +75,26 @@ public class Drawing3DPolyline : Drawing3D
     /// <summary>
     /// Convert this to the 2d elements.
     /// </summary>
-    /// <param name="owner"></param>
     /// <returns></returns>
-    public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
+    private protected override IEnumerable<IDrawing2D> To2D()
     {
         var baseColor = ImGui.ColorConvertU32ToFloat4(showColor);
 
-        if(baseColor.W == 0) return Array.Empty<IDrawing2D>();
+        if(baseColor.W == 0) return [];
 
         baseColor.W *= AlphaRatio;
         var fillColor = ImGui.ColorConvertFloat4ToU32(baseColor);
         baseColor.W = AlphaRatio;
         var boarderColor = ImGui.ColorConvertFloat4ToU32(baseColor);
 
-        IEnumerable<IDrawing2D> result = Array.Empty<IDrawing2D>();
+        IEnumerable<IDrawing2D> result = [];
         var hasFill = FillPoints != null && FillPoints.Any();
         var hasBorder = Thickness != 0;
 
         var screenPts = new List<Vector2[]>(BorderPoints.Count());
         foreach (var points in BorderPoints)
         {
-            var pts = owner.GetPtsOnScreen(points, Thickness > 0, false);
+            var pts = XIVPainterMain.GetPtsOnScreen(points, Thickness > 0, false);
             screenPts.Add(pts);
 
             if (hasBorder)
@@ -108,7 +107,7 @@ public class Drawing3DPolyline : Drawing3D
                     {
                         foreach (var item in DrawingExtensions.OffSetPolyline(points.ToArray(), -AnimationRatio))
                         {
-                            var offset = owner.GetPtsOnScreen(item, true, false);
+                            var offset = XIVPainterMain.GetPtsOnScreen(item, true, false);
 
                             baseColor.W *= 1 - AnimationRatio;
 
@@ -132,7 +131,7 @@ public class Drawing3DPolyline : Drawing3D
         {
             foreach (var points in FillPoints)
             {
-                var pts = owner.GetPtsOnScreen(points, true, false);
+                var pts = XIVPainterMain.GetPtsOnScreen(points, true, false);
 
                 result = result.Concat(DrawingExtensions.ConvexPoints(pts)
                     .Select(p => new PolylineDrawing(p, fillColor, 0) as IDrawing2D));
@@ -145,10 +144,9 @@ public class Drawing3DPolyline : Drawing3D
     /// <summary>
     /// The things that can be done in the task.
     /// </summary>
-    /// <param name="painter"></param>
-    public override void UpdateOnFrame(XIVPainter painter)
+    protected override void UpdateOnFrame()
     {
-        base.UpdateOnFrame(painter);
+        base.UpdateOnFrame();
 
         if (DeadTime != DateTime.MinValue && DateTime.Now > DeadTime) return;
         var inside = Service.ClientState.LocalPlayer != null && DrawingExtensions.IsPointInside(Service.ClientState.LocalPlayer.Position, BorderPoints);

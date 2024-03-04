@@ -45,14 +45,13 @@ public class Drawing3DImage(IDalamudTextureWrap? texture, Vector3 position, floa
     /// <summary>
     /// Convert this to the 2d elements.
     /// </summary>
-    /// <param name="owner"></param>
     /// <returns></returns>
-    public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
+    private protected override IEnumerable<IDrawing2D> To2D()
     {
         if (HideIfInvisible && !Position.CanSee() || Image == null || Size == 0) 
             return [];
 
-        var pts = owner.GetPtsOnScreen([Position], false, false);
+        var pts = XIVPainterMain.GetPtsOnScreen([Position], false, false);
         if (pts.Length == 0) return [];
         var pt = pts[0];
 
@@ -66,9 +65,9 @@ public class Drawing3DImage(IDalamudTextureWrap? texture, Vector3 position, floa
                 float width = device->Width;
                 float height = device->Height;
 
-                pt = XIVPainter.GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
+                pt = XIVPainterMain.GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
             }
 
-        return new IDrawing2D[] { new ImageDrawing(Image, pt - half, pt + half) };
+        return [new ImageDrawing(Image, pt - half, pt + half)];
     }
 }

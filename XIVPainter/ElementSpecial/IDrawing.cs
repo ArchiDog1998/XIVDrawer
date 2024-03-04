@@ -5,18 +5,31 @@ namespace XIVPainter.ElementSpecial;
 /// <summary>
 /// Drawing element
 /// </summary>
-public interface IDrawing
+public abstract class  IDrawing : BasicDrawing
 {
-    /// <summary>
-    /// The things that can be done in the task.
-    /// </summary>
-    /// <param name="painter"></param>
-    void UpdateOnFrame(XIVPainter painter);
+    private protected IDrawing()
+    {
+        XIVPainterMain._drawingElements.Add(this);
+    }
 
-    /// <summary>
-    /// Convert this to the 2d elements.
-    /// </summary>
-    /// <param name="owner"></param>
-    /// <returns></returns>
-    IEnumerable<IDrawing2D> To2D(XIVPainter owner);
+    internal void UpdateOnFrameMain()
+    {
+        if (!Enable) return;
+        UpdateOnFrame();
+    }
+
+    protected abstract void UpdateOnFrame();
+
+    internal IEnumerable<IDrawing2D> To2DMain()
+    {
+        if (!Enable) return [];
+        return To2D();
+    }
+
+    private protected abstract IEnumerable<IDrawing2D> To2D();
+
+    private protected override void AdditionalDispose()
+    {
+        XIVPainterMain._drawingElements.Remove(this);
+    }
 }

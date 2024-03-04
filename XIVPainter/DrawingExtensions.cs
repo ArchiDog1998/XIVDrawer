@@ -75,60 +75,6 @@ public static class DrawingExtensions
     }
 
     /// <summary>
-    /// Get the closest point to the polygon.
-    /// </summary>
-    /// <param name="pt">testing point</param>
-    /// <param name="pts">polygon</param>
-    /// <returns>closest point</returns>
-    public static Vector3 GetClosestPoint(Vector3 pt, IEnumerable<IEnumerable<Vector3>> pts)
-    {
-        float minDis = float.MaxValue;
-        Vector3 result = default;
-
-        foreach (var partPts in pts)
-        {
-            SegmentAction(partPts, (a, b) =>
-            {
-                var dis = PointSegment(pt, a, b, out var res);
-                if(dis < minDis)
-                {
-                    minDis = dis;
-                    result = res;
-                }
-            });
-        }
-
-        return result;
-    }
-
-    static float PointSegment(in Vector3 p, in Vector3 a, in Vector3 b, out Vector3 cp)
-    {
-        Vector3 ab = b - a;
-        Vector3 ap = p - a;
-
-        float proj = Vector3.Dot(ap, ab);
-        float abLenSq = ab.LengthSquared();
-        float d = proj / abLenSq;
-
-        cp = d switch
-        {
-            <= 0 => a,
-            >= 1 => b,
-            _ => a + ab * d,
-        };
-        return Vector3.Distance(p, cp);
-    }
-
-    /// <summary>
-    /// Offset the polygon
-    /// </summary>
-    /// <param name="pts">polygon</param>
-    /// <param name="offset">distance to offset</param>
-    /// <returns>offseted polygon</returns>
-    public static IEnumerable<Vector3[]>? OffSetPolyline(in IEnumerable<Vector3[]>? pts, float offset)
-        => pts?.SelectMany(p => OffSetPolyline(p, offset));
-
-    /// <summary>
     /// Offset the polygon
     /// </summary>
     /// <param name="pts">polygon</param>
@@ -136,13 +82,13 @@ public static class DrawingExtensions
     /// <returns>offseted polygon</returns>
     public static IEnumerable<Vector3[]> OffSetPolyline(in Vector3[] pts, float offset)
     {
-        if (pts.Length < 3) return new Vector3[][] { pts };
+        if (pts.Length < 3) return [pts];
 
         if (!IsOrdered(pts.Select(p => new Vector2(p.X, p.Z)).ToArray()))
             offset = -offset;
 
         var path = Vec3ToPathD(pts);
-        var result = Clipper.InflatePaths(new PathsD(new PathD[] { path }), offset, JoinType.Round, EndType.Polygon);
+        var result = Clipper.InflatePaths(new PathsD([path]), offset, JoinType.Round, EndType.Polygon);
 
         float height = 0;
         foreach (var p in pts)
@@ -334,6 +280,34 @@ public static class DrawingExtensions
         } ,
         _ => x => x,
     };
+
+    /// <summary>
+    /// Get the font based on size.
+    /// </summary>
+    /// <param name="size"></param>
+    /// <returns></returns>
+    public unsafe static ImFontPtr GetFont(float size)
+    {
+        var style = new Dalamud.Interface.GameFonts.GameFontStyle(Dalamud.Interface.GameFonts.GameFontStyle.GetRecommendedFamilyAndSize(Dalamud.Interface.GameFonts.GameFontFamily.Axis, size));
+
+        var handle = Service.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(style);
+
+        try
+        {
+            var font = handle.Lock().ImFont;
+
+            if ((IntPtr)font.NativePtr == IntPtr.Zero)
+            {
+                return ImGui.GetFont();
+            }
+            font.Scale = size / style.FontSize;
+            return font;
+        }
+        catch
+        {
+            return ImGui.GetFont();
+        }
+    }
 }
 
 /// <summary>

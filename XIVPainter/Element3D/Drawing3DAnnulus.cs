@@ -51,10 +51,9 @@ public class Drawing3DAnnulus : Drawing3DPolyline
     /// <summary>
     /// The things that can be done in the task.
     /// </summary>
-    /// <param name="painter"></param>
-    public override void UpdateOnFrame(XIVPainter painter)
+    protected override void UpdateOnFrame()
     {
-        base.UpdateOnFrame(painter);
+        base.UpdateOnFrame();
 
         if (Radius1 == 0 || Radius2 == 0)
         {
@@ -62,15 +61,15 @@ public class Drawing3DAnnulus : Drawing3DPolyline
             return;
         }
 
-        IEnumerable<IEnumerable<Vector3>> boarder = Array.Empty<IEnumerable<Vector3>>(),
-            fill = Array.Empty<IEnumerable<Vector3>>();
+        IEnumerable<IEnumerable<Vector3>> boarder = [],
+            fill = [];
         foreach (var pair in ArcStartSpan)
         {
-            var circleSegment = (int)(MathF.Tau * MathF.Max(Radius1, Radius2) / painter.SampleLength);
+            var circleSegment = (int)(MathF.Tau * MathF.Max(Radius1, Radius2) / XIVPainterMain.SampleLength);
             circleSegment = Math.Min(circleSegment, 72);
 
-            var sect1 = XIVPainter.SectorPlots(Center, Radius1, pair.X, pair.Y, circleSegment).Reverse().ToArray();
-            var sect2 = XIVPainter.SectorPlots(Center, Radius2, pair.X, pair.Y, circleSegment);
+            var sect1 = XIVPainterMain.SectorPlots(Center, Radius1, pair.X, pair.Y, circleSegment).Reverse().ToArray();
+            var sect2 = XIVPainterMain.SectorPlots(Center, Radius2, pair.X, pair.Y, circleSegment);
             boarder = boarder.Append(sect1);
             boarder = boarder.Append(sect2);
 
@@ -81,13 +80,13 @@ public class Drawing3DAnnulus : Drawing3DPolyline
             
             if(pair.Y == MathF.Tau)
             {
-                fill = fill.Append(new Vector3[]
-                {
+                fill = fill.Append(
+                [
                     sect1.First(),
                     sect1.Last(),
                     sect2.First(),
                     sect2.Last(),
-                });
+                ]);
             }
         }
         BorderPoints = boarder;
