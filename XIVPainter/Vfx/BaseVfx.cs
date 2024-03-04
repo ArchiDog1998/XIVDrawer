@@ -97,11 +97,16 @@ public abstract unsafe class BaseVfx() : BasicDrawing()
     /// <inheritdoc/>>
     private protected sealed override void AdditionalDispose()
     {
-        if (!VfxManager.AddedVfxStructs.Remove(this)) return;
-        if (Handle == IntPtr.Zero) return;
-        Remove();
-
-        Vfx = null;
+        try
+        {
+            if (Handle == IntPtr.Zero) return;
+            if (!VfxManager.AddedVfxStructs.Remove(this)) return;
+            Remove();
+        }
+        finally
+        {
+            Vfx = null;
+        }
     }
     private protected abstract void Remove();
 

@@ -300,7 +300,7 @@ public static class DrawingExtensions
             {
                 return ImGui.GetFont();
             }
-            font.Scale = size / style.FontSize;
+            font.Scale = size / font.FontSize;
             return font;
         }
         catch

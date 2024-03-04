@@ -153,14 +153,8 @@ internal static class VfxManager
 
         if (!path.EndsWith("avfx")) return;
 
-        if (path.StartsWith("vfx/omen/eff/"))
-        {
-            if (!System.Enum.GetValues<GroundOmenType>().Any(i => i.GetAttribute<VfxPathAttribute>()?.Path == path))
-            {
-                Service.Log.Debug("Omen: " + path);
-            }
-        }
-        else if (!path.StartsWith("vfx/common/eff/"))
+        else if (!path.StartsWith("vfx/common/eff/")
+            && !path.StartsWith("vfx/omen/eff/"))
         {
             if (!System.Enum.GetValues<ObjectOmenType>().Any(i => i.GetAttribute<VfxPathAttribute>()?.Path == path))
             {

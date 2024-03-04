@@ -58,7 +58,8 @@ public class VfxHighlightLine(Vector3 from, Vector3 to, float radius) : BasicDra
         }
         else
         {
-            cir1.UpdateScale(Vector3.One * MathF.Max(0.01f, (1 - ratio) * Radius / 2));
+            var t = (1 - ratio) * 0.9f + 0.1f;
+            cir1.UpdateScale(Vector3.One * MathF.Max(0.01f, t * Radius));
             cir2.UpdateScale(Vector3.One * MathF.Max(0.01f, ratio * Radius));
         }
 
