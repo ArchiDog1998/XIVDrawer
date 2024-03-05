@@ -2,6 +2,7 @@
 
 using Dalamud.Hooking;
 using Dalamud.Utility;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using XIVPainter.Enum;
@@ -92,9 +93,12 @@ internal static class VfxManager
 
     public static void ClearAllVfx()
     {
-        foreach (var item in AddedVfxStructs)
+        lock (AddedVfxStructs)
         {
-            item.Dispose();
+            foreach (var item in AddedVfxStructs)
+            {
+                item.Dispose();
+            }
         }
     }
 
@@ -126,12 +130,30 @@ internal static class VfxManager
 
     private static void RemoveVfx(nint vfx)
     {
-        var item = AddedVfxStructs.FirstOrDefault(x => x.Handle == vfx);
+        BaseVfx? item;
+
+        lock (AddedVfxStructs)
+        {
+            item = AddedVfxStructs.FirstOrDefault(x => x.Handle == vfx);
+        }
 
         if (item == null) return;
 
-        AddedVfxStructs.Remove(item);
-        item?.Dispose();
+#if DEBUG
+        Service.Log.Debug($"!!Remove the vfx at hook to use dispose at {vfx:x}");
+#endif
+        try
+        {
+            lock (AddedVfxStructs)
+            {
+                AddedVfxStructs.Remove(item);
+            }
+            item?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Service.Log.Error(ex, "Failed to dispose the vfx.");
+        }
     }
 
 #if DEBUG

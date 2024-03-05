@@ -1,5 +1,4 @@
-﻿using Clipper2Lib;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+﻿using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 
 namespace XIVPainter;
@@ -72,53 +71,6 @@ public static class DrawingExtensions
         }
 
         return count % 2 == 1;
-    }
-
-    /// <summary>
-    /// Offset the polygon
-    /// </summary>
-    /// <param name="pts">polygon</param>
-    /// <param name="offset">distance to offset</param>
-    /// <returns>offseted polygon</returns>
-    public static IEnumerable<Vector3[]> OffSetPolyline(in Vector3[] pts, float offset)
-    {
-        if (pts.Length < 3) return [pts];
-
-        if (!IsOrdered(pts.Select(p => new Vector2(p.X, p.Z)).ToArray()))
-            offset = -offset;
-
-        var path = Vec3ToPathD(pts);
-        var result = Clipper.InflatePaths(new PathsD([path]), offset, JoinType.Round, EndType.Polygon);
-
-        float height = 0;
-        foreach (var p in pts)
-        {
-            height += p.Y;
-        }
-        height /= pts.Length;
-
-        return result.Select(p => PathDToVec3(p, height));
-    }
-
-    internal static PathsD Vec3ToPathsD(IEnumerable<IEnumerable<Vector3>> pts)
-        => new(pts.Select(Vec3ToPathD));
-
-    internal static PathD Vec3ToPathD(IEnumerable<Vector3> pts)
-    {
-        return new PathD(pts.Select(p => new PointD(p.X, p.Z)));
-    }
-    internal static IEnumerable<Vector3[]>? PathsDToVec3(PathsD? path, float height)
-    => path?.Select(p => PathDToVec3(p, height));
-
-    internal static Vector3[] PathDToVec3(PathD path, in float height)
-    {
-        var result = new Vector3[path.Count];
-        for (int i = 0; i < path.Count; i++)
-        {
-            var p = path[i];
-            result[i] = new Vector3((float)p.x, height, (float)p.y);
-        }
-        return result;
     }
 
     internal static void SegmentAction<T>(IEnumerable<T> pts, Action<T?, T> pairAction, in bool closed = true)

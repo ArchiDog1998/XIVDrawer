@@ -13,7 +13,8 @@ public class ActorVfx : BaseVfx
     /// <param name="caster"></param>
     /// <param name="target"></param>
     /// <param name="path"></param>
-    public ActorVfx(GameObject caster, GameObject target, VfxString path) : this(caster.Address, target.Address, path) { }
+    public ActorVfx(string path, GameObject caster, GameObject target) 
+        : this(path, caster.Address, target.Address) { }
 
     /// <summary>
     /// 
@@ -21,13 +22,17 @@ public class ActorVfx : BaseVfx
     /// <param name="caster"></param>
     /// <param name="target"></param>
     /// <param name="path"></param>
-    public ActorVfx(IntPtr caster, IntPtr target, VfxString path)
+    public ActorVfx(string path, IntPtr caster, IntPtr target)
     {
         Handle = VfxManager.ActorVfxCreate?.Invoke(path, caster, target, -1, (char)0, 0, (char)0) ?? IntPtr.Zero;
+
+#if DEBUG
+        Service.Log.Debug($"Created Actor {Handle:x}");
+#endif
     }
 
     private protected override void Remove()
     {
-        VfxManager.ActorVfxRemove?.Invoke(Handle, (char)1);
+        VfxManager.ActorVfxRemoveHook?.Original.Invoke(Handle, (char)1);
     }
 }

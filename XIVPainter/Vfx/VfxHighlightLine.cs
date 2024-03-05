@@ -32,8 +32,8 @@ public class VfxHighlightLine(Vector3 from, Vector3 to, float radius) : BasicDra
     public Action? UpdateEveryFrame { get; set; }
 
     readonly StaticVfx
-        cir1 = new ("vfx/omen/eff/general_1bpf.avfx", from, 0, Vector3.One * radius), 
-        cir2 = new ("vfx/omen/eff/general_1bpf.avfx", to, 0, Vector3.One * radius);
+        cir1 = new (GroundOmenFriendly.BasicCircle.Omen(), from, 0, Vector3.One * radius), 
+        cir2 = new (GroundOmenFriendly.BasicCircle.Omen(), to, 0, Vector3.One * radius);
 
     /// <inheritdoc/>
     public override bool Enable 

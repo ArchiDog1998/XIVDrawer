@@ -103,16 +103,13 @@ public class Drawing3DPolyline : Drawing3D
                 {
                     result = result.Append(new PolylineDrawing(pts, boarderColor, Thickness));
 
-                    if(AnimationRatio != 0)
+                    if (AnimationRatio != 0)
                     {
-                        foreach (var item in DrawingExtensions.OffSetPolyline(points.ToArray(), -AnimationRatio))
-                        {
-                            var offset = XIVPainterMain.GetPtsOnScreen(item, true, false);
+                        var offset = XIVPainterMain.GetPtsOnScreen(points, true, false);
 
-                            baseColor.W *= 1 - AnimationRatio;
+                        baseColor.W *= 1 - AnimationRatio;
 
-                            result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
-                        }
+                        result = result.Append(new PolylineDrawing(offset, ImGui.ColorConvertFloat4ToU32(baseColor), Thickness));
                     }
                 }
                 else

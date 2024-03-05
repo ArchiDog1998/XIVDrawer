@@ -13,8 +13,9 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Clipper2" Version="1.3.0" />
-		<PackageReference Include="LibTessDotNet" Version="1.1.15" />
+	  <PackageReference Include="LibTessDotNet" Version="1.1.15" />
+	</ItemGroup>
+	<ItemGroup>
 		
 		<Reference Include="Dalamud">
 			<HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>

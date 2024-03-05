@@ -13,13 +13,15 @@ public class StaticVfx : BaseVfx
 
     public float RotateAddition { get; init; }
 
+    public Vector3 LocationOffset { get; set; }
+
     /// <summary>
     /// 
     /// </summary>
     /// <param name="path"></param>
     /// <param name="owner"></param>
     /// <param name="scale"></param>
-    public StaticVfx(VfxString path, GameObject owner, Vector3 scale)
+    public StaticVfx(string path, GameObject owner, Vector3 scale)
         : this(path,owner.Position, owner.Rotation, scale)
     {
         Owner = owner;
@@ -32,7 +34,7 @@ public class StaticVfx : BaseVfx
     /// <param name="position"></param>
     /// <param name="rotation"></param>
     /// <param name="scale"></param>
-    public unsafe StaticVfx(VfxString path, Vector3 position, float rotation, Vector3 scale)
+    public unsafe StaticVfx(string path, Vector3 position, float rotation, Vector3 scale)
         :this(path, position, new Vector3(0, 0, rotation), scale)
     {
 
@@ -45,7 +47,7 @@ public class StaticVfx : BaseVfx
     /// <param name="position"></param>
     /// <param name="rotation"></param>
     /// <param name="scale"></param>
-    public unsafe StaticVfx(VfxString path, Vector3 position, Vector3 rotation, Vector3 scale)
+    public unsafe StaticVfx(string path, Vector3 position, Vector3 rotation, Vector3 scale)
     {
         Handle = VfxManager.StaticVfxCreate?.Invoke(path, "Client.System.Scheduler.Instance.VfxObject") ?? IntPtr.Zero;
         VfxManager.StaticVfxRun?.Invoke(Handle, 0f, 0xFFFFFFFF);
@@ -57,20 +59,30 @@ public class StaticVfx : BaseVfx
 
     private protected override void CustomUpdate()
     {
-        if (Owner == null) return;
-
-        UpdatePosition(Owner.Position);
-
-        if (Target == null)
+        try
         {
-            UpdateRotation(Owner.Rotation);
-        }
-        else
+            if (Owner == null) return;
+
+            var rotation = Owner.Rotation;
+            if (Target != null)
+            {
+                var dir = Target.Position - Owner.Position;
+                rotation = MathF.Atan2(dir.X, dir.Z);
+            }
+            UpdateRotation(rotation += RotateAddition);
+
+            var locOff = new Vector3(
+                LocationOffset.X * MathF.Sin(rotation),
+                LocationOffset.Y,
+                LocationOffset.Z * MathF.Cos(rotation));
+
+            UpdatePosition(Owner.Position + locOff);
+        }catch (Exception e)
         {
-            var dir = Target.Position - Owner.Position;
-            UpdateRotation(MathF.Atan2(dir.X , dir.Z) + RotateAddition);
+            Service.Log.Error(e, "sth wrong");
         }
+
     }
 
-    private protected override void Remove() => VfxManager.StaticVfxRemove?.Invoke(Handle);
+    private protected override void Remove() => VfxManager.StaticVfxRemoveHook?.Original.Invoke(Handle);
 }

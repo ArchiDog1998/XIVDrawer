@@ -1,12 +1,14 @@
-﻿using Clipper2Lib;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using System.Xml.Linq;
+using XIVPainter.Element;
 using XIVPainter.Element2D;
-using XIVPainter.Element3D;
 using XIVPainter.ElementSpecial;
 using XIVPainter.Vfx;
 
@@ -25,6 +27,10 @@ public static class XIVPainterMain
     private static WindowSystem? windowSystem;
 
     #region Config
+    /// <summary>
+    /// The hight scale for the vfx things.
+    /// </summary>
+    public static float HeightScale { get; set; } = 5;
 
     /// <summary>
     /// Enable this <seealso cref="XIVPainterMain"/>
@@ -58,6 +64,7 @@ public static class XIVPainterMain
     #endregion
 
     private static bool _inited = false;
+
     /// <summary>
     /// The way to create this.
     /// </summary>
@@ -160,30 +167,6 @@ public static class XIVPainterMain
 
         await Task.WhenAll([.. drawing2Ds]);
         return drawing2Ds.SelectMany(i => i.Result).ToArray();
-    }
-
-    private static IEnumerable<Vector3[]>? GetUnion(IEnumerable<Drawing3DPolyline> polys)
-    {
-        if (!polys.Any())
-        {
-            return null;
-        }
-
-        PathsD? result = null;
-        float height = 0;
-
-        foreach (var p in polys)
-        {
-            height += p.BorderPoints.Sum(poly => poly.Sum(p => p.Y) / poly.Count()) / p.BorderPoints.Count();
-            var path = DrawingExtensions.Vec3ToPathsD(p.BorderPoints);
-            if (path == null) continue;
-
-            result = result == null ? Clipper.Union(path, FillRule.NonZero)
-                : Clipper.Union(result, path, FillRule.NonZero);
-        }
-
-        height /= polys.Count();
-        return DrawingExtensions.PathsDToVec3(result, height);
     }
 
     #region Trasform
@@ -375,4 +358,80 @@ public static class XIVPainterMain
         var z = Math.Cos(rotation) * radius + pt.Z;
         return new Vector3((float)x, pt.Y, (float)z);
     }
+
+#if DEBUG
+    /// <summary>
+    /// Show off the vfx for test.
+    /// </summary>
+    /// <returns></returns>
+    public static async Task ShowOff()
+    {
+        if (Service.ClientState.LocalPlayer is not PlayerCharacter player) return;
+
+        await ShowSepcialElements(player);
+        await Task.Delay(3000);
+
+        await ShowGroundHostile(player);
+        await Task.Delay(3000);
+
+        await ShowGroundFriendly(player);
+        await Task.Delay(3000);
+    }
+
+    private static async Task ShowGroundHostile(PlayerCharacter player) 
+    {
+        foreach (var item in typeof(GroundOmenHostile).GetRuntimeFields())
+        {
+            if (item.GetValue(null) is not string str) continue;
+
+            _ = new StaticVfx(str.Omen(), player, new Vector3(3, HeightScale, 3));
+            await MessageDelay(item.Name);
+        }
+
+        ShowQuest("That's all Hostile Omen!");
+    }
+
+    private static async Task ShowGroundFriendly(PlayerCharacter player)
+    {
+        foreach (var item in typeof(GroundOmenNone).GetRuntimeFields()
+            .Concat(typeof(GroundOmenFriendly).GetRuntimeFields()))
+        {
+            if (item.GetValue(null) is not string str) continue;
+
+            _ = new StaticVfx(str.Omen(), player, new Vector3(3, HeightScale, 3));
+            await MessageDelay(item.Name);
+        }
+
+        ShowQuest("That's all Friendly Omen!");
+    }
+
+    private static async Task ShowSepcialElements(PlayerCharacter player)
+    {
+        _ = new Single1(player, 6);
+        await MessageDelay("Single 2, Radius 3");
+
+        _ = new Share2(player, 6);
+        await MessageDelay("Share 2, Radius 3");
+
+        _ = new Share4(player, 6);
+        await MessageDelay("Share 4, Radius 3");
+
+        ShowQuest("That's all special Element!");
+    }
+
+    private static async Task MessageDelay(string name)
+    {
+        Service.Toasts.ShowError(name);
+        await Task.Delay(5000);
+    }
+
+    private static void ShowQuest(string str)
+    {
+        Service.Toasts.ShowQuest(str, new Dalamud.Game.Gui.Toast.QuestToastOptions()
+        {
+            DisplayCheckmark = true,
+            PlaySound = true,
+        });
+    }
+#endif
 }

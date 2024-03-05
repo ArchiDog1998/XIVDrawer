@@ -34,9 +34,9 @@ public abstract class BasicDrawing : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
         Service.Framework.Update -= Framework_Update;
         AdditionalDispose();
+        GC.SuppressFinalize(this);
     }
 
     private protected virtual void AdditionalDispose()

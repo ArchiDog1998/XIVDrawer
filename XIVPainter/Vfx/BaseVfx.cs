@@ -75,7 +75,11 @@ public abstract unsafe class BaseVfx() : BasicDrawing()
         {
             Vfx = (VfxStruct*)value;
             if (Vfx == null) return;
-            VfxManager.AddedVfxStructs.Add(this);
+
+            lock (VfxManager.AddedVfxStructs)
+            {
+                VfxManager.AddedVfxStructs.Add(this);
+            }
         }
     }
 
@@ -100,7 +104,13 @@ public abstract unsafe class BaseVfx() : BasicDrawing()
         try
         {
             if (Handle == IntPtr.Zero) return;
-            if (!VfxManager.AddedVfxStructs.Remove(this)) return;
+            lock (VfxManager.AddedVfxStructs)
+            {
+                if (!VfxManager.AddedVfxStructs.Remove(this)) return;
+            }
+#if DEBUG
+            Service.Log.Debug($"Dispose the vfx from Dispose at {Handle:x}");
+#endif
             Remove();
         }
         finally
