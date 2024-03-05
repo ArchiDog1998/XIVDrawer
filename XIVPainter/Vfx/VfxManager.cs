@@ -178,10 +178,7 @@ internal static class VfxManager
         else if (!path.StartsWith("vfx/common/eff/")
             && !path.StartsWith("vfx/omen/eff/"))
         {
-            if (!System.Enum.GetValues<ObjectOmenType>().Any(i => i.GetAttribute<VfxPathAttribute>()?.Path == path))
-            {
-                Service.Log.Verbose("Object Unknown: " + path);
-            }
+            Service.Log.Verbose("Object Unknown: " + path);
         }
         static unsafe string ReadTerminatedString(byte* ptr)
         {

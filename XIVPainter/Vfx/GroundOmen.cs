@@ -5,6 +5,9 @@
 /// </summary>
 public struct GroundOmenHostile
 {
+    /// <summary>
+    /// Use it with <see cref="OmenHelper.Omen(string)"/>.
+    /// </summary>
     public const string
         Circle = "general_1bf",
         CircleEr = "er_general_1f",
@@ -26,7 +29,6 @@ public struct GroundOmenHostile
         Fan150Er = "er_gl_fan150_1bt",
         Fan180 = "gl_fan180_1bf",
         Fan180Er = "er_gl_fan180_1bf",
-        Fan225 = "gl_fan225_c0g",
         Fan270 = "gl_fan270_0100af",
         Fan270Er = "er_gl_fan270_1bf";
 
@@ -38,6 +40,9 @@ public struct GroundOmenHostile
 /// </summary>
 public struct GroundOmenNone
 {
+    /// <summary>
+    /// Use it with <see cref="OmenHelper.Omen(string)"/>.
+    /// </summary>
     public const string
         Circle = "general01bf",
         Fan120 = "gl_fan120_1f";
@@ -48,6 +53,9 @@ public struct GroundOmenNone
 /// </summary>
 public struct GroundOmenFriendly
 {
+    /// <summary>
+    /// Use it with <see cref="OmenHelper.Omen(string)"/>.
+    /// </summary>
     public const string
         BasicCircle = "general_1bpf",
         Circle = "general_1bpxf",

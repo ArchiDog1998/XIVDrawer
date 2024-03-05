@@ -99,7 +99,7 @@ public abstract unsafe class BaseVfx() : BasicDrawing()
     }
 
     /// <inheritdoc/>>
-    private protected sealed override void AdditionalDispose()
+    private protected override void AdditionalDispose()
     {
         try
         {

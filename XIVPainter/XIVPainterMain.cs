@@ -281,7 +281,7 @@ public static class XIVPainterMain
     }
 
     /// <summary>
-    /// Make the <paramref name="pt"/> into the Rectange.
+    /// Make the <paramref name="pt"/> into the Rectangle.
     /// </summary>
     /// <param name="pos"></param>
     /// <param name="size"></param>
@@ -368,7 +368,7 @@ public static class XIVPainterMain
     {
         if (Service.ClientState.LocalPlayer is not PlayerCharacter player) return;
 
-        await ShowSepcialElements(player);
+        await ShowSpecialElements(player);
         await Task.Delay(3000);
 
         await ShowGroundHostile(player);
@@ -384,7 +384,7 @@ public static class XIVPainterMain
         {
             if (item.GetValue(null) is not string str) continue;
 
-            _ = new StaticVfx(str.Omen(), player, new Vector3(3, HeightScale, 3));
+            using var i = new StaticVfx(str.Omen(), player, new Vector3(3, HeightScale, 3));
             await MessageDelay(item.Name);
         }
 
@@ -398,22 +398,22 @@ public static class XIVPainterMain
         {
             if (item.GetValue(null) is not string str) continue;
 
-            _ = new StaticVfx(str.Omen(), player, new Vector3(3, HeightScale, 3));
+            using var i = new StaticVfx(str.Omen(), player, new Vector3(3, HeightScale, 3));
             await MessageDelay(item.Name);
         }
 
         ShowQuest("That's all Friendly Omen!");
     }
 
-    private static async Task ShowSepcialElements(PlayerCharacter player)
+    private static async Task ShowSpecialElements(PlayerCharacter player)
     {
-        _ = new Single1(player, 6);
-        await MessageDelay("Single 2, Radius 3");
+        _ = new Single1(player, 3);
+        await MessageDelay("Single 1, Radius 3");
 
-        _ = new Share2(player, 6);
+        _ = new Share2(player, 3);
         await MessageDelay("Share 2, Radius 3");
 
-        _ = new Share4(player, 6);
+        _ = new Share4(player, 3);
         await MessageDelay("Share 4, Radius 3");
 
         ShowQuest("That's all special Element!");
