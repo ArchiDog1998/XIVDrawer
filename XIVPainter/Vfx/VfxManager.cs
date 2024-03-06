@@ -1,11 +1,8 @@
 ﻿// From https://github.com/0ceal0t/Dalamud-VFXEditor/tree/main/VFXEditor/Interop
 
 using Dalamud.Hooking;
-using Dalamud.Utility;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
-using XIVPainter.Enum;
 
 namespace XIVPainter.Vfx;
 internal static class VfxManager

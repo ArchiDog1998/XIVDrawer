@@ -27,9 +27,23 @@ public static class OmenHelper
     public static string LockOn(this string str) => $"vfx/lockon/eff/{str}.avfx";
 
     /// <summary>
+    /// Un lock on the string.
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
+    public static string UnLockOn(this string str) => str.Length > 20 ? str[15..^5] : string.Empty;
+
+    /// <summary>
     /// Make name to omen path.
     /// </summary>
     /// <param name="str"></param>
     /// <returns></returns>
     public static string Omen(this string str) => $"vfx/omen/eff/{str}.avfx";
+
+    /// <summary>
+    /// Un omen the string.
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
+    public static string UnOmen(this string str) => str.Length > 18 ? str[13..^5] : string.Empty;
 }
