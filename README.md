@@ -21,7 +21,7 @@ Add it to your plugin's CSProj file:
 Then, in the entry point of your plugin:
 
 ```c#
-var painter = XIVPainter.XIVPainter.Create(pluginInterface, "%NAME%");
+XIVPainterMain.Init(pluginInterface, "%NAME%");
 ```
 
 where pluginInterface is a **DalamudPluginInterface**.
@@ -32,10 +32,24 @@ Don't forget to **dispose** it!
 
 ## Usage
 
+All things need to be disposed of to close it.
+
+### VFX stuff
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wE8VVTmQyxQ?si=Lnjw9O4yCyY-I9kO" title="YouTube video player" frameborder="0"</iframe>
+
+To use this code to show the vfx stuff.
+
+```c#
+_ = XIVPainterMain.ShowOff();
+```
+
+There are two things called `ActorVfx` and `StaticVfx` for you to use in your own project.
+
 ### Hotbar highlighting
 
 ```c#
-painter.AddDrawings(new DrawingHighlightHotbar(new(0f, 1f, 0.8f, 1f), 7411));
+new DrawingHighlightHotbar(new(0f, 1f, 0.8f, 1f), 7411);
 ```
 
 ![highlight](assets/1687487480217.png)
@@ -43,10 +57,8 @@ painter.AddDrawings(new DrawingHighlightHotbar(new(0f, 1f, 0.8f, 1f), 7411));
 ### Drawing stuff
 
 ``` c#
-painter.AddDrawings(new Drawing3DCircularSectorO(Player.Object, 5, ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.5f, 0.4f, 0.15f)), 5));
+new Drawing3DCircularSectorO(Player.Object, 5, ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.5f, 0.4f, 0.15f)), 5);
 ```
-
-![Moving](assets/Moving.gif)
 
 ### Animation stuff
 
@@ -55,24 +67,19 @@ var deadTime = DateTime.Now.AddSeconds(10);
 var r = new Random();
 var col = ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.5f, 0.2f, 0.15f));
 var colIn = ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.5f, 0.2f, 0.5f));
-painter.AddDrawings(
     new Drawing3DAnnulus(Player.Object.Position + new Vector3((float)r.NextDouble() * 3, 0, (float)r.NextDouble() * 3), 3, 5, col, 2)
     {
         DeadTime = deadTime,
         InsideColor = colIn,
-        PolylineType = XIVPainter.Enum.PolylineType.ShouldGoOut,
-    },
+    };
 
     new Drawing3DCircularSector(Player.Object.Position + new Vector3((float)r.NextDouble() * 3, 0, (float)r.NextDouble() * 3), 3, col, 2)
     {
         DeadTime = deadTime,
         InsideColor = colIn,
-        PolylineType = XIVPainter.Enum.PolylineType.ShouldGoOut,
-    });
+    };
 ```
 
 `DeadTime` will make an animation about disappear.
 
 `PolylineType` will show the moving suggestion for you.
-
-![Suggestion](assets/Suggestion.gif)
