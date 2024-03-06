@@ -61,8 +61,7 @@ public class Drawing3DAnnulusO : Drawing3DAnnulus
     /// <summary>
     /// The things that can be done in the task.
     /// </summary>
-    /// <param name="painter"></param>
-    public override void UpdateOnFrame(XIVPainter painter)
+    protected override void UpdateOnFrame()
     {
         Center = Target?.Position ?? default;
         if (Target == null)
@@ -76,6 +75,6 @@ public class Drawing3DAnnulusO : Drawing3DAnnulus
             ArcStartSpan = ArcStartSpanTarget.Select(pt => new Vector2(pt.X + Target?.Rotation ?? 0, pt.Y)).ToArray();
         }
         
-        base.UpdateOnFrame(painter);
+        base.UpdateOnFrame();
     }
 }

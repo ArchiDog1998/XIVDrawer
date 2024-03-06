@@ -82,16 +82,11 @@ public class DrawingHighlightHotbar : IDrawing
         return true;
     }
 
-    /// <summary>
-    /// Convert this to the 2d elements.
-    /// </summary>
-    /// <param name="owner"></param>
-    /// <returns></returns>
-    public unsafe IEnumerable<IDrawing2D> To2D(XIVPainter owner)
+    private protected override unsafe IEnumerable<IDrawing2D> To2D()
     {
-        if(_texture == null) return Array.Empty<IDrawing2D>();
+        if(_texture == null) return [];
 
-        List<IDrawing2D> result = new();
+        List<IDrawing2D> result = [];
 
         var hotBarIndex = 0;
         foreach (var intPtr in GetAddons<AddonActionBar>()
@@ -154,15 +149,14 @@ public class DrawingHighlightHotbar : IDrawing
     /// <summary>
     /// The things that can be done in the task.
     /// </summary>
-    /// <param name="painter"></param>
-    public void UpdateOnFrame(XIVPainter painter)
+    protected override void UpdateOnFrame()
     {
         return;
     }
 
     unsafe static IEnumerable<IntPtr> GetAddons<T>() where T : struct
     {
-        if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return Array.Empty<nint>();
+        if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return [];
 
         return on.AddonIdentifiers
             .Select(str => Service.GameGui.GetAddonByName(str, 1))

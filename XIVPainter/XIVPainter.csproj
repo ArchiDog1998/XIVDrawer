@@ -13,8 +13,9 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Clipper2" Version="1.3.0" />
-		<PackageReference Include="LibTessDotNet" Version="1.1.15" />
+	  <PackageReference Include="LibTessDotNet" Version="1.1.15" />
+	</ItemGroup>
+	<ItemGroup>
 		
 		<Reference Include="Dalamud">
 			<HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
@@ -27,9 +28,6 @@
 		<Reference Include="ImGuiScene">
 			<HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
 			<Private>False</Private>
-		</Reference>
-		<Reference Include="KdTreeLib">
-		  <HintPath>..\Dependencies\KdTreeLib.dll</HintPath>
 		</Reference>
 		<Reference Include="Lumina">
 			<HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
@@ -47,7 +45,10 @@
 			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-
+		<Reference Include="SharpDX.Mathematics">
+			<HintPath>$(DalamudLibPath)SharpDX.Mathematics.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
 		<Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
 		<Using Include="Dalamud.Interface" />
 		<Using Include="Newtonsoft.Json" />

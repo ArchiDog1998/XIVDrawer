@@ -43,14 +43,11 @@ public class Drawing3DCircularSector : Drawing3DPolyline
     /// <summary>
     /// The things that can be done in the task.
     /// </summary>
-    /// <param name="painter"></param>
-    public override void UpdateOnFrame(XIVPainter painter)
+    protected override void UpdateOnFrame()
     {
-        base.UpdateOnFrame(painter);
-
         BorderPoints = ArcStartSpan.Select(pair =>
         {
-            IEnumerable<Vector3> pts = painter.SectorPlots(Center, Radius, pair.X, pair.Y);
+            IEnumerable<Vector3> pts = XIVPainterMain.SectorPlots(Center, Radius, pair.X, pair.Y);
             if (pair.Y != MathF.Tau && pts.Any() && IsFill)
             {
                 pts = pts.Append(Center);

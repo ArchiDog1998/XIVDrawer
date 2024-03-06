@@ -10,29 +10,27 @@ public class Drawing3DPoly : Drawing3D
     /// <summary>
     /// The sub items.
     /// </summary>
-    public IDrawing3D[] SubItems { get; set; } = [];
+    public Drawing3D[] SubItems { get; set; } = [];
 
     /// <summary>
     /// Convert this to the 2d elements.
     /// </summary>
-    /// <param name="owner"></param>
     /// <returns></returns>
-    public override IEnumerable<IDrawing2D> To2D(XIVPainter owner)
+    private protected override IEnumerable<IDrawing2D> To2D()
     {
-        return SubItems.SelectMany(i => i.To2D(owner)) ?? Array.Empty<IDrawing2D>();
+        return SubItems.SelectMany(i => i.To2DMain()) ?? [];
     }
 
     /// <summary>
     /// The things that can be done in the task.
     /// </summary>
-    /// <param name="painter"></param>
-    public override void UpdateOnFrame(XIVPainter painter)
+    protected override void UpdateOnFrame()
     {
-        base.UpdateOnFrame(painter);
+        base.UpdateOnFrame();
         foreach (var item in SubItems)
         {
             item.DeadTime = DeadTime;
-            item.UpdateOnFrame(painter);
+            item.UpdateOnFrameMain();
         }
     }
 }

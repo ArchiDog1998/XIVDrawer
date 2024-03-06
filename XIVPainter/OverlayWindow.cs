@@ -6,12 +6,10 @@ namespace XIVPainter;
 
 internal class OverlayWindow : Window
 {
-    readonly XIVPainter _owner;
-    public OverlayWindow(XIVPainter owner) : base(owner._name, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus
+    public OverlayWindow() : base(XIVPainterMain._name, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus
             | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoDocking
             | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav, true)
     {
-        _owner = owner;
         IsOpen = true;
     }
 
@@ -26,22 +24,18 @@ internal class OverlayWindow : Window
 
     public override void Draw()
     {
-        if (!_owner.Enable || Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
+        if (!XIVPainterMain.Enable || Service.ClientState == null || Service.ClientState.LocalPlayer == null) return;
 
         ImGui.GetStyle().AntiAliasedFill = false;
 
-#if DEBUG
-        ImGui.TextColored(Dalamud.Interface.Colors.ImGuiColors.DalamudRed,
-            $"{RaycastManager.PointCount}");
-#endif
         try
         {
-            if (!_owner.UseTaskToAccelerate)
+            if (!XIVPainterMain.UseTaskToAccelerate)
             {
-                _owner._drawingElements2D = _owner.To2DAsync().Result;
+                XIVPainterMain._drawingElements2D = XIVPainterMain.To2DAsync().Result;
             }
 
-            foreach (var item in _owner._drawingElements2D.OrderBy(drawing =>
+            foreach (var item in XIVPainterMain._drawingElements2D.OrderBy(drawing =>
             {
                 if (drawing is PolylineDrawing poly)
                 {
@@ -58,7 +52,7 @@ internal class OverlayWindow : Window
         }
         catch (Exception ex)
         {
-            Service.Log.Warning(ex, $"{_owner._name} failed to draw on Screen.");
+            Service.Log.Warning(ex, $"{XIVPainterMain._name} failed to draw on Screen.");
         }
     }
 
