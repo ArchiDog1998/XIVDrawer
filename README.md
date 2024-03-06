@@ -32,13 +32,13 @@ Don't forget to **dispose** it!
 
 ## Usage
 
-All things need to be disposed of to close it.
+All things need to be disposed to close it.
 
 ### VFX stuff
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/wE8VVTmQyxQ?si=Lnjw9O4yCyY-I9kO" title="YouTube video player" frameborder="0"</iframe>
 
-To use this code to show the vfx stuff.
+Use this code to show the Vfx stuff.
 
 ```c#
 _ = XIVPainterMain.ShowOff();
