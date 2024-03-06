@@ -1,13 +1,10 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using System.Xml.Linq;
-using XIVPainter.Element;
 using XIVPainter.Element2D;
 using XIVPainter.ElementSpecial;
 using XIVPainter.Vfx;
@@ -407,14 +404,13 @@ public static class XIVPainterMain
 
     private static async Task ShowSpecialElements(PlayerCharacter player)
     {
-        _ = new Single1(player, 3);
-        await MessageDelay("Single 1, Radius 3");
+        foreach (var item in typeof(ActorOmen).GetRuntimeFields())
+        {
+            if (item.GetValue(null) is not string str) continue;
 
-        _ = new Share2(player, 3);
-        await MessageDelay("Share 2, Radius 3");
-
-        _ = new Share4(player, 3);
-        await MessageDelay("Share 4, Radius 3");
+            using var i = new ActorVfx(str.LockOn(), player, player);
+            await MessageDelay(item.Name);
+        }
 
         ShowQuest("That's all special Element!");
     }
