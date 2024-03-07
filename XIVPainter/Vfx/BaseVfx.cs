@@ -98,6 +98,7 @@ public abstract unsafe class BaseVfx() : BasicDrawing()
     {
         try
         {
+            if (Handle == IntPtr.Zero) return;
             Remove();
         }
         finally

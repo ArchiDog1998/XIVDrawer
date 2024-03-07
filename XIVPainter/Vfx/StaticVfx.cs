@@ -86,5 +86,9 @@ public class StaticVfx : BaseVfx
 
     }
 
-    private protected override void Remove() => VfxManager.StaticVfxRemove?.Invoke(Handle);
+    private protected override void Remove()
+    {
+        if (!VfxManager.AddedVfxStructs.Remove(this)) return;
+        VfxManager.StaticVfxRemoveHook?.Original(Handle);
+    }
 }

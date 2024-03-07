@@ -27,6 +27,9 @@ internal static class VfxManager
 
     public static StaticVfxRemoveDelegate? StaticVfxRemove;
 
+    // ======= STATIC HOOKS ========
+    public static Hook<StaticVfxRemoveDelegate>? StaticVfxRemoveHook { get; private set; }
+
     // ======== ACTOR =============
     public delegate nint ActorVfxCreateDelegate(string path, nint a2, nint a3, float a4, char a5, ushort a6, char a7);
 
@@ -52,6 +55,10 @@ internal static class VfxManager
         StaticVfxRemove = Marshal.GetDelegateForFunctionPointer<StaticVfxRemoveDelegate>(staticVfxRemoveAddress);
         StaticVfxRun = Marshal.GetDelegateForFunctionPointer<StaticVfxRunDelegate>(Service.SigScanner.ScanText(StaticVfxRunSig));
         StaticVfxCreate = Marshal.GetDelegateForFunctionPointer<StaticVfxCreateDelegate>(staticVfxCreateAddress);
+
+        StaticVfxRemoveHook = Service.Hook.HookFromAddress<StaticVfxRemoveDelegate>(staticVfxRemoveAddress, StaticVfxRemoveHandler);
+
+        StaticVfxRemoveHook.Enable();
 
         Service.ClientState.Logout += ClearAllVfx;
 #if DEBUG
@@ -79,10 +86,37 @@ internal static class VfxManager
         ClearAllVfx();
 
         Service.ClientState.Logout -= ClearAllVfx;
+
+        StaticVfxRemoveHook?.Dispose();
 #if DEBUG
         _getResourceAsyncHook?.Dispose();
         _getResourceSyncHook?.Dispose();
 #endif
+    }
+
+    private static nint StaticVfxRemoveHandler(nint vfx)
+    {
+        RemoveVfx(vfx);
+        return StaticVfxRemoveHook!.Original(vfx);
+    }
+    private static void RemoveVfx(nint vfx)
+    {
+        var item = AddedVfxStructs.FirstOrDefault(x => x.Handle == vfx);
+
+        if (item == null) return;
+
+#if DEBUG
+        Service.Log.Debug($"!!Remove the vfx at hook to use dispose at {vfx:x}");
+#endif
+        try
+        {
+            AddedVfxStructs.Remove(item);
+            item?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Service.Log.Error(ex, "Failed to dispose the vfx.");
+        }
     }
 #if DEBUG
     private unsafe static void* GetResourceSyncDetour(IntPtr pFileManager, uint* pCategoryId, char* pResourceType, uint* pResourceHash, char* pPath, void* pUnknown)
