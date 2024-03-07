@@ -75,11 +75,6 @@ public abstract unsafe class BaseVfx() : BasicDrawing()
         {
             Vfx = (VfxStruct*)value;
             if (Vfx == null) return;
-
-            lock (VfxManager.AddedVfxStructs)
-            {
-                VfxManager.AddedVfxStructs.Add(this);
-            }
         }
     }
 
@@ -99,18 +94,10 @@ public abstract unsafe class BaseVfx() : BasicDrawing()
     }
 
     /// <inheritdoc/>>
-    private protected override void AdditionalDispose()
+    private protected sealed override void AdditionalDispose()
     {
         try
         {
-            if (Handle == IntPtr.Zero) return;
-            lock (VfxManager.AddedVfxStructs)
-            {
-                if (!VfxManager.AddedVfxStructs.Remove(this)) return;
-            }
-#if DEBUG
-            Service.Log.Debug($"Dispose the vfx from Dispose at {Handle:x}");
-#endif
             Remove();
         }
         finally
@@ -118,7 +105,7 @@ public abstract unsafe class BaseVfx() : BasicDrawing()
             Vfx = null;
         }
     }
-    private protected abstract void Remove();
+    private protected virtual void Remove() { }
 
     /// <summary>
     /// 

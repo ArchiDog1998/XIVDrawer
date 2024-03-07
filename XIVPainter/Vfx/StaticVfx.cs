@@ -52,6 +52,8 @@ public class StaticVfx : BaseVfx
         Handle = VfxManager.StaticVfxCreate?.Invoke(path, "Client.System.Scheduler.Instance.VfxObject") ?? IntPtr.Zero;
         VfxManager.StaticVfxRun?.Invoke(Handle, 0f, 0xFFFFFFFF);
 
+        VfxManager.AddedVfxStructs.Add(this);
+
         UpdatePosition(position);
         UpdateRotation(rotation);
         UpdateScale(scale);
@@ -84,5 +86,5 @@ public class StaticVfx : BaseVfx
 
     }
 
-    private protected override void Remove() => VfxManager.StaticVfxRemoveHook?.Original.Invoke(Handle);
+    private protected override void Remove() => VfxManager.StaticVfxRemove?.Invoke(Handle);
 }

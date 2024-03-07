@@ -30,9 +30,4 @@ public class ActorVfx : BaseVfx
         Service.Log.Debug($"Created Actor {Handle:x}");
 #endif
     }
-
-    private protected override void Remove()
-    {
-        VfxManager.ActorVfxRemoveHook?.Original.Invoke(Handle, (char)1);
-    }
 }
