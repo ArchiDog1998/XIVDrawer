@@ -1,12 +1,74 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿//From https://github.com/0ceal0t/Dalamud-VFXEditor/blob/main/VFXEditor/Interop/Structs/Vfx/BaseVfx.cs
+
+using Dalamud.Game.ClientState.Objects.Types;
+using System.Runtime.InteropServices;
 
 namespace XIVPainter.Vfx;
+
+[StructLayout(LayoutKind.Explicit)]
+
+internal unsafe struct VfxStruct
+{
+    [FieldOffset(0x38)] public byte Flags;
+    [FieldOffset(0x50)] public Vector3 Position;
+    [FieldOffset(0x60)] public Quat Rotation;
+    [FieldOffset(0x70)] public Vector3 Scale;
+
+    [FieldOffset(0x128)] public int ActorCaster;
+    [FieldOffset(0x130)] public int ActorTarget;
+
+    [FieldOffset(0x1B8)] public int StaticCaster;
+    [FieldOffset(0x1C0)] public int StaticTarget;
+}
+
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct Quat
+{
+    public float X;
+    public float Z;
+    public float Y;
+    public float W;
+
+    public static implicit operator System.Numerics.Vector4(Quat pos) => new(pos.X, pos.Y, pos.Z, pos.W);
+
+    public static implicit operator SharpDX.Vector4(Quat pos) => new(pos.X, pos.Z, pos.Y, pos.W);
+}
 
 /// <summary>
 /// 
 /// </summary>
-public class StaticVfx : BaseVfx
+public unsafe class StaticVfx : BasicDrawing
 {
+    internal VfxStruct* Vfx;
+    private float _height;
+    private bool _enable = true;
+
+    /// <inheritdoc/>
+    public override bool Enable
+    {
+        get => _enable;
+        set
+        {
+            if (_enable == value) return;
+            _enable = value;
+
+            unsafe
+            {
+                if (_enable)
+                {
+                    Vfx->Scale.Y = _height;
+                }
+                else
+                {
+                    _height = Vfx->Scale.Y;
+                    Vfx->Scale.Y = 0;
+                }
+            }
+
+            Update();
+        }
+    }
     public GameObject? Owner { get; set; }
 
     public GameObject? Target { get; set; }
@@ -49,8 +111,8 @@ public class StaticVfx : BaseVfx
     /// <param name="scale"></param>
     public unsafe StaticVfx(string path, Vector3 position, Vector3 rotation, Vector3 scale)
     {
-        Handle = VfxManager.StaticVfxCreate?.Invoke(path, "Client.System.Scheduler.Instance.VfxObject") ?? IntPtr.Zero;
-        VfxManager.StaticVfxRun?.Invoke(Handle, 0f, 0xFFFFFFFF);
+        Vfx = (VfxStruct*)(VfxManager.StaticVfxCreate?.Invoke(path, "Client.System.Scheduler.Instance.VfxObject") ?? IntPtr.Zero);
+        VfxManager.StaticVfxRun?.Invoke((IntPtr)Vfx, 0f, 0xFFFFFFFF);
 
         VfxManager.AddedVfxStructs.Add(this);
 
@@ -59,7 +121,7 @@ public class StaticVfx : BaseVfx
         UpdateScale(scale);
     }
 
-    private protected override void CustomUpdate()
+    private protected override void AdditionalUpdate()
     {
         try
         {
@@ -79,16 +141,99 @@ public class StaticVfx : BaseVfx
                 LocationOffset.Z * MathF.Cos(rotation));
 
             UpdatePosition(Owner.Position + locOff);
-        }catch (Exception e)
+        }
+        catch (Exception e)
         {
             Service.Log.Error(e, "sth wrong");
+        }
+        finally
+        {
+            if (!Enable)
+            {
+                Vfx->Scale.Y = 0;
+            }
+            Update();
         }
 
     }
 
-    private protected override void Remove()
+    private protected sealed override void AdditionalDispose()
     {
-        if (!VfxManager.AddedVfxStructs.Remove(this)) return;
-        VfxManager.StaticVfxRemoveHook?.Original(Handle);
+        try
+        {
+            if (Vfx == null) return;
+            if (!VfxManager.AddedVfxStructs.Remove(this)) return;
+            VfxManager.StaticVfxRemoveHook?.Original((IntPtr)Vfx);
+        }
+        finally
+        {
+            Vfx = null;
+        }
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void Update()
+    {
+        if (Vfx == null) return;
+        Vfx->Flags |= 0x2;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="position"></param>
+    public void UpdatePosition(Vector3 position)
+    {
+        if (Vfx == null) return;
+        Vfx->Position = new Vector3
+        {
+            X = position.X,
+            Y = position.Y,
+            Z = position.Z,
+        };
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="scale"></param>
+    public void UpdateScale(Vector3 scale)
+    {
+        if (Vfx == null) return;
+
+        Vfx->Scale = new Vector3
+        {
+            X = scale.X,
+            Y = scale.Y,
+            Z = scale.Z
+        };
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="rotation"></param>
+    public void UpdateRotation(float rotation)
+        => UpdateRotation(new Vector3(0, 0, rotation));
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="rotation"></param>
+    public void UpdateRotation(Vector3 rotation)
+    {
+        if (Vfx == null) return;
+
+        var q = Quaternion.CreateFromYawPitchRoll(rotation.X, rotation.Y, rotation.Z);
+        Vfx->Rotation = new Quat
+        {
+            X = q.X,
+            Y = q.Y,
+            Z = q.Z,
+            W = q.W
+        };
     }
 }

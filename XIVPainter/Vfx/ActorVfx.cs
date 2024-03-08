@@ -5,7 +5,7 @@ namespace XIVPainter.Vfx;
 /// <summary>
 /// 
 /// </summary>
-public class ActorVfx : BaseVfx
+public class ActorVfx : IDisposable
 {
     /// <summary>
     /// 
@@ -24,10 +24,16 @@ public class ActorVfx : BaseVfx
     /// <param name="path"></param>
     public ActorVfx(string path, IntPtr caster, IntPtr target)
     {
-        Handle = VfxManager.ActorVfxCreate?.Invoke(path, caster, target, -1, (char)0, 0, (char)0) ?? IntPtr.Zero;
+        var handle = VfxManager.ActorVfxCreate?.Invoke(path, caster, target, -1, (char)0, 0, (char)0) ?? IntPtr.Zero;
 
 #if DEBUG
-        Service.Log.Debug($"Created Actor {Handle:x}");
+        Service.Log.Debug($"Created Actor {handle:x}");
 #endif
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
     }
 }

@@ -99,9 +99,9 @@ internal static class VfxManager
         RemoveVfx(vfx);
         return StaticVfxRemoveHook!.Original(vfx);
     }
-    private static void RemoveVfx(nint vfx)
+    private static unsafe void RemoveVfx(nint vfx)
     {
-        var item = AddedVfxStructs.FirstOrDefault(x => x.Handle == vfx);
+        var item = AddedVfxStructs.FirstOrDefault(x => (IntPtr)x.Vfx == vfx);
 
         if (item == null) return;
 
