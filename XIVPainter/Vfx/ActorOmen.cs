@@ -6,12 +6,14 @@
 public struct ActorOmen
 {
     /// <summary>
-    /// Use it with <see cref="OmenHelper.LockOn(string)"/>.
+    /// Use it with <see cref="OmenHelper.LockOn(string)"/>, or <see cref="OmenHelper.Channeling(string)"/>
     /// </summary>
     public const string
         Share4 = "com_share0c", //com_share3t ?
         Share2 = "m0618trg_a0k1",
-        Single = "lockon5_t0h";
+        Single = "lockon5_t0h",
+
+        ChannelingDark = "chn_dark001f";
 }
 
 /// <summary>
@@ -46,4 +48,18 @@ public static class OmenHelper
     /// <param name="str"></param>
     /// <returns></returns>
     public static string UnOmen(this string str) => str.Length > 18 ? str[13..^5] : string.Empty;
+
+    /// <summary>
+    /// channeling the str.
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
+    public static string Channeling(this string str) => $"vfx/channeling/eff/{str}.avfx";
+
+    /// <summary>
+    /// Un channeling the string.
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
+    public static string UnChanneling(this string str) => str.Length > 18 ? str[19..^5] : string.Empty;
 }

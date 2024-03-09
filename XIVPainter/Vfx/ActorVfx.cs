@@ -5,8 +5,11 @@ namespace XIVPainter.Vfx;
 /// <summary>
 /// 
 /// </summary>
-public class ActorVfx : IDisposable
+public class ActorVfx : BasicDrawing
 {
+    private bool _shouldRemove;
+    private readonly IntPtr _handle;
+
     /// <summary>
     /// 
     /// </summary>
@@ -24,16 +27,22 @@ public class ActorVfx : IDisposable
     /// <param name="path"></param>
     public ActorVfx(string path, IntPtr caster, IntPtr target)
     {
-        var handle = VfxManager.ActorVfxCreate?.Invoke(path, caster, target, -1, (char)0, 0, (char)0) ?? IntPtr.Zero;
+        _handle = VfxManager.ActorVfxCreate?.Invoke(path, caster, target, -1, (char)0, 0, (char)0) ?? IntPtr.Zero;
 
 #if DEBUG
-        Service.Log.Debug($"Created Actor {handle:x}");
+        Service.Log.Debug($"Created Actor {_handle:x}");
 #endif
+        _shouldRemove = path.StartsWith("vfx/channeling/eff/");
+
+        VfxManager.AddedActorVfxStructs.Add(this);
     }
 
-    /// <inheritdoc/>
-    public void Dispose()
+    private protected override void AdditionalDispose()
     {
-        GC.SuppressFinalize(this);
+        if (_shouldRemove)
+        {
+            VfxManager.ActorVfxRemove?.Invoke(_handle, (char)1);
+        }
+        _shouldRemove = false;
     }
 }

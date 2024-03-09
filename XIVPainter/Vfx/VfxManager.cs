@@ -13,6 +13,7 @@ internal static class VfxManager
     private const string StaticVfxRemoveSig = "40 53 48 83 EC 20 48 8B D9 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 28 33 D2 E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9";
 
     private const string ActorVfxCreateSig = "40 53 55 56 57 48 81 EC ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 0F B6 AC 24 ?? ?? ?? ?? 0F 28 F3 49 8B F8";
+    public const string ActorVfxRemoveSig = "0F 11 48 10 48 8D 05"; // the weird one
 
     //====== STATIC ===========
     public delegate nint StaticVfxCreateDelegate(string path, string pool);
@@ -35,7 +36,12 @@ internal static class VfxManager
 
     public static ActorVfxCreateDelegate? ActorVfxCreate;
 
+    public delegate IntPtr ActorVfxRemoveDelegate(IntPtr vfx, char a2);
+
+    public static ActorVfxRemoveDelegate? ActorVfxRemove;
+
     public static HashSet<StaticVfx> AddedVfxStructs { get; } = [];
+    public static HashSet<ActorVfx> AddedActorVfxStructs { get; } = [];
 #if DEBUG
     private unsafe delegate void* GetResourceSyncPrototype(IntPtr pFileManager, uint* pCategoryId, char* pResourceType, uint* pResourceHash, char* pPath, void* pUnknown);
 
@@ -50,8 +56,13 @@ internal static class VfxManager
         var staticVfxCreateAddress = Service.SigScanner.ScanText(StaticVfxCreateSig);
         var staticVfxRemoveAddress = Service.SigScanner.ScanText(StaticVfxRemoveSig);
         var actorVfxCreateAddress = Service.SigScanner.ScanText(ActorVfxCreateSig);
+        var actorVfxRemoveAddressTemp = Service.SigScanner.ScanText(ActorVfxRemoveSig) + 7;
+        var actorVfxRemoveAddress = Marshal.ReadIntPtr(actorVfxRemoveAddressTemp + Marshal.ReadInt32(actorVfxRemoveAddressTemp) + 4);
+
 
         ActorVfxCreate = Marshal.GetDelegateForFunctionPointer<ActorVfxCreateDelegate>(actorVfxCreateAddress);
+        ActorVfxRemove = Marshal.GetDelegateForFunctionPointer<ActorVfxRemoveDelegate>(actorVfxRemoveAddress);
+
         StaticVfxRemove = Marshal.GetDelegateForFunctionPointer<StaticVfxRemoveDelegate>(staticVfxRemoveAddress);
         StaticVfxRun = Marshal.GetDelegateForFunctionPointer<StaticVfxRunDelegate>(Service.SigScanner.ScanText(StaticVfxRunSig));
         StaticVfxCreate = Marshal.GetDelegateForFunctionPointer<StaticVfxCreateDelegate>(staticVfxCreateAddress);
@@ -76,6 +87,10 @@ internal static class VfxManager
     public static void ClearAllVfx()
     {
         foreach (var item in AddedVfxStructs)
+        {
+            item.Dispose();
+        }
+        foreach (var item in AddedActorVfxStructs)
         {
             item.Dispose();
         }
@@ -137,8 +152,7 @@ internal static class VfxManager
 
         if (!path.EndsWith("avfx")) return;
 
-        else if (!path.StartsWith("vfx/common/eff/")
-            && !path.StartsWith("vfx/omen/eff/"))
+        else if (!path.StartsWith("vfx/common/eff/"))
         {
             Service.Log.Verbose("Object Unknown: " + path);
         }
