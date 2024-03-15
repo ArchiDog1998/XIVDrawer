@@ -78,10 +78,16 @@ public static class XIVPainterMain
         windowSystem = new WindowSystem(_name);
         windowSystem.AddWindow(new OverlayWindow());
 
-        Service.PluginInterface.UiBuilder.Draw += windowSystem.Draw;
+        Service.PluginInterface.UiBuilder.Draw += OnDraw;
         Service.Framework.Update += Update;
 
         VfxManager.Init();
+    }
+
+    private static void OnDraw()
+    {
+        if (Service.GameGui.GameUiHidden) return;
+        windowSystem?.Draw();
     }
 
     /// <summary>
@@ -97,7 +103,7 @@ public static class XIVPainterMain
             item.Dispose();
         }
 
-        Service.PluginInterface.UiBuilder.Draw -= windowSystem!.Draw;
+        Service.PluginInterface.UiBuilder.Draw -= OnDraw;
         Service.Framework.Update -= Update;
 
         VfxManager.Dispose();
