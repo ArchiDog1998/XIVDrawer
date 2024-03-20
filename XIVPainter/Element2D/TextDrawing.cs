@@ -15,6 +15,7 @@ namespace XIVPainter.Element2D;
 /// <param name="scale"></param>
 /// <param name="bgColor"></param>
 /// <param name="corner"></param>
+/// <param name="id"></param>
 public readonly struct TextDrawing(Vector2 pt, uint color, string text, Vector2 padding, float scale, uint bgColor, float corner, int id = 0) : IDrawing2D
 {
     readonly Vector2 _pt = pt;
