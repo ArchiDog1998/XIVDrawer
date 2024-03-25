@@ -70,16 +70,16 @@ public struct GroundOmenHostile
         Sircle88 = "gl_sircle_1715w",
         Sircle90 = "gl_sircle_2018w",
 
-        Fan060_3006 = "gl_fan_o60h30m6p",
-        Fan060_1606 = "gl_fan_o60h16m6p",
-        Fan060_2314 = "gl_fan_o60h23m14p",
-        Fan060_3021 = "gl_fan_o60h30m21p",
-        Fan180_4010 = "gl_fan180_4010c",
+        Fan060_20 = "gl_fan_o60h30m6p",
+        Fan180_25 = "gl_fan180_4010c",
+        Fan060_38 = "gl_fan_o60h16m6p",
+        Fan060_61 = "gl_fan_o60h23m14p",
+        Fan060_70 = "gl_fan_o60h30m21p",
 
         Fan270_0100 = "gl_fan270_0100af",
-        Fan270_1005 = "gl_fan270_1005af",
-        Fan270_1510 = "gl_fan270_1510af",
-        Fan270_1908 = "gl_fan270_1908at";
+        Fan270_42 = "gl_fan270_1908at",
+        Fan270_50 = "gl_fan270_1005af",
+        Fan270_67 = "gl_fan270_1510af";
 
     //TODO: Sircle / Fan Sircle.
 }

@@ -3,6 +3,7 @@
 namespace XIVPainter;
 public abstract class BasicDrawing : IDisposable
 {
+    private bool _disposed;
     public virtual bool Enable { get; set; } = true;
 
     /// <summary>
@@ -34,6 +35,9 @@ public abstract class BasicDrawing : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
+        if(_disposed) return;
+        _disposed = true;
+
         Service.Framework.Update -= Framework_Update;
         AdditionalDispose();
         GC.SuppressFinalize(this);
