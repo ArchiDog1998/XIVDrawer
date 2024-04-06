@@ -69,12 +69,25 @@ public unsafe class StaticVfx : BasicDrawing
             Update();
         }
     }
+
+    /// <summary>
+    /// The owner of this static vfx
+    /// </summary>
     public GameObject? Owner { get; set; }
 
+    /// <summary>
+    /// The rotation to the target.
+    /// </summary>
     public GameObject? Target { get; set; }
 
+    /// <summary>
+    /// The rotate addition.
+    /// </summary>
     public float RotateAddition { get; init; }
 
+    /// <summary>
+    /// The location offfset.
+    /// </summary>
     public Vector3 LocationOffset { get; set; }
 
     /// <summary>
@@ -154,7 +167,6 @@ public unsafe class StaticVfx : BasicDrawing
             }
             Update();
         }
-
     }
 
     private protected sealed override void AdditionalDispose()
