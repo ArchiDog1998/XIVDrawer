@@ -1,9 +1,17 @@
 ﻿using Dalamud.Plugin.Services;
 
 namespace XIVPainter;
+
+/// <summary>
+/// The basic drawing thing.
+/// </summary>
 public abstract class BasicDrawing : IDisposable
 {
     private bool _disposed;
+
+    /// <summary>
+    /// If it is enabled.
+    /// </summary>
     public virtual bool Enable { get; set; } = true;
 
     /// <summary>

@@ -18,6 +18,9 @@ public abstract class  IDrawing : BasicDrawing
         UpdateOnFrame();
     }
 
+    /// <summary>
+    /// The things that it should upate on every frame.
+    /// </summary>
     protected abstract void UpdateOnFrame();
 
     internal IEnumerable<IDrawing2D> To2DMain()

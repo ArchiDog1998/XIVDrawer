@@ -11,7 +11,19 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
+		<Description>A basic library for drawing thing in FFXIV</Description>
+		<PackageProjectUrl></PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/ArchiDog1998/XIVPainter</RepositoryUrl>
+		<PackageTags>FFXIV, FF14, Dalamud, VFX, Drawing</PackageTags>
+		<PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="LibTessDotNet" Version="1.1.15" />
 	</ItemGroup>
