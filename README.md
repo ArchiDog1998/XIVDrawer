@@ -1,13 +1,13 @@
-# XIVPainter
+# XIVDrawer
 
-XIVPainter is a drawing library in Imgui designed to work within Dalamud Plugins. It can draw polygons, images, text, and so on to your world.
+XIVDrawer is a drawing library in Imgui designed to work within Dalamud Plugins. It can draw polygons, images, text, and so on to your world.
 
 ## Getting Started
 
 Add XIVPainter as a submodule to your project:
 
 ```shell
-git submodule add https://github.com/ArchiDog1998/XIVPainter
+git submodule add https://github.com/ArchiDog1998/XIVDrawer
 ```
 
 Add it to your plugin's CSProj file:
@@ -21,7 +21,7 @@ Add it to your plugin's CSProj file:
 Then, in the entry point of your plugin:
 
 ```c#
-XIVPainterMain.Init(pluginInterface, "%NAME%");
+XIVDrawerMain.Init(pluginInterface, "%NAME%");
 ```
 
 where pluginInterface is a **DalamudPluginInterface**.
