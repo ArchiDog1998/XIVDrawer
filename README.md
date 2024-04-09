@@ -45,7 +45,7 @@ All things need to be disposed to close it.
 Use this code to show the Vfx stuff.
 
 ```c#
-_ = XIVPainterMain.ShowOff();
+_ = XIVDrawerMain.ShowOff();
 ```
 
 There are two things called `ActorVfx` and `StaticVfx` for you to use in your own project.

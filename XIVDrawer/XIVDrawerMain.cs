@@ -371,7 +371,10 @@ public static class XIVDrawerMain
     {
         if (Service.ClientState.LocalPlayer is not PlayerCharacter player) return;
 
-        await ShowSpecialElements(player);
+        await ShowLockOnElements(player);
+        await Task.Delay(3000);
+
+        await ShowChannelingElements(player);
         await Task.Delay(3000);
 
         await ShowGroundHostile(player);
@@ -408,7 +411,7 @@ public static class XIVDrawerMain
         ShowQuest("That's all Friendly Omen!");
     }
 
-    private static async Task ShowSpecialElements(PlayerCharacter player)
+    private static async Task ShowLockOnElements(PlayerCharacter player)
     {
         foreach (var item in typeof(LockOnOmen).GetRuntimeFields())
         {
@@ -418,7 +421,20 @@ public static class XIVDrawerMain
             await MessageDelay(item.Name);
         }
 
-        ShowQuest("That's all special Element!");
+        ShowQuest("That's all lockOn Element!");
+    }
+
+    private static async Task ShowChannelingElements(PlayerCharacter player)
+    {
+        foreach (var item in typeof(ChannelingOmen).GetRuntimeFields())
+        {
+            if (item.GetValue(null) is not string str) continue;
+
+            using var i = new ActorVfx(str.Channeling(), player, player);
+            await MessageDelay(item.Name);
+        }
+
+        ShowQuest("That's all Channeling Element!");
     }
 
     private static async Task MessageDelay(string name)

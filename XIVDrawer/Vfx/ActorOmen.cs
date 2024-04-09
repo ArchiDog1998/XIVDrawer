@@ -23,7 +23,14 @@ public struct ChannelingOmen
     /// Use it with <see cref="OmenHelper.Channeling(string)"/>, or <see cref="OmenHelper.UnChanneling(string)"/>
     /// </summary>
     public const string
-        ChannelingDark = "chn_dark001f";
+        ChannelingDark = "chn_dark001f",
+        ChannelingLight = "chn_light01f",
+        ChannelingWater = "chn_water01f",
+        ChannelingWind = "chn_wind001f",
+        ChannelingFire = "chn_fire001f",
+        ChannelingThunder = "chn_thunder1f",
+        ChannelingEarth = "chn_earth001f",
+        ChannelingIce = "chn_ice001f";
 }
 
 /// <summary>
