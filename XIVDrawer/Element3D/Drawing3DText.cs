@@ -1,5 +1,4 @@
 ﻿using XIVDrawer.Element2D;
-using XIVPainter.Element2D;
 
 namespace XIVDrawer.Element3D;
 

@@ -1,5 +1,9 @@
 # XIVDrawer
 
+> [!IMPORTANT]
+>
+> Due to the `XIVPainter` is already taken in Nuget, I have to change its name to `XIVDrawer`!
+
 XIVDrawer is a drawing library in Imgui designed to work within Dalamud Plugins. It can draw polygons, images, text, and so on to your world.
 
 ## Getting Started
@@ -14,7 +18,7 @@ Add it to your plugin's CSProj file:
 
 ```xml
 <ItemGroup>
-	<ProjectReference Include="..\XIVPainter\XIVPainter\XIVPainter.csproj" />
+	<ProjectReference Include="..\XIVDrawer\XIVDrawer\XIVDrawer.csproj" />
 </ItemGroup>
 ```
 
