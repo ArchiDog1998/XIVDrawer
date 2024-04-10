@@ -24,15 +24,16 @@ public class ActorVfx : BasicDrawing
     /// </summary>
     /// <param name="caster"></param>
     /// <param name="target"></param>
+    /// <param name="shouldRemove">Should this vfx be removed manually?</param>
     /// <param name="path"></param>
-    public ActorVfx(string path, nint caster, nint target)
+    public ActorVfx(string path, nint caster, nint target, bool? shouldRemove = null)
     {
         _handle = VfxManager.ActorVfxCreate?.Invoke(path, caster, target, -1, (char)0, 0, (char)0) ?? nint.Zero;
 
 #if DEBUG
         Service.Log.Debug($"Created Actor {_handle:x}");
 #endif
-        _shouldRemove = !path.StartsWith("vfx/lockon/eff/");
+        _shouldRemove = shouldRemove ?? !path.StartsWith("vfx/lockon/eff/");
 
         VfxManager.AddedActorVfxStructs.Add(this);
     }
