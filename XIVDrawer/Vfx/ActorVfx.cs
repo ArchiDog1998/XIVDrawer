@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
-using XIVDrawer;
 
 namespace XIVDrawer.Vfx;
 
@@ -33,7 +32,7 @@ public class ActorVfx : BasicDrawing
 #if DEBUG
         Service.Log.Debug($"Created Actor {_handle:x}");
 #endif
-        _shouldRemove = path.StartsWith("vfx/channeling/eff/");
+        _shouldRemove = !path.StartsWith("vfx/lockon/eff/");
 
         VfxManager.AddedActorVfxStructs.Add(this);
     }
