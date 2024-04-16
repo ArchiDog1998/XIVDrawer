@@ -58,6 +58,11 @@ public static class XIVDrawerMain
     /// To make it faster
     /// </summary>
     public static bool UseTaskToAccelerate { get; set; } = false;
+
+    /// <summary>
+    /// The view Padding range.
+    /// </summary>
+    public static Vector4 ViewPadding { get; set; } = Vector4.One * 50;
     #endregion
 
     private static bool _inited = false;
