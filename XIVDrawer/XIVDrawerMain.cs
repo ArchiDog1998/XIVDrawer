@@ -12,11 +12,11 @@ using XIVDrawer.Vfx;
 namespace XIVDrawer;
 
 /// <summary>
-/// The painter for FFXIV in Dalamud.
+/// The drawer for FFXIV in Dalamud.
 /// </summary>
 public static class XIVDrawerMain
 {
-    internal static string _name = "XIV Painter";
+    internal static string _name = "XIV Drawer";
 
     internal static readonly List<IDrawing> _drawingElements = [];
     internal static IDrawing2D[] _drawingElements2D = [];

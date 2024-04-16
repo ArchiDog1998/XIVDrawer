@@ -41,6 +41,10 @@ public class Drawing3DImage(IDalamudTextureWrap? texture, Vector3 position, floa
     /// </summary>
     public bool HideIfInvisible { get; set; }
 
+    /// <summary>
+    /// The view Padding range.
+    /// </summary>
+    public Vector4 ViewPadding { get; set; } = Vector4.One * 50;
 
     /// <summary>
     /// Convert this to the 2d elements.
@@ -65,7 +69,8 @@ public class Drawing3DImage(IDalamudTextureWrap? texture, Vector3 position, floa
                 float width = device->Width;
                 float height = device->Height;
 
-                pt = XIVDrawerMain.GetPtInRect(windowPos + half, new Vector2(width, height) - 2 * half, pt);
+                pt = XIVDrawerMain.GetPtInRect(windowPos + half + new Vector2(ViewPadding.X, ViewPadding.Y), 
+                    new Vector2(width, height) - 2 * half - new Vector2(ViewPadding.X + ViewPadding.Z, ViewPadding.Y + ViewPadding.W), pt);
             }
 
         return [new ImageDrawing(Image, pt - half, pt + half)];
