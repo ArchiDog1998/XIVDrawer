@@ -25,7 +25,7 @@ public static class XIVDrawerMain
 
     #region Config
     /// <summary>
-    /// The hight scale for the vfx things.
+    /// The height scale for the vfx things.
     /// </summary>
     public static float HeightScale { get; set; } = 5;
 
