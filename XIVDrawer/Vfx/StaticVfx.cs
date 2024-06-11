@@ -40,7 +40,7 @@ internal struct Quat
 /// </summary>
 public unsafe class StaticVfx : BasicDrawing
 {
-    internal VfxStruct* Vfx;
+    internal VfxStruct* Vfx = null;
     private float _height;
     private bool _enable = true;
 
@@ -52,6 +52,7 @@ public unsafe class StaticVfx : BasicDrawing
         {
             if (_enable == value) return;
             _enable = value;
+            if (Vfx == null) return;
 
             unsafe
             {
@@ -86,7 +87,7 @@ public unsafe class StaticVfx : BasicDrawing
     public float RotateAddition { get; init; }
 
     /// <summary>
-    /// The location offfset.
+    /// The location offset.
     /// </summary>
     public Vector3 LocationOffset { get; set; }
 
@@ -124,7 +125,11 @@ public unsafe class StaticVfx : BasicDrawing
     /// <param name="scale"></param>
     public unsafe StaticVfx(string path, Vector3 position, Vector3 rotation, Vector3 scale)
     {
+        if (!XIVDrawerMain.Enable) return;
+
         Vfx = (VfxStruct*)(VfxManager.StaticVfxCreate?.Invoke(path, "Client.System.Scheduler.Instance.VfxObject") ?? nint.Zero);
+        if (Vfx == null) return;
+
         VfxManager.StaticVfxRun?.Invoke((nint)Vfx, 0f, 0xFFFFFFFF);
 
         VfxManager.AddedVfxStructs.Add(this);
