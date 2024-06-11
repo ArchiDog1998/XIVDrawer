@@ -125,8 +125,6 @@ public unsafe class StaticVfx : BasicDrawing
     /// <param name="scale"></param>
     public unsafe StaticVfx(string path, Vector3 position, Vector3 rotation, Vector3 scale)
     {
-        if (!XIVDrawerMain.Enable) return;
-
         Vfx = (VfxStruct*)(VfxManager.StaticVfxCreate?.Invoke(path, "Client.System.Scheduler.Instance.VfxObject") ?? nint.Zero);
         if (Vfx == null) return;
 

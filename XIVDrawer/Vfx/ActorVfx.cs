@@ -28,8 +28,6 @@ public class ActorVfx : BasicDrawing
     /// <param name="path"></param>
     public ActorVfx(string path, nint caster, nint target, bool? shouldRemove = null)
     {
-        if (XIVDrawerMain.Enable) return;
-
         _handle = VfxManager.ActorVfxCreate?.Invoke(path, caster, target, -1, (char)0, 0, (char)0) ?? nint.Zero;
 
 #if DEBUG
