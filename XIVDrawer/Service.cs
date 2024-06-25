@@ -21,5 +21,6 @@ internal class Service
     [PluginService] public static ISigScanner SigScanner { get; private set; } = null!;
     [PluginService] public static IGameInteropProvider Hook { get; private set; } = null!;
     [PluginService] public static IToastGui Toasts { get; private set; } = null!;
+    [PluginService] public static ITextureProvider Texture { get; private set; } = null!;
 
 }

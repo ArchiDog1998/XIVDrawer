@@ -3,10 +3,10 @@ using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Data.Files;
 using XIVDrawer.Element2D;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace XIVDrawer.ElementSpecial;
 
@@ -60,7 +60,7 @@ public class DrawingHighlightHotbar : IDrawing
             array[i + 3] = imageData[i + 3];
         }
 
-        _texture = Service.PluginInterface.UiBuilder.LoadImageRaw(array, tex!.Header.Width, tex!.Header.Height, 4);
+        _texture = Service.Texture.CreateFromRawAsync(new(tex!.Header.Width, tex!.Header.Height, 4), array).Result;
     }
 
     static unsafe bool IsVisible(AtkUnitBase unit)
@@ -75,7 +75,7 @@ public class DrawingHighlightHotbar : IDrawing
     {
         while (node != null)
         {
-            if (!node->IsVisible) return false;
+            if (!node->IsVisible()) return false;
             node = node->ParentNode;
         }
 
@@ -98,10 +98,10 @@ public class DrawingHighlightHotbar : IDrawing
             if (actionBar != null && IsVisible(actionBar->AtkUnitBase))
             {
                 var s = actionBar->AtkUnitBase.Scale;
-                var hotBar = Framework.Instance()->GetUiModule()->GetRaptureHotbarModule()->HotBarsSpan[hotBarIndex];
+                var hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->HotBars[hotBarIndex];
 
                 var slotIndex = 0;
-                foreach (var slot in actionBar->ActionBarSlotVector.Span)
+                foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
                 {
                     var iconAddon = slot.Icon;
                     if ((nint)iconAddon != nint.Zero && IsVisible(&iconAddon->AtkResNode))
@@ -124,7 +124,7 @@ public class DrawingHighlightHotbar : IDrawing
                         else
                         {
                             node = *slot.Icon->AtkResNode.ParentNode->ParentNode;
-                            bar = hotBar.SlotsSpan[slotIndex];
+                            bar = hotBar.Slots[slotIndex];
                         }
 
                         if (IsActionSlotRight(slot, bar))
@@ -167,8 +167,8 @@ public class DrawingHighlightHotbar : IDrawing
     {
         if (hot.HasValue)
         {
-            if (hot.Value.IconTypeA != HotbarSlotType.CraftAction && hot.Value.IconTypeA != HotbarSlotType.Action) return false;
-            if (hot.Value.IconTypeB != HotbarSlotType.CraftAction && hot.Value.IconTypeB != HotbarSlotType.Action) return false;
+            if (hot.Value.OriginalApparentSlotType != HotbarSlotType.CraftAction && hot.Value.OriginalApparentSlotType != HotbarSlotType.Action) return false;
+            if (hot.Value.ApparentSlotType != HotbarSlotType.CraftAction && hot.Value.ApparentSlotType != HotbarSlotType.Action) return false;
         }
 
         return ActionIds.Contains(ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId));
