@@ -16,7 +16,7 @@ public class ActorVfx : BasicDrawing
     /// <param name="caster"></param>
     /// <param name="target"></param>
     /// <param name="path"></param>
-    public ActorVfx(string path, GameObject caster, GameObject target)
+    public ActorVfx(string path, IGameObject caster, IGameObject target)
         : this(path, caster.Address, target.Address) { }
 
     /// <summary>

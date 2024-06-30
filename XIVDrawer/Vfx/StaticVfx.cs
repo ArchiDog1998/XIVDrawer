@@ -74,12 +74,12 @@ public unsafe class StaticVfx : BasicDrawing
     /// <summary>
     /// The owner of this static vfx
     /// </summary>
-    public GameObject? Owner { get; set; }
+    public IGameObject? Owner { get; set; }
 
     /// <summary>
     /// The rotation to the target.
     /// </summary>
-    public GameObject? Target { get; set; }
+    public IGameObject? Target { get; set; }
 
     /// <summary>
     /// The rotate addition.
@@ -97,7 +97,7 @@ public unsafe class StaticVfx : BasicDrawing
     /// <param name="path"></param>
     /// <param name="owner"></param>
     /// <param name="scale"></param>
-    public StaticVfx(string path, GameObject owner, Vector3 scale)
+    public StaticVfx(string path, IGameObject owner, Vector3 scale)
         : this(path, owner.Position, owner.Rotation, scale)
     {
         Owner = owner;

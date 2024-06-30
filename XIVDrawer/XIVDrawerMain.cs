@@ -73,7 +73,7 @@ public static class XIVDrawerMain
     /// <param name="pluginInterface"></param>
     /// <param name="name"></param>
     /// <returns></returns>
-    public static void Init(DalamudPluginInterface pluginInterface, string name)
+    public static void Init(IDalamudPluginInterface pluginInterface, string name)
     {
         if (_inited) return;
         _inited = true;
@@ -374,7 +374,7 @@ public static class XIVDrawerMain
     /// <returns></returns>
     public static async Task ShowOff()
     {
-        if (Service.ClientState.LocalPlayer is not PlayerCharacter player) return;
+        if (Service.ClientState.LocalPlayer is not IPlayerCharacter player) return;
 
         await ShowLockOnElements(player);
         await Task.Delay(3000);
@@ -389,7 +389,7 @@ public static class XIVDrawerMain
         await Task.Delay(3000);
     }
 
-    private static async Task ShowGroundHostile(PlayerCharacter player)
+    private static async Task ShowGroundHostile(IPlayerCharacter player)
     {
         foreach (var item in typeof(GroundOmenHostile).GetRuntimeFields())
         {
@@ -402,7 +402,7 @@ public static class XIVDrawerMain
         ShowQuest("That's all Hostile Omen!");
     }
 
-    private static async Task ShowGroundFriendly(PlayerCharacter player)
+    private static async Task ShowGroundFriendly(IPlayerCharacter player)
     {
         foreach (var item in typeof(GroundOmenNone).GetRuntimeFields()
             .Concat(typeof(GroundOmenFriendly).GetRuntimeFields()))
@@ -416,7 +416,7 @@ public static class XIVDrawerMain
         ShowQuest("That's all Friendly Omen!");
     }
 
-    private static async Task ShowLockOnElements(PlayerCharacter player)
+    private static async Task ShowLockOnElements(IPlayerCharacter player)
     {
         foreach (var item in typeof(LockOnOmen).GetRuntimeFields())
         {
@@ -429,7 +429,7 @@ public static class XIVDrawerMain
         ShowQuest("That's all lockOn Element!");
     }
 
-    private static async Task ShowChannelingElements(PlayerCharacter player)
+    private static async Task ShowChannelingElements(IPlayerCharacter player)
     {
         foreach (var item in typeof(ChannelingOmen).GetRuntimeFields())
         {

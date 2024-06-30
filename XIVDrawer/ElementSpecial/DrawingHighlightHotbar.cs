@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Internal;
+﻿using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
@@ -98,7 +98,7 @@ public class DrawingHighlightHotbar : IDrawing
             if (actionBar != null && IsVisible(actionBar->AtkUnitBase))
             {
                 var s = actionBar->AtkUnitBase.Scale;
-                var hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->HotBars[hotBarIndex];
+                var hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->Hotbars[hotBarIndex];
 
                 var slotIndex = 0;
                 foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
@@ -107,7 +107,7 @@ public class DrawingHighlightHotbar : IDrawing
                     if ((nint)iconAddon != nint.Zero && IsVisible(&iconAddon->AtkResNode))
                     {
                         AtkResNode node = default;
-                        HotBarSlot? bar;
+                        HotbarSlot? bar;
 
                         if (hotBarIndex > 9)
                         {
@@ -163,7 +163,7 @@ public class DrawingHighlightHotbar : IDrawing
             .Where(ptr => ptr != nint.Zero);
     }
 
-    unsafe bool IsActionSlotRight(ActionBarSlot slot, HotBarSlot? hot)
+    unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot? hot)
     {
         if (hot.HasValue)
         {
