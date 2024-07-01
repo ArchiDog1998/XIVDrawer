@@ -32,7 +32,7 @@ public enum RadiusInclude : byte
 
 internal static class RadiusIncludeExtension
 {
-    internal static float GetRadius(this RadiusInclude include, GameObject? target, float radius)
+    internal static float GetRadius(this RadiusInclude include, IGameObject? target, float radius)
     {
         if (target == null) return 0;
         if (include.HasFlag(RadiusInclude.IncludePlayer))

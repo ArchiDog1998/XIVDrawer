@@ -4,7 +4,7 @@ using XIVDrawer.Enum;
 namespace XIVDrawer.Element3D;
 
 /// <summary>
-/// The annulus drawing binding by a <seealso cref="GameObject"/>.
+/// The annulus drawing binding by a <seealso cref="IGameObject"/>.
 /// </summary>
 public class Drawing3DAnnulusO : Drawing3DAnnulus
 {
@@ -26,7 +26,7 @@ public class Drawing3DAnnulusO : Drawing3DAnnulus
     /// <summary>
     /// The binding target
     /// </summary>
-    public GameObject? Target { get; set; }
+    public IGameObject? Target { get; set; }
 
     /// <summary>
     /// Arc start, span.
@@ -43,7 +43,7 @@ public class Drawing3DAnnulusO : Drawing3DAnnulus
     /// <param name="thickness"></param>
     /// <param name="include"></param>
     /// <param name="arcStartSpan"></param>
-    public Drawing3DAnnulusO(GameObject? target, float radius1, float radius2, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan)
+    public Drawing3DAnnulusO(IGameObject? target, float radius1, float radius2, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan)
         : base(target?.Position ?? default, include.GetRadius(target, radius1), include.GetRadius(target, radius2), color, thickness)
     {
         RadiusTarget1 = radius1;

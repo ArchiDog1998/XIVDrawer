@@ -1,4 +1,5 @@
 ﻿using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using XIVDrawer.Element2D;

@@ -4,7 +4,7 @@ using XIVDrawer.Enum;
 namespace XIVDrawer.Element3D;
 
 /// <summary>
-/// The circular sector drawing binding by a <seealso cref="GameObject"/>.
+/// The circular sector drawing binding by a <seealso cref="IGameObject"/>.
 /// </summary>
 public class Drawing3DCircularSectorO : Drawing3DCircularSector
 {
@@ -21,7 +21,7 @@ public class Drawing3DCircularSectorO : Drawing3DCircularSector
     /// <summary>
     /// The binding target
     /// </summary>
-    public GameObject? Target { get; set; }
+    public IGameObject? Target { get; set; }
 
     /// <summary>
     /// Arc start, span.
@@ -37,7 +37,7 @@ public class Drawing3DCircularSectorO : Drawing3DCircularSector
     /// <param name="thickness"></param>
     /// <param name="include"></param>
     /// <param name="arcStartSpan"></param>
-    public Drawing3DCircularSectorO(GameObject? target, float radius, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan)
+    public Drawing3DCircularSectorO(IGameObject? target, float radius, uint color, float thickness, RadiusInclude include = RadiusInclude.IncludeBoth, params Vector2[] arcStartSpan)
         : base(target?.Position ?? default, include.GetRadius(target, radius), color, thickness)
     {
         RadiusTarget = radius;
