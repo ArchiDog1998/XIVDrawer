@@ -38,7 +38,7 @@ public static class DrawingExtensions
         RaycastHit hit = default;
 
         return !FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule
-            ->RaycastMaterialFilter(&hit, camera, vec, dis, 1, unknown);
+            ->RaycastMaterialFilter(&hit, &camera, &vec, dis, 1, unknown);
     }
 
     /// <summary>
