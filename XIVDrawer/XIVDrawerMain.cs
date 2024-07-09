@@ -266,7 +266,8 @@ public static class XIVDrawerMain
     static unsafe Vector3 WorldToCamera(Vector3 worldPos)
     {
         var camera = CameraManager.Instance()->CurrentCamera;
-        return Vector3.Transform(worldPos, camera->ViewMatrix * camera->RenderCamera->ProjectionMatrix);
+        var pCoords = Vector4.Transform(new Vector4(worldPos, 1f), camera->ViewMatrix * camera->RenderCamera->ProjectionMatrix);
+        return new(pCoords.X, pCoords.Y, pCoords.W);
     }
 
     static unsafe Vector2 CameraToScreen(Vector3 cameraPos, bool inScreen)
