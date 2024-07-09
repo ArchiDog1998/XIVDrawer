@@ -1,4 +1,5 @@
-﻿using Dalamud.Interface.Textures.TextureWraps;
+﻿using Dalamud.Interface.Textures;
+using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
@@ -60,7 +61,7 @@ public class DrawingHighlightHotbar : IDrawing
             array[i + 3] = imageData[i + 3];
         }
 
-        _texture = Service.Texture.CreateFromRawAsync(new(tex!.Header.Width, tex!.Header.Height, 4), array).Result;
+        _texture = Service.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex!.Header.Width, tex!.Header.Height), array);
     }
 
     static unsafe bool IsVisible(AtkUnitBase unit)
