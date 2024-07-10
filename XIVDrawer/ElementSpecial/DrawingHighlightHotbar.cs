@@ -178,8 +178,8 @@ public class DrawingHighlightHotbar : IDrawing
 
     unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot hot)
     {
-        if (hot.OriginalApparentSlotType != HotbarSlotType.CraftAction && hot.OriginalApparentSlotType != HotbarSlotType.Action) return false;
-        if (hot.ApparentSlotType != HotbarSlotType.CraftAction && hot.ApparentSlotType != HotbarSlotType.Action) return false;
+        if (hot.OriginalApparentSlotType is not HotbarSlotType.GeneralAction and not HotbarSlotType.Action) return false;
+        if (hot.ApparentSlotType is not HotbarSlotType.GeneralAction and not HotbarSlotType.Action) return false;
 
         return ActionIds.Contains(ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId));
     }
