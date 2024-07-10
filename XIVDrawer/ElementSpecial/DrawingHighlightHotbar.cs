@@ -61,7 +61,7 @@ public class DrawingHighlightHotbar : IDrawing
             array[i + 3] = imageData[i + 3];
         }
 
-        _texture = Service.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex!.Header.Width, tex!.Header.Height), array);
+        _texture = Service.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Height), array);
     }
 
     static unsafe bool IsVisible(AtkUnitBase unit)
@@ -99,6 +99,21 @@ public class DrawingHighlightHotbar : IDrawing
             if (actionBar != null && IsVisible(actionBar->AtkUnitBase))
             {
                 var s = actionBar->AtkUnitBase.Scale;
+
+                var isCrossBar = hotBarIndex > 9;
+                if (isCrossBar)
+                {
+                    if (hotBarIndex == 10)
+                    {
+                        var actBar = (AddonActionCross*)intPtr;
+                        hotBarIndex = actBar->RaptureHotbarId;
+                    }
+                    else
+                    {
+                        var actBar = (AddonActionDoubleCrossBase*)intPtr;
+                        hotBarIndex = actBar->BarTarget;
+                    }
+                }
                 var hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->Hotbars[hotBarIndex];
 
                 var slotIndex = 0;
@@ -108,9 +123,9 @@ public class DrawingHighlightHotbar : IDrawing
                     if ((nint)iconAddon != nint.Zero && IsVisible(&iconAddon->AtkResNode))
                     {
                         AtkResNode node = default;
-                        HotbarSlot? bar;
+                        HotbarSlot bar = hotBar.Slots[slotIndex];
 
-                        if (hotBarIndex > 9)
+                        if (isCrossBar)
                         {
                             var manager = slot.Icon->AtkResNode.ParentNode->GetAsAtkComponentNode()->Component->UldManager.NodeList[2]->GetAsAtkComponentNode()->Component->UldManager;
 
@@ -119,13 +134,10 @@ public class DrawingHighlightHotbar : IDrawing
                                 node = *manager.NodeList[i];
                                 if (node.Width == 72) break;
                             }
-
-                            bar = null;
                         }
                         else
                         {
                             node = *slot.Icon->AtkResNode.ParentNode->ParentNode;
-                            bar = hotBar.Slots[slotIndex];
                         }
 
                         if (IsActionSlotRight(slot, bar))
@@ -164,13 +176,10 @@ public class DrawingHighlightHotbar : IDrawing
             .Where(ptr => ptr != nint.Zero);
     }
 
-    unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot? hot)
+    unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot hot)
     {
-        if (hot.HasValue)
-        {
-            if (hot.Value.OriginalApparentSlotType != HotbarSlotType.CraftAction && hot.Value.OriginalApparentSlotType != HotbarSlotType.Action) return false;
-            if (hot.Value.ApparentSlotType != HotbarSlotType.CraftAction && hot.Value.ApparentSlotType != HotbarSlotType.Action) return false;
-        }
+        if (hot.OriginalApparentSlotType != HotbarSlotType.CraftAction && hot.OriginalApparentSlotType != HotbarSlotType.Action) return false;
+        if (hot.ApparentSlotType != HotbarSlotType.CraftAction && hot.ApparentSlotType != HotbarSlotType.Action) return false;
 
         return ActionIds.Contains(ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId));
     }
