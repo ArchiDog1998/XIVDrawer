@@ -48,8 +48,8 @@ internal static class VfxManager
 
     private unsafe delegate void* GetResourceAsyncPrototype(nint pFileManager, uint* pCategoryId, char* pResourceType, uint* pResourceHash, char* pPath, void* pUnknown, bool isUnknown);
 
-    static Hook<GetResourceSyncPrototype>? _getResourceSyncHook;
-    static Hook<GetResourceAsyncPrototype>? _getResourceAsyncHook;
+    private static Hook<GetResourceSyncPrototype>? _getResourceSyncHook;
+    private static Hook<GetResourceAsyncPrototype>? _getResourceAsyncHook;
 #endif
 
     public static void Init()
@@ -76,10 +76,10 @@ internal static class VfxManager
 #if DEBUG
         unsafe
         {
-            _getResourceSyncHook = Service.Hook.HookFromSignature<GetResourceSyncPrototype>("E8 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ?? 48 89 87 ?? ?? ?? ?? 48 8D 54 24", GetResourceSyncDetour);
+            _getResourceSyncHook = Service.Hook.HookFromSignature<GetResourceSyncPrototype>("E8 ?? ?? ?? ?? 48 8B D8 8B C7 ", GetResourceSyncDetour);
             _getResourceSyncHook.Enable();
 
-            _getResourceAsyncHook = Service.Hook.HookFromSignature<GetResourceAsyncPrototype>("E8 ?? ?? ?? ?? 48 8B D8 EB 07 F0 FF 83", GetResourceAsyncDetour);
+            _getResourceAsyncHook = Service.Hook.HookFromSignature<GetResourceAsyncPrototype>("E8 ?? ?? ?? 00 48 8B D8 EB ?? F0 FF 83 ?? ?? 00 00", GetResourceAsyncDetour);
             _getResourceAsyncHook.Enable();
         }
 #endif
@@ -135,19 +135,19 @@ internal static class VfxManager
         }
     }
 #if DEBUG
-    private unsafe static void* GetResourceSyncDetour(nint pFileManager, uint* pCategoryId, char* pResourceType, uint* pResourceHash, char* pPath, void* pUnknown)
+    private static unsafe void* GetResourceSyncDetour(nint pFileManager, uint* pCategoryId, char* pResourceType, uint* pResourceHash, char* pPath, void* pUnknown)
     {
         DrawDebug(pPath);
         return _getResourceSyncHook!.Original(pFileManager, pCategoryId, pResourceType, pResourceHash, pPath, pUnknown);
     }
 
-    private unsafe static void* GetResourceAsyncDetour(nint pFileManager, uint* pCategoryId, char* pResourceType, uint* pResourceHash, char* pPath, void* pUnknown, bool isUnknown)
+    private static unsafe void* GetResourceAsyncDetour(nint pFileManager, uint* pCategoryId, char* pResourceType, uint* pResourceHash, char* pPath, void* pUnknown, bool isUnknown)
     {
         DrawDebug(pPath);
         return _getResourceAsyncHook!.Original(pFileManager, pCategoryId, pResourceType, pResourceHash, pPath, pUnknown, isUnknown);
     }
 
-    private unsafe static void DrawDebug(char* pPath)
+    private static unsafe void DrawDebug(char* pPath)
     {
         var path = ReadTerminatedString((byte*)pPath);
 

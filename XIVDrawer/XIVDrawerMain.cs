@@ -23,6 +23,11 @@ public static class XIVDrawerMain
 
     private static WindowSystem? windowSystem;
 
+    /// <summary>
+    /// Additional Draw.
+    /// </summary>
+    public static event Action? AdditionalDraw;
+
     #region Config
     /// <summary>
     /// The height scale for the vfx things.
@@ -89,6 +94,8 @@ public static class XIVDrawerMain
         VfxManager.Init();
     }
 
+    internal static  void AdditionDraw() => AdditionalDraw?.Invoke();
+
     private static void OnDraw()
     {
         if (Service.GameGui.GameUiHidden) return;
@@ -124,7 +131,7 @@ public static class XIVDrawerMain
         Task.Run(UpdateData);
     }
 
-    static bool _started = false;
+    private static bool _started = false;
     private static async void UpdateData()
     {
         try
@@ -194,7 +201,7 @@ public static class XIVDrawerMain
         return changedPts.Select(p => CameraToScreen(p, inScreen)).ToArray();
     }
 
-    static IEnumerable<Vector3> DivideCurve(IEnumerable<Vector3> worldPts, float length, bool isClosed)
+    private static IEnumerable<Vector3> DivideCurve(IEnumerable<Vector3> worldPts, float length, bool isClosed)
     {
         if (worldPts.Count() < 2 || length <= 0.01f) return worldPts;
 
@@ -210,7 +217,7 @@ public static class XIVDrawerMain
         return pts;
     }
 
-    static Vector3[] DashPoints(Vector3 previous, Vector3 next, float length)
+    private static Vector3[] DashPoints(Vector3 previous, Vector3 next, float length)
     {
         var dir = next - previous;
         var count = Math.Max(1, (int)(dir.Length() / length));
@@ -222,7 +229,7 @@ public static class XIVDrawerMain
         return points;
     }
 
-    static IEnumerable<Vector3> ChangePtsBehindCamera(Vector3[] cameraPts)
+    private static IEnumerable<Vector3> ChangePtsBehindCamera(Vector3[] cameraPts)
     {
         var changedPts = new List<Vector3>(cameraPts.Length * 2);
 
@@ -251,8 +258,8 @@ public static class XIVDrawerMain
         return changedPts.Where(p => p.Z > 0);
     }
 
-    const float PLANE_Z = 0.001f;
-    static void GetPointOnPlane(Vector3 front, ref Vector3 back)
+    private const float PLANE_Z = 0.001f;
+    private static void GetPointOnPlane(Vector3 front, ref Vector3 back)
     {
         if (front.Z <= 0) return;
         if (back.Z > 0) return;
@@ -263,14 +270,14 @@ public static class XIVDrawerMain
         back.Z = PLANE_Z;
     }
 
-    static unsafe Vector3 WorldToCamera(Vector3 worldPos)
+    private static unsafe Vector3 WorldToCamera(Vector3 worldPos)
     {
         var camera = CameraManager.Instance()->CurrentCamera;
         var pCoords = Vector4.Transform(new Vector4(worldPos, 1f), camera->ViewMatrix * camera->RenderCamera->ProjectionMatrix);
         return new(pCoords.X, pCoords.Y, pCoords.W);
     }
 
-    static unsafe Vector2 CameraToScreen(Vector3 cameraPos, bool inScreen)
+    private static unsafe Vector2 CameraToScreen(Vector3 cameraPos, bool inScreen)
     {
         var screenPos = new Vector2(cameraPos.X / MathF.Abs(cameraPos.Z), cameraPos.Y / MathF.Abs(cameraPos.Z));
         var windowPos = ImGuiHelpers.MainViewport.Pos;
@@ -361,7 +368,7 @@ public static class XIVDrawerMain
         return pts;
     }
 
-    static Vector3 RoundPoint(Vector3 pt, double radius, float rotation)
+    private static Vector3 RoundPoint(Vector3 pt, double radius, float rotation)
     {
         var x = Math.Sin(rotation) * radius + pt.X;
         var z = Math.Cos(rotation) * radius + pt.Z;

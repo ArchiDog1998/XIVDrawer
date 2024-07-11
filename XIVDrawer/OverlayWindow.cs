@@ -54,6 +54,15 @@ internal class OverlayWindow : Window
         {
             Service.Log.Warning(ex, $"{XIVDrawerMain._name} failed to draw on Screen.");
         }
+
+        try
+        {
+            XIVDrawerMain.AdditionDraw();
+        }
+        catch (Exception ex)
+        {
+            Service.Log.Warning(ex, $"{XIVDrawerMain._name} failed to draw the additional.");
+        }
     }
 
     public override void PostDraw()

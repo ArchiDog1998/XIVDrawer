@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
-using XIVDrawer;
 
 namespace XIVDrawer.Enum;
 

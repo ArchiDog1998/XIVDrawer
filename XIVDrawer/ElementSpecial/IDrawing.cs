@@ -19,7 +19,7 @@ public abstract class IDrawing : BasicDrawing
     }
 
     /// <summary>
-    /// The things that it should upate on every frame.
+    /// The things that it should update on every frame.
     /// </summary>
     protected abstract void UpdateOnFrame();
 

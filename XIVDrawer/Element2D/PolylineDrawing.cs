@@ -11,9 +11,9 @@
 /// <param name="thickness"></param>
 public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thickness) : IDrawing2D
 {
-    readonly Vector2[] _pts = pts;
-    readonly uint _color = color;
-    readonly internal float _thickness = thickness;
+    private readonly Vector2[] _pts = pts;
+    private readonly uint _color = color;
+    internal readonly float _thickness = thickness;
 
     /// <summary>
     /// Draw on the <seealso cref="ImGui"/>

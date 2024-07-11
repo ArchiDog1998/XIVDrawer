@@ -8,7 +8,7 @@ namespace XIVDrawer.Element3D;
 /// </summary>
 public class Drawing3DPolyline : Drawing3D
 {
-    uint showColor;
+    private uint showColor;
 
     /// <summary>
     /// If the player is inside of this, what the color it should be.

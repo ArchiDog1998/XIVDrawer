@@ -15,9 +15,9 @@ namespace XIVDrawer.Element2D;
 /// <param name="col"></param>
 public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
 {
-    readonly IDalamudTextureWrap _texture = texture;
-    readonly Vector2 _pt1 = pt1, _pt2 = pt2, _uv1 = default, _uv2 = Vector2.One;
-    readonly uint _col = col;
+    private readonly IDalamudTextureWrap _texture = texture;
+    private readonly Vector2 _pt1 = pt1, _pt2 = pt2, _uv1 = default, _uv2 = Vector2.One;
+    private readonly uint _col = col;
 
     /// <summary>
     /// 

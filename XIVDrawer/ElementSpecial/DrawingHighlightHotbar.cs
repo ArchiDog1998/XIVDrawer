@@ -17,10 +17,10 @@ namespace XIVDrawer.ElementSpecial;
 /// </summary>
 public class DrawingHighlightHotbar : IDrawing
 {
-    static readonly Vector2 _uv1 = new(96 * 5 / 852f, 0),
+    private static readonly Vector2 _uv1 = new(96 * 5 / 852f, 0),
         _uv2 = new((96 * 5 + 144) / 852f, 0.5f);
 
-    static IDalamudTextureWrap? _texture = null;
+    private static IDalamudTextureWrap? _texture = null;
 
     /// <summary>
     /// The action ids that 
@@ -64,7 +64,7 @@ public class DrawingHighlightHotbar : IDrawing
         _texture = Service.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Height), array);
     }
 
-    static unsafe bool IsVisible(AtkUnitBase unit)
+    private static unsafe bool IsVisible(AtkUnitBase unit)
     {
         if (!unit.IsVisible) return false;
         if (unit.VisibilityFlags == 1) return false;
@@ -72,7 +72,7 @@ public class DrawingHighlightHotbar : IDrawing
         return IsVisible(unit.RootNode);
     }
 
-    static unsafe bool IsVisible(AtkResNode* node)
+    private static unsafe bool IsVisible(AtkResNode* node)
     {
         while (node != null)
         {
@@ -167,7 +167,7 @@ public class DrawingHighlightHotbar : IDrawing
         return;
     }
 
-    unsafe static IEnumerable<nint> GetAddons<T>() where T : struct
+    private static unsafe IEnumerable<nint> GetAddons<T>() where T : struct
     {
         if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return [];
 
@@ -176,7 +176,7 @@ public class DrawingHighlightHotbar : IDrawing
             .Where(ptr => ptr != nint.Zero);
     }
 
-    unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot hot)
+    private unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot hot)
     {
         if (hot.OriginalApparentSlotType is not HotbarSlotType.GeneralAction and not HotbarSlotType.Action) return false;
         if (hot.ApparentSlotType is not HotbarSlotType.GeneralAction and not HotbarSlotType.Action) return false;

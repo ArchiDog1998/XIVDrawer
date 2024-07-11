@@ -26,7 +26,7 @@ public static class DrawingExtensions
     /// </summary>
     /// <param name="point">testing point in world.</param>
     /// <returns>can be seen.</returns>
-    public unsafe static bool CanSee(in this Vector3 point)
+    public static unsafe bool CanSee(in this Vector3 point)
     {
         var camera = (Vector3)CameraManager.Instance()->CurrentCamera->Object.Position;
 
@@ -127,7 +127,7 @@ public static class DrawingExtensions
         return result;
     }
 
-    static bool IsOrdered(in Vector2[] points)
+    private static bool IsOrdered(in Vector2[] points)
     {
         int index = 0;
         float leftBottom = float.MaxValue;
@@ -194,13 +194,14 @@ public static class DrawingExtensions
         }
     }
 
-    const double c1 = 1.70158;
-    const double c3 = c1 + 1;
-    const double c4 = 2 * Math.PI / 3;
-    const double n1 = 7.5625;
-    const double d1 = 2.75;
+    private const double
+        c1 = 1.70158,
+        c3 = c1 + 1,
+        c4 = 2 * Math.PI / 3,
+        n1 = 7.5625,
+        d1 = 2.75;
 
-    static Func<double, double> FindOutFuction(in EaseFuncType outType) => outType switch
+    private static Func<double, double> FindOutFuction(in EaseFuncType outType) => outType switch
     {
         EaseFuncType.Sine => x => Math.Sin(x * Math.PI / 2),
         EaseFuncType.Quad => x => 1 - (1 - x) * (1 - x),
@@ -239,7 +240,7 @@ public static class DrawingExtensions
     /// </summary>
     /// <param name="size"></param>
     /// <returns></returns>
-    public unsafe static ImFontPtr GetFont(float size)
+    public static unsafe ImFontPtr GetFont(float size)
     {
         var style = new Dalamud.Interface.GameFonts.GameFontStyle(Dalamud.Interface.GameFonts.GameFontStyle.GetRecommendedFamilyAndSize(Dalamud.Interface.GameFonts.GameFontFamily.Axis, size));
 
