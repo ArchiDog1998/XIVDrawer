@@ -25,7 +25,7 @@ public class DrawingHighlightHotbar : IDrawing
     /// <summary>
     /// The action ids that 
     /// </summary>
-    public HashSet<uint> ActionIds { get; } = [];
+    public HashSet<HotbarID> HotbarIDs { get; } = [];
 
     /// <summary>
     /// The color of highlight.
@@ -37,11 +37,11 @@ public class DrawingHighlightHotbar : IDrawing
     /// </summary>
     /// <param name="color">Color</param>
     /// <param name="ids">action ids</param>
-    public DrawingHighlightHotbar(Vector4 color, params uint[] ids)
+    public DrawingHighlightHotbar(Vector4 color, params HotbarID[] ids)
         : this()
     {
         Color = color;
-        ActionIds = new HashSet<uint>(ids);
+        HotbarIDs = new (ids);
     }
 
     /// <summary>
@@ -159,9 +159,7 @@ public class DrawingHighlightHotbar : IDrawing
         return result;
     }
 
-    /// <summary>
-    /// The things that can be done in the task.
-    /// </summary>
+    /// <inheritdoc/>
     protected override void UpdateOnFrame()
     {
         return;
@@ -178,9 +176,16 @@ public class DrawingHighlightHotbar : IDrawing
 
     private unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot hot)
     {
-        if (hot.OriginalApparentSlotType is not HotbarSlotType.GeneralAction and not HotbarSlotType.Action) return false;
-        if (hot.ApparentSlotType is not HotbarSlotType.GeneralAction and not HotbarSlotType.Action) return false;
+        var actionId = ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId);
+        foreach (var hotbarId in HotbarIDs)
+        {
+            if (hot.OriginalApparentSlotType != hotbarId.SlotType) continue;
+            if (hot.ApparentSlotType != hotbarId.SlotType) continue;
+            if (actionId != hotbarId.Id) continue;
 
-        return ActionIds.Contains(ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId));
+            return true;
+        }
+
+        return false;
     }
 }
