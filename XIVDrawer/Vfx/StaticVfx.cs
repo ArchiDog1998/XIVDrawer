@@ -84,7 +84,7 @@ public unsafe class StaticVfx : BasicDrawing
     /// <summary>
     /// The rotate addition.
     /// </summary>
-    public float RotateAddition { get; init; }
+    public float RotateAddition { get; set; }
 
     /// <summary>
     /// The location offset.

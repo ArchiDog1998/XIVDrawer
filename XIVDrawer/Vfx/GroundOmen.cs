@@ -114,6 +114,7 @@ public struct GroundOmenFriendly
         Fan030 = "gl_fan030_1bpf",
         Fan045 = "gl_fan045_1bpxf",
         Fan060 = "gl_fan060_1bpf",
+        BasicFan090 = "gl_fan090_1bpf",
         Fan090 = "gl_fan090_1bpxf",
         Fan120 = "gl_fan120_1bpxf",
         Fan150 = "gl_fan150_1bpf";
